@@ -1,0 +1,24 @@
+﻿namespace PlanIt.Models;
+using MongoDB.Driver;
+
+public class DataAccess
+{
+    private readonly MongoClient _client;
+    private IMongoDatabase _db;
+    
+    public IMongoCollection<Task> Tasks;
+    public IMongoCollection<Notification> Notifications;
+
+    public DataAccess(string host, short port, string db_name)
+    {
+        _client = new MongoClient($"mongodb://{host}:{port}");
+        _db = _client.GetDatabase(db_name);
+        Notifications = _db.GetCollection<Notification>("Notifications");
+        Tasks = _db.GetCollection<Task>("Tasks");
+    }
+
+    public void ChangeDb(string db_name)
+    {
+        _db = _client.GetDatabase(db_name);
+    }
+}

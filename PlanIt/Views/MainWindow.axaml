@@ -1,0 +1,385 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PlanIt.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="540"
+        x:Class="PlanIt.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="PlanIt"
+        Width="960"
+        Height="540"
+        MinWidth="540"
+        MinHeight="405">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) 502px-->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="27*" MinWidth="181"></ColumnDefinition>
+            <ColumnDefinition Width="73*"></ColumnDefinition>
+        </Grid.ColumnDefinitions> 
+        
+        <Border x:Name="SideBarBorder" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <Grid RowDefinitions="48,*">
+                <Border x:Name="UpperBlock" Padding="11 8">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Svg VerticalAlignment="Center" Path="../Assets/Images/Logo.svg" Height="32" Width="32"></Svg>
+                            <TextBlock VerticalAlignment="Center" Classes="t-b t-20">PlanIt</TextBlock>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="1" x:Name="ThemeChanger" OnContent="" OffContent=""></ToggleSwitch>
+                    </Grid>
+                </Border>
+                <Border Grid.Row="1" Padding="11 8">
+                    <ScrollViewer>
+                        <Grid RowDefinitions="Auto, Auto, *" RowSpacing="9" x:Name="ScrollGrid">
+                            <TextBox x:Name="SearchBar" Watermark="Search..."></TextBox>
+                            <WrapPanel Grid.Row="1" ItemSpacing="6" LineSpacing="6">
+                                <WrapPanel.ItemWidth>
+                                    <MultiBinding Converter="{StaticResource FilterBlockResponsiveWidthConverter}">
+                                        <Binding Path="Bounds.Width" RelativeSource="{RelativeSource Self}"></Binding>
+                                        <Binding Path="Text" ElementName="AllFilterBlock"></Binding>
+                                    </MultiBinding>
+                                </WrapPanel.ItemWidth>
+                                
+                                <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <StackPanel Orientation="Vertical" Spacing="3" HorizontalAlignment="Left">
+                                            <Grid HorizontalAlignment="Left">
+                                                <Ellipse Height="24" Width="24" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="today"></Ellipse>
+                                                <Svg Path="..\Assets\Images\calendar_day.svg" Height="16" Width="16" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg>
+                                            </Grid>
+                                            <TextBlock Classes="t-10 today t-sb" HorizontalAlignment="Left">Today</TextBlock>
+                                        </StackPanel>
+                                        <DockPanel Grid.Column="1" HorizontalAlignment="Right">
+                                            <TextBlock DockPanel.Dock="Top" Classes="t-16 today t-b">15</TextBlock>
+                                        </DockPanel>
+                                    </Grid>
+                                </Button>
+                                <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
+                                            <Grid HorizontalAlignment="Left">
+                                                <Ellipse Height="24" Width="24" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="scheduled"></Ellipse>
+                                                <Svg Path="..\Assets\Images\calendar_many.svg" Height="16" Width="16" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg>
+                                            </Grid>
+                                            <TextBlock Classes="t-10 scheduled t-sb" HorizontalAlignment="Left">Scheduled</TextBlock>
+                                        </StackPanel>
+                                        <DockPanel Grid.Column="1" HorizontalAlignment="Right">
+                                            <TextBlock DockPanel.Dock="Top" Classes="t-16 scheduled t-b">15</TextBlock>
+                                        </DockPanel>
+                                    </Grid>
+                                </Button>
+                                <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
+                                            <Grid HorizontalAlignment="Left">
+                                                <Ellipse Height="24" Width="24" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="all"></Ellipse>
+                                                <Svg Path="..\Assets\Images\box.svg" Height="16" Width="16" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg>
+                                            </Grid>
+                                            <TextBlock Classes="t-10 all t-sb" HorizontalAlignment="Left">All</TextBlock>
+                                        </StackPanel>
+                                        <DockPanel Grid.Column="1" HorizontalAlignment="Right">
+                                            <TextBlock DockPanel.Dock="Top" Classes="t-16 all t-b" x:Name="AllFilterBlock">100000</TextBlock>
+                                        </DockPanel>
+                                    </Grid>
+                                </Button>
+                                <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
+                                            <Grid HorizontalAlignment="Left">
+                                                <Ellipse Height="24" Width="24" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="important"></Ellipse>
+                                                <Svg Path="..\Assets\Images\exclamation.svg" Height="16" Width="16" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg>
+                                            </Grid>
+                                            <TextBlock Classes="t-10 important t-sb" HorizontalAlignment="Left">Important</TextBlock>
+                                        </StackPanel>
+                                        <DockPanel Grid.Column="1" HorizontalAlignment="Right">
+                                            <TextBlock DockPanel.Dock="Top" Classes="t-16 important t-b">15</TextBlock>
+                                        </DockPanel>
+                                    </Grid>
+                                </Button>
+                            </WrapPanel>
+                            <Grid Grid.Row="2" RowDefinitions="Auto, *" RowSpacing="8">
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <TextBlock Classes="t-b t-16" HorizontalAlignment="Left" VerticalAlignment="Center">Categories</TextBlock>
+                                    <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="19" Height="19" Classes="btn"><Svg Path="../Assets/Images/plus.svg" Width="11" Height="11" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg></Button>
+                                </Grid>
+                                <ListBox Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                    <ListBoxItem Height="32" Classes="category" Padding="6">
+                                        <Grid ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <Grid VerticalAlignment="Center">
+                                                    <Ellipse Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Red"></Ellipse>
+                                                </Grid>
+                                                <TextBlock Classes="t-14 t-r" VerticalAlignment="Center" TextWrapping="Wrap">Tasks with very long name tewrwdas</TextBlock>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Classes="t-14 t-b" HorizontalAlignment="Right" VerticalAlignment="Center">15</TextBlock>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem IsEnabled="False">
+                                        <Rectangle HorizontalAlignment="Center" VerticalAlignment="Center" Height="1" Width="{Binding Bounds.Width, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource DividerResponsiveWidthConverter}}" Fill="{DynamicResource BackgroundCategory}"></Rectangle>
+                                    </ListBoxItem>
+                                </ListBox>
+                            </Grid>
+                        </Grid>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
+        <Border Grid.Column="1" x:Name="MainBarBorder">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" MaxHeight="{Binding Path=Bounds.Height, ElementName=UpperBlock}"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                
+                <Border Padding="8" HorizontalAlignment="Stretch">
+                    <Border Padding="4" x:Name="Panel" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <Ellipse Width="23" Height="23" VerticalAlignment="Center" Fill="Red"></Ellipse>
+                            <TextBlock Classes="t-m t-14" VerticalAlignment="Center">Category</TextBlock>
+                            <Rectangle Width="1" VerticalAlignment="Stretch" Fill="{DynamicResource PanelDivider}"></Rectangle>
+                            <Button VerticalAlignment="Center" Classes="btn" Width="23" Height="23" Margin="3 0 0 0"><Svg Path="../Assets/Images/plus.svg" Height="13" Width="13" VerticalAlignment="Center" HorizontalAlignment="Center"></Svg></Button>
+                        </StackPanel>
+                    </Border>
+                </Border>
+                
+                <Border Grid.Row="1" >
+                    <ListBox ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Padding="17 0">
+                        <ListBoxItem Classes="task" Padding="8">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                    <ToggleButton Width="16" Height="16" Classes="taskToggle" VerticalAlignment="Center"></ToggleButton>
+                                    <TextBlock Classes="t-12 t-m" VerticalAlignment="Center" TextWrapping="Wrap">Some task title</TextBlock>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="1">
+                                    <Grid RowDefinitions="Auto, Auto" Margin="0 0  5 0">
+                                        <TextBlock HorizontalAlignment="Right" Classes="t-8 second">21.06.2026</TextBlock>
+                                        <TextBlock Grid.Row="1" HorizontalAlignment="Right" Classes="t-8 second">17:00</TextBlock>
+                                    </Grid>
+                                    <Button Width="13" Height="13" Classes="taskBtn">
+                                        <Svg Path="../Assets/Images/edit.svg" Height="13" Width="13"></Svg>
+                                    </Button>
+                                    <Button Width="13" Height="13" Classes="taskBtn">
+                                        <Svg Path="../Assets/Images/trash.svg" Height="13" Width="13"></Svg>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </ListBoxItem>
+                    </ListBox>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
+        <!-- -->
+        <!-- <Border HorizontalAlignment="Stretch"> -->
+        <!--     <Grid RowDefinitions="Auto, *"> -->
+        <!--         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="44 0" VerticalAlignment="Top" HorizontalAlignment="Stretch" MaxHeight="{Binding Bounds.Height, RelativeSource={RelativeSource AncestorType=Window}}"> -->
+        <!--             <StackPanel Spacing="17"> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"><Ellipse Width="20" Height="20" Classes="taskToggleInner" VerticalAlignment="Center" HorizontalAlignment="Center"></Ellipse></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Classes="taskBtn"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Classes="taskBtn"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task taskImportant"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"><Ellipse Width="20" Height="20" Classes="taskToggleInner" VerticalAlignment="Center" HorizontalAlignment="Center"></Ellipse></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m important">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Classes="taskBtn"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Classes="taskBtn"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Grid RowDefinitions="Auto, Auto" Margin="0 0  11 0"> -->
+        <!--                                 <TextBlock HorizontalAlignment="Right" Foreground="{DynamicResource TaskSecondaryText}">21.06.2026</TextBlock> -->
+        <!--                                 <TextBlock Grid.Row="1" HorizontalAlignment="Right" Foreground="{DynamicResource TaskSecondaryText}">17:00</TextBlock> -->
+        <!--                             </Grid> -->
+        <!--                             <Button Width="26" Height="26" Classes="taskBtn"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Classes="taskBtn"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--                 <Border Padding="16" Classes="task"> -->
+        <!--                     <Grid ColumnDefinitions="*, Auto"> -->
+        <!--                         <StackPanel Orientation="Horizontal" Spacing="16"> -->
+        <!--                             <ToggleButton Width="32" Height="32" Classes="taskToggle"></ToggleButton> -->
+        <!--                             <TextBlock Classes="t-28 t-m">Some task title</TextBlock> -->
+        <!--                         </StackPanel> -->
+        <!--                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5"> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/edit.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                             <Button Width="26" Height="26" Background="{DynamicResource BackgroundTask}"> -->
+        <!--                                 <Svg Path="../Assets/Images/trash.svg" Height="26" Width="26"></Svg> -->
+        <!--                             </Button> -->
+        <!--                         </StackPanel> -->
+        <!--                     </Grid> -->
+        <!--                 </Border> -->
+        <!--             </StackPanel> -->
+        <!--         </ScrollViewer> -->
+        <!--     </Grid> -->
+        <!-- </Border> -->
