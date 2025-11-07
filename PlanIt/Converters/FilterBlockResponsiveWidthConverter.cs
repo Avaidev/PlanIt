@@ -8,8 +8,8 @@ namespace PlanIt.Converters
 {
     public class FilterBlockResponsiveWidthConverter : IMultiValueConverter
     {
-        private const int DIGIT_PIXELS = 11;
-        private const int DEFAULT_FILTER_BTN_LEN = 48;
+        private const int DIGIT_PIXELS = 15;
+        private const int DEFAULT_FILTER_BTN_LEN = 50;
         
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {

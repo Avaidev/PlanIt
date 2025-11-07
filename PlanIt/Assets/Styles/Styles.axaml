@@ -28,6 +28,17 @@
             <Setter Property="Background" Value="{DynamicResource BackgroundUpper}"></Setter>
             <Setter Property="CornerRadius" Value="64"></Setter>
         </Style>
+        
+        <Style Selector="^.task">
+            <Setter Property="Background" Value="{DynamicResource BackgroundTask}"></Setter>
+            <Setter Property="CornerRadius" Value="64"></Setter>
+            <Setter Property="Padding" Value="12 10"></Setter>
+            <Setter Property="Margin" Value="0 0 0 5"></Setter>
+            
+            <Style Selector="^.important">
+                <Setter Property="BorderBrush" Value="{DynamicResource Important}"></Setter>
+            </Style>
+        </Style>
     </Style>
     
     <Style Selector="ListBox">
@@ -38,25 +49,12 @@
         <Style Selector="^.category">
             <Setter Property="Background" Value="{DynamicResource BackgroundCategory}"></Setter>
             <Setter Property="CornerRadius" Value="8"></Setter>
+            <Setter Property="Margin" Value="0  0 0 8"></Setter>
+            <Setter Property="Padding" Value="6"></Setter>
             
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="{DynamicResource CategoryHover}"></Setter>
                 <Setter Property="Cursor" Value="Hand"></Setter>
-            </Style>
-        </Style>
-        
-        <Style Selector="^.task">
-            <Setter Property="Background" Value="{DynamicResource BackgroundTask}"></Setter>
-            <Setter Property="CornerRadius" Value="16"></Setter>
-            <Setter Property="BorderThickness" Value="2"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource BackgroundTask}"></Setter>
-            
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource BackgroundTask}"></Setter>
-            </Style>
-            
-            <Style Selector="^.important">
-                <Setter Property="BorderBrush" Value="{DynamicResource Important}"></Setter>
             </Style>
         </Style>
     </Style>
@@ -65,8 +63,8 @@
         <Setter Property="FontFamily" Value="Inter"></Setter>
         <Setter Property="Foreground" Value="{DynamicResource Text}"></Setter>
         
-        <Style Selector="^.t-8">
-            <Setter Property="FontSize" Value="8"></Setter>
+        <Style Selector="^.t-10">
+            <Setter Property="FontSize" Value="10"></Setter>
         </Style>
         
         <Style Selector="^.t-12">
@@ -77,16 +75,29 @@
             <Setter Property="FontSize" Value="14"></Setter>
         </Style>
         
-        <Style Selector="^.t-10">
-            <Setter Property="FontSize" Value="10"></Setter>
+        <Style Selector="^.t-16">
+            <Setter Property="FontSize" Value="16"></Setter>
+        </Style>
+        
+        <Style Selector="^.t-18">
+            <Setter Property="FontSize" Value="18"></Setter>
         </Style>
         
         <Style Selector="^.t-20">
             <Setter Property="FontSize" Value="20"></Setter>
         </Style>
         
-        <Style Selector="^.t-16">
-            <Setter Property="FontSize" Value="16"></Setter>
+        
+        <Style Selector="^.t-22">
+            <Setter Property="FontSize" Value="22"></Setter>
+        </Style>
+        
+        <Style Selector="^.t-24">
+            <Setter Property="FontSize" Value="24"></Setter>
+        </Style>
+        
+        <Style Selector="^.t-26">
+            <Setter Property="FontSize" Value="26"></Setter>
         </Style>
         
         <Style Selector="^.today">
@@ -153,6 +164,8 @@
     </Style>
     
     <Style Selector="Button">
+        <Setter Property="Padding" Value="0"></Setter>
+        <Setter Property="Margin" Value="0"></Setter>
         <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Transitions">
                 <Transitions>
@@ -241,14 +254,29 @@
     </Style>
     
     <Style Selector="ScrollViewer ScrollBar:vertical">
+        <Style Selector="^ /template/ RepeatButton">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+        
         <Style Selector="^ /template/ Rectangle#TrackRect">
-            <Setter Property="Opacity" Value="0"></Setter>
+            <Setter Property="IsVisible" Value="False"></Setter>
+        </Style>
+        
+        <Style Selector="^ /template/ Track">
+            <Setter Property="Grid.RowSpan" Value="3"></Setter>
+            <Setter Property="Grid.Row" Value="0"></Setter>
         </Style>
         
         <Style Selector="^ /template/ Thumb">
-            <Setter Property="Background" Value="{DynamicResource ScrollBarThumb}"></Setter>
+            <Setter Property="Background" Value="{DynamicResource BackgroundUpper}"></Setter>
             <Setter Property="CornerRadius" Value="8"></Setter>
+            <Setter Property="Width" Value="10"></Setter>
         </Style>
+    </Style>
+    
+    <Style Selector="ScrollViewer /template/ ScrollContentPresenter#PART_ContentPresenter">
+        <Setter Property="Grid.ColumnSpan" Value="1"/>
+        <Setter Property="Margin" Value="0 0 6 0"></Setter>
     </Style>
     
     <Style Selector="ToggleButton">
