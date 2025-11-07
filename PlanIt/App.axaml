@@ -17,6 +17,7 @@
              
     <Application.Resources>
         <converters:FilterBlockResponsiveWidthConverter x:Key="FilterBlockResponsiveWidthConverter"></converters:FilterBlockResponsiveWidthConverter>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"></converters:BoolToVisibilityConverter>
         <converters:DividerResponsiveWidthConverter x:Key="DividerResponsiveWidthConverter"></converters:DividerResponsiveWidthConverter>
     </Application.Resources>
 </Application>

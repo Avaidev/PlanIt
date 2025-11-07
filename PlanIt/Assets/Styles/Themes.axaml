@@ -41,6 +41,25 @@
             <Color x:Key="TaskToggleInner">#2D5A76</Color>
             <Color x:Key="TaskToggleInnerImportant">#EAE2C0</Color>
             <Color x:Key="TaskTrash">#722D2D</Color>
+            
+            <Color x:Key="Default">#333333</Color>
+            <Color x:Key="Red">#FF8D8F</Color>
+            <Color x:Key="Green">#78DA8D</Color>
+            <Color x:Key="Yellow">#F6E18D</Color>
+            <Color x:Key="Pink">#D683E8</Color>
+            <Color x:Key="Emerald">#83E1E8</Color>
+            <Color x:Key="Blue">#8799F4</Color>
+            <Color x:Key="Purple">#8977EF</Color>
+            
+            <x:String x:Key="Cubes">avares://PlanIt/Assets/Images/cubes.svg</x:String>
+            <x:String x:Key="Box">avares://PlanIt/Assets/Images/box.svg</x:String>
+            <x:String x:Key="Edit">avares://PlanIt/Assets/Images/edit.svg</x:String>
+            <x:String x:Key="Trash">avares://PlanIt/Assets/Images/trash.svg</x:String>
+            <x:String x:Key="CalendarDay">avares://PlanIt/Assets/Images/calendar_day.svg</x:String>
+            <x:String x:Key="CalendarMany">avares://PlanIt/Assets/Images/calendar_many.svg</x:String>
+            <x:String x:Key="Exclamation">avares://PlanIt/Assets/Images/exclamation.svg</x:String>
+            <x:String x:Key="Logo">avares://PlanIt/Assets/Images/Logo.svg</x:String>
+            <x:String x:Key="Plus">avares://PlanIt/Assets/Images/plus.svg</x:String>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

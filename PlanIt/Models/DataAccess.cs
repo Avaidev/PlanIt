@@ -6,7 +6,7 @@ public class DataAccess
     private readonly MongoClient _client;
     private IMongoDatabase _db;
     
-    public IMongoCollection<Task> Tasks;
+    public IMongoCollection<Category> Categories;
     public IMongoCollection<Notification> Notifications;
 
     public DataAccess(string host, short port, string db_name)
@@ -14,7 +14,7 @@ public class DataAccess
         _client = new MongoClient($"mongodb://{host}:{port}");
         _db = _client.GetDatabase(db_name);
         Notifications = _db.GetCollection<Notification>("Notifications");
-        Tasks = _db.GetCollection<Task>("Tasks");
+        Categories = _db.GetCollection<Category>("Categories");
     }
 
     public void ChangeDb(string db_name)
