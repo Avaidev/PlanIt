@@ -21,14 +21,6 @@
     
     <!-- <Window.DataTemplates> -->
     <!--     <DataTemplate> -->
-    <!--         <Grid ColumnDefinitions="Auto, *, Auto" HorizontalAlignment="Stretch" VerticalAlignment="Center" ColumnSpacing="5"> -->
-    <!--             <Ellipse Width="26" Height="26" HorizontalAlignment="Left" VerticalAlignment="Center" Fill="Red"></Ellipse> -->
-    <!--             <TextBlock Grid.Column="1" Classes="t-16 t-r" VerticalAlignment="Center" TextWrapping="Wrap">Tasks</TextBlock> -->
-    <!--             <TextBlock Grid.Column="2" Classes="t-18 t-b" HorizontalAlignment="Right" VerticalAlignment="Center">15</TextBlock> -->
-    <!--         </Grid> -->
-    <!--     </DataTemplate> -->
-    <!--      -->
-    <!--     <DataTemplate> -->
     <!--         <Border Classes="task"> -->
     <!--             <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto, Auto, Auto"> -->
     <!--                 <ToggleButton Width="32" Height="32" Classes="taskToggle" VerticalAlignment="Center" HorizontalAlignment="Left"></ToggleButton> -->
@@ -46,144 +38,208 @@
     <!--         </Border> -->
     <!--     </DataTemplate> -->
     <!-- </Window.DataTemplates> -->
-    
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="27*" MinWidth="190"></ColumnDefinition>
-            <ColumnDefinition Width="73*"></ColumnDefinition>
-        </Grid.ColumnDefinitions> 
-        
-        <Border x:Name="SideBarBorder" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-            <Grid RowDefinitions="Auto,*">
-                <Border x:Name="UpperBlock" Padding="11 8">
-                    <Grid ColumnDefinitions="*, Auto">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <Svg VerticalAlignment="Center" Path="{DynamicResource Logo}" Height="36" Width="36"></Svg>
-                            <TextBlock VerticalAlignment="Center" Classes="t-b t-22">PlanIt</TextBlock>
-                        </StackPanel>
-                        <ToggleSwitch Grid.Column="1" x:Name="ThemeChanger" OnContent="" OffContent=""></ToggleSwitch>
-                    </Grid>
-                </Border>
-                <Border Grid.Row="1" Padding="11 8 0 8">
-                    <ScrollViewer AllowAutoHide="False">
-                        <Grid RowDefinitions="Auto, Auto, *" RowSpacing="9" x:Name="ScrollGrid">
-                            <TextBox x:Name="SearchBar" Watermark="Search..."></TextBox>
-                            <WrapPanel Grid.Row="1" ItemSpacing="6" LineSpacing="6">
-                                <WrapPanel.ItemWidth>
-                                    <MultiBinding Converter="{StaticResource FilterBlockResponsiveWidthConverter}">
-                                        <Binding Path="Bounds.Width" RelativeSource="{RelativeSource Self}"></Binding>
-                                        <Binding Path="Text" ElementName="AllFilterBlock"></Binding>
-                                    </MultiBinding>
-                                </WrapPanel.ItemWidth>
-                                
-                                <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
-                                    <Grid ColumnDefinitions="*, Auto">
-                                        <StackPanel Orientation="Vertical" Spacing="3" HorizontalAlignment="Left">
-                                            <Grid HorizontalAlignment="Left">
-                                                <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="today"></Ellipse>
-                                                <Svg Path="{DynamicResource CalendarDay}" Height="22" Width="22" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg>
-                                            </Grid>
-                                            <TextBlock Classes="t-16 today t-sb" HorizontalAlignment="Left">Today</TextBlock>
-                                        </StackPanel>
-                                        <DockPanel Grid.Column="1" HorizontalAlignment="Right">
-                                            <TextBlock DockPanel.Dock="Top" Classes="t-20 today t-b">15</TextBlock>
-                                        </DockPanel>
-                                    </Grid>
-                                </Button>
-                                <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
-                                    <Grid ColumnDefinitions="*, Auto">
-                                        <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
-                                            <Grid HorizontalAlignment="Left">
-                                                <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="scheduled"></Ellipse>
-                                                <Svg Path="{DynamicResource CalendarMany}" Height="22" Width="22" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg>
-                                            </Grid>
-                                            <TextBlock Classes="t-16 scheduled t-sb" HorizontalAlignment="Left">Scheduled</TextBlock>
-                                        </StackPanel>
-                                        <DockPanel Grid.Column="1" HorizontalAlignment="Right">
-                                            <TextBlock DockPanel.Dock="Top" Classes="t-20 scheduled t-b">15</TextBlock>
-                                        </DockPanel>
-                                    </Grid>
-                                </Button>
-                                <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
-                                    <Grid ColumnDefinitions="*, Auto">
-                                        <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
-                                            <Grid HorizontalAlignment="Left">
-                                                <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="all"></Ellipse>
-                                                <Svg Path="{DynamicResource Box}" Height="22" Width="22" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg>
-                                            </Grid>
-                                            <TextBlock Classes="t-16 all t-sb" HorizontalAlignment="Left">All</TextBlock>
-                                        </StackPanel>
-                                        <DockPanel Grid.Column="1" HorizontalAlignment="Right">
-                                            <TextBlock DockPanel.Dock="Top" Classes="t-20 all t-b" x:Name="AllFilterBlock">100000</TextBlock>
-                                        </DockPanel>
-                                    </Grid>
-                                </Button>
-                                <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
-                                    <Grid ColumnDefinitions="*, Auto">
-                                        <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
-                                            <Grid HorizontalAlignment="Left">
-                                                <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="important"></Ellipse>
-                                                <Svg Path="{DynamicResource Exclamation}" Height="22" Width="22" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg>
-                                            </Grid>
-                                            <TextBlock Classes="t-16 important t-sb" HorizontalAlignment="Left">Important</TextBlock>
-                                        </StackPanel>
-                                        <DockPanel Grid.Column="1" HorizontalAlignment="Right">
-                                            <TextBlock DockPanel.Dock="Top" Classes="t-20 important t-b">15</TextBlock>
-                                        </DockPanel>
-                                    </Grid>
-                                </Button>
-                            </WrapPanel>
-                            <Grid Grid.Row="2" RowDefinitions="Auto, *" RowSpacing="8">
-                                <Grid ColumnDefinitions="*, Auto">
-                                    <TextBlock Classes="t-b t-22" HorizontalAlignment="Left" VerticalAlignment="Center">Categories</TextBlock>
-                                    <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="30" Classes="btn"><Svg Path="{DynamicResource Plus}" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center"></Svg></Button>
-                                </Grid>
-                                <ListBox Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                                    <ListBoxItem Classes="category">
-                                        <Grid ColumnDefinitions="Auto, *, Auto" HorizontalAlignment="Stretch" VerticalAlignment="Center" ColumnSpacing="5">
-                                            <Ellipse Width="26" Height="26" HorizontalAlignment="Left" VerticalAlignment="Center" Fill="Red"></Ellipse>
-                                            <TextBlock Grid.Column="1" Classes="t-16 t-r" VerticalAlignment="Center" TextWrapping="Wrap">Tasks</TextBlock>
-                                            <TextBlock Grid.Column="2" Classes="t-18 t-b" HorizontalAlignment="Right" VerticalAlignment="Center">15</TextBlock>
-                                        </Grid>
-                                    </ListBoxItem>
-                                    <ListBoxItem IsEnabled="False" Height="1" Padding="0" Margin="0 0  0 8">
-                                        <Rectangle Height="1" Width="{Binding Bounds.Width, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource DividerResponsiveWidthConverter}}" Fill="{DynamicResource BackgroundCategory}"></Rectangle>
-                                    </ListBoxItem>
-                                </ListBox>
-                            </Grid>
+        <Grid x:Name="MainWindowLayout" ZIndex="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="27*" MinWidth="190"></ColumnDefinition>
+                <ColumnDefinition Width="73*"></ColumnDefinition>
+            </Grid.ColumnDefinitions> 
+            
+            <Border x:Name="SideBarBorder" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <Grid RowDefinitions="Auto,*">
+                    <Border x:Name="UpperBlock" Padding="11 8">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Border VerticalAlignment="Center" Height="36" Width="36" BorderThickness="2" BorderBrush="{DynamicResource StrokeButton}" Background="{DynamicResource BackgroundButton}" CornerRadius="32">
+                                    <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Height="16" Width="16" Data="{StaticResource ListIcon}" Foreground="{DynamicResource Text}"></PathIcon>
+                                </Border>
+                                <!-- <Svg VerticalAlignment="Center" Path="{DynamicResource LogoIcon}" Height="36" Width="36"></Svg> -->
+                                <TextBlock VerticalAlignment="Center" Classes="t-b t-22">PlanIt</TextBlock>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" x:Name="ThemeChanger" OnContent="" OffContent="" IsChecked="{Binding WindowVM.IsDarkTheme, Mode=TwoWay}"></ToggleSwitch>
                         </Grid>
-                    </ScrollViewer>
-                </Border>
-            </Grid>
-        </Border>
-        <Border Grid.Column="1" x:Name="MainBarBorder">
-            <Grid RowSpacing="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
-                </Grid.RowDefinitions>
-                
-                <Border Padding="8" HorizontalAlignment="Stretch">
-                    <Border Padding="6" x:Name="Panel" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
-                            <Grid VerticalAlignment="Center">
-                                <Ellipse Width="30" Height="30" Fill="{DynamicResource Pink}"></Ellipse>
-                                <Svg Width="18" Height="18" Path="{DynamicResource Cubes}"></Svg>
-                            </Grid>
-                            <TextBlock Classes="t-m t-20" VerticalAlignment="Center">Category</TextBlock>
-                            <Rectangle Width="1" VerticalAlignment="Stretch" Fill="{DynamicResource PanelDivider}"></Rectangle>
-                            <Button VerticalAlignment="Center" Classes="btn" Width="30" Height="30" Margin="6 0 0 0"><Svg Path="{DynamicResource Plus}" Height="18" Width="18" VerticalAlignment="Center" HorizontalAlignment="Center"></Svg></Button>
-                        </StackPanel>
                     </Border>
-                </Border>
-                
-                <Border Grid.Row="1" Padding="17 0">
-                    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AllowAutoHide="False">
-                        <ItemsControl>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Border>
-            </Grid>
-        </Border>
+                    <Border Grid.Row="1" Padding="11 8 0 8">
+                        <ScrollViewer AllowAutoHide="False" Classes="mainScroll">
+                            <Grid RowDefinitions="Auto, Auto, *" RowSpacing="9" x:Name="ScrollGrid">
+                                <TextBox x:Name="SearchBar" Watermark="Search..."></TextBox>
+                                <WrapPanel Grid.Row="1" ItemSpacing="6" LineSpacing="6">
+                                    <WrapPanel.ItemWidth>
+                                        <MultiBinding Converter="{StaticResource FilterBlockResponsiveWidthConverter}">
+                                            <Binding Path="Bounds.Width" RelativeSource="{RelativeSource Self}"></Binding>
+                                            <Binding Path="Text" ElementName="AllFilterBlock"></Binding>
+                                        </MultiBinding>
+                                    </WrapPanel.ItemWidth>
+                                    
+                                    <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <StackPanel Orientation="Vertical" Spacing="3" HorizontalAlignment="Left">
+                                                <Grid HorizontalAlignment="Left">
+                                                    <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="today"></Ellipse>
+                                                    <PathIcon Height="18" Width="18" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{StaticResource CalendarDayIcon}" Foreground="{DynamicResource BackgroundSecondary}"></PathIcon>
+                                                </Grid>
+                                                <TextBlock Classes="t-16 today t-sb" HorizontalAlignment="Left">Today</TextBlock>
+                                            </StackPanel>
+                                            <DockPanel Grid.Column="1" HorizontalAlignment="Right">
+                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 today t-b">15</TextBlock>
+                                            </DockPanel>
+                                        </Grid>
+                                    </Button>
+                                    <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
+                                                <Grid HorizontalAlignment="Left">
+                                                    <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="scheduled"></Ellipse>
+                                                    <PathIcon HorizontalAlignment="Center" VerticalAlignment="Center" Height="18" Width="18" Data="{StaticResource CalendarManyIcon}" Foreground="{DynamicResource BackgroundSecondary}"></PathIcon>
+                                                </Grid>
+                                                <TextBlock Classes="t-16 scheduled t-sb" HorizontalAlignment="Left">Scheduled</TextBlock>
+                                            </StackPanel>
+                                            <DockPanel Grid.Column="1" HorizontalAlignment="Right">
+                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 scheduled t-b">15</TextBlock>
+                                            </DockPanel>
+                                        </Grid>
+                                    </Button>
+                                    <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
+                                                <Grid HorizontalAlignment="Left">
+                                                    <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="all"></Ellipse>
+                                                    <PathIcon HorizontalAlignment="Center" VerticalAlignment="Center" Height="18" Width="18" Data="{StaticResource BoxIcon}" Foreground="{DynamicResource BackgroundSecondary}"></PathIcon>
+                                                </Grid>
+                                                <TextBlock Classes="t-16 all t-sb" HorizontalAlignment="Left">All</TextBlock>
+                                            </StackPanel>
+                                            <DockPanel Grid.Column="1" HorizontalAlignment="Right">
+                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 all t-b" x:Name="AllFilterBlock">100000</TextBlock>
+                                            </DockPanel>
+                                        </Grid>
+                                    </Button>
+                                    <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
+                                                <Grid HorizontalAlignment="Left">
+                                                    <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="important"></Ellipse>
+                                                    <PathIcon HorizontalAlignment="Center" VerticalAlignment="Center" Height="18" Width="18" Data="{StaticResource ExclamationIcon}" Foreground="{DynamicResource BackgroundSecondary}"></PathIcon>
+                                                </Grid>
+                                                <TextBlock Classes="t-16 important t-sb" HorizontalAlignment="Left">Important</TextBlock>
+                                            </StackPanel>
+                                            <DockPanel Grid.Column="1" HorizontalAlignment="Right">
+                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 important t-b">15</TextBlock>
+                                            </DockPanel>
+                                        </Grid>
+                                    </Button>
+                                </WrapPanel>
+                                <Grid Grid.Row="2" RowDefinitions="Auto, *" RowSpacing="8">
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <TextBlock Classes="t-b t-22" HorizontalAlignment="Left" VerticalAlignment="Center">Categories</TextBlock>
+                                        <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="30" Classes="btn" Command="{Binding WindowVM.ShowCategoryOverlay}">
+                                            <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource Text}"></PathIcon>
+                                        </Button>
+                                    </Grid>
+                                    <ListBox x:Name="CategoryListBox" Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding WindowVM.Categories}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid ColumnDefinitions="Auto, *, Auto" HorizontalAlignment="Stretch" VerticalAlignment="Center" ColumnSpacing="5">
+                                                    <Grid HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                        <Ellipse Width="26" Height="26" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{Binding Color, Converter={StaticResource ResourceLookupConverter}}"></Ellipse>
+                                                        <PathIcon Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{Binding Icon, Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource Text}"></PathIcon>
+                                                    </Grid>
+                                                    <TextBlock Grid.Column="1" Classes="t-16 t-r" VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding Title}"></TextBlock>
+                                                    <TextBlock Grid.Column="2" Classes="t-18 t-b" HorizontalAlignment="Right" VerticalAlignment="Center" Text="{Binding TasksCount}"></TextBlock>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Grid>
+                            </Grid>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Border>
+            <Border Grid.Column="1" x:Name="MainBarBorder">
+                <Grid RowSpacing="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    
+                    <Border Padding="8" HorizontalAlignment="Stretch">
+                        <Border Padding="6" x:Name="Panel" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                                <Grid VerticalAlignment="Center">
+                                    <Ellipse Width="30" Height="30" Fill="{Binding WindowVM.PanelElement.Color, Converter={StaticResource ResourceLookupConverter}}"></Ellipse>
+                                    <PathIcon Width="14" Height="14" Data="{Binding WindowVM.PanelElement.Icon, Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource Text}"></PathIcon>
+                                </Grid>
+                                <TextBlock Classes="t-m t-20" VerticalAlignment="Center" Text="{Binding WindowVM.PanelElement.Text}"></TextBlock>
+                                <Rectangle Width="1" VerticalAlignment="Stretch" IsVisible="{Binding WindowVM.PanelElement.PlusIsVisible}" Fill="{DynamicResource PanelDivider}"></Rectangle>
+                                <Button VerticalAlignment="Center" Classes="btn" Width="30" Height="30" Margin="6 0 0 0" Command="{Binding WindowVM.ShowTaskOverlay}" IsVisible="{Binding WindowVM.PanelElement.PlusIsVisible}">
+                                   <PathIcon Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource Text}"></PathIcon> 
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </Border>
+                    
+                    <Border Grid.Row="1" Padding="17 0">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AllowAutoHide="False" Classes="mainScroll">
+                            <ItemsControl>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid x:Name="InputBlocker" Background="Transparent" IsHitTestVisible="True" IsVisible="{Binding OverlayService.IsAnyVisible}"></Grid>
+        <Grid x:Name="CategoryCreateLayout" ZIndex="2" IsHitTestVisible="True" IsVisible="{Binding OverlayService.IsCategoryCreateVisible}">
+            <Border Background="Black" Opacity="0.4" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></Border>
+            <Border Padding="13" Width="352" Height="290" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="CategoryLayoutBorder">
+                <Grid RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="7">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <Button Classes="btn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding CategoryCreationVM.HideCategoryOverlay}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="t-b t-14" Foreground="{DynamicResource Text}">New Category</TextBlock>
+                        <Button Grid.Column="2" Classes="btn" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding CategoryCreationVM.ApplyCreation}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource AcceptIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
+                    </Grid>
+                    <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Margin="0 3 0 0" ColumnSpacing="36">
+                        <Grid VerticalAlignment="Center" HorizontalAlignment="Left">
+                            <Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" Width="80" Height="80" Fill="{Binding CategoryCreationVM.SelectedColor, Converter={StaticResource ResourceLookupConverter}}"></Ellipse>
+                            <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="36" Height="36" Data="{Binding CategoryCreationVM.SelectedIcon, Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource Text}"></PathIcon>
+                        </Grid>
+                        <TextBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Watermark="Title..." Text="{Binding CategoryCreationVM.EnteredTitle, Mode=TwoWay}" Classes="titleInput"></TextBox>
+                    </Grid>
+                    <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Colors</TextBlock>
+                        <ListBox Grid.Row="1" x:Name="CategoryColorsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding CategoryCreationVM.SelectedColor, Mode=TwoWay}" ItemsSource="{Binding CategoryCreationVM.Colors}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="9" RowSpacing="7" ColumnSpacing="7"></UniformGrid>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Ellipse Fill="{Binding ., Converter={StaticResource ResourceLookupConverter}}"></Ellipse>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                    <Grid Grid.Row="3" RowDefinitions="Auto, Auto">
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Icons</TextBlock>
+                        <ListBox Grid.Row="1" x:Name="CategoryIconsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding CategoryCreationVM.SelectedIcon, Mode=TwoWay}" ItemsSource="{Binding CategoryCreationVM.Icons}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="2" Columns="9" RowSpacing="7" ColumnSpacing="7"></UniformGrid>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{DynamicResource BackgroundIconOverlay}"></Ellipse>
+                                        <PathIcon Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{Binding ., Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource Text}"></PathIcon>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid x:Name="TaskCreateLayout" ZIndex="2" Background="Black" Opacity="0.4" IsHitTestVisible="True" IsVisible="{Binding OverlayService.IsTaskCreateVisible}"></Grid>
     </Grid>
 </Window>

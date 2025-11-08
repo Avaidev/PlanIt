@@ -4,6 +4,8 @@
     <option name="projectPerEditor">
       <map>
         <entry key="App.axaml" value="PlanIt.csproj" />
+        <entry key="Assets/Images/list-task 1.xaml" value="PlanIt.csproj" />
+        <entry key="Assets/Styles/Icons.axaml" value="PlanIt.csproj" />
         <entry key="Assets/Styles/Styles.axaml" value="PlanIt.csproj" />
         <entry key="Assets/Styles/Styles.xaml" value="PlanIt.csproj" />
         <entry key="Assets/Styles/Themes.axaml" value="PlanIt.csproj" />

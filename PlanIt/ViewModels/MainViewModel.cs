@@ -1,4 +1,5 @@
-﻿using PlanIt.Services;
+﻿using PlanIt.Models;
+using PlanIt.Services;
 
 namespace PlanIt.ViewModels;
 
@@ -12,10 +13,11 @@ public class MainViewModel : ViewModelBase
     
     public MainViewModel()
     {
+        var db = new DataAccess("127.0.0.1", 27017, "planit");
         OverlayService = new OverlayService();
-        WindowVM = new WindowViewModel(OverlayService);
-        CategoryCreationVM = new CategoryCreationViewModel(OverlayService);
-        TaskCreationVM = new TaskCreationViewModel(OverlayService);
+        WindowVM = new WindowViewModel(OverlayService, db);
+        CategoryCreationVM = new CategoryCreationViewModel(OverlayService, db);
+        TaskCreationVM = new TaskCreationViewModel(OverlayService, db);
         
     }
 }

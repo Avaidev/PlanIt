@@ -13,6 +13,7 @@
             <Color x:Key="BackgroundSearch">#47648A</Color>
             <Color x:Key="BackgroundFilter">#618CA9</Color>
             <Color x:Key="BackgroundTask">#2D5872</Color>
+            <Color x:Key="BackgroundIconOverlay">#62B6E8</Color>
             
             <Color x:Key="ButtonHover">#0189A3</Color>
             <Color x:Key="CategoryHover">#749AC7</Color>
@@ -23,6 +24,7 @@
             <Color x:Key="StrokeButton">#052228</Color>
             <Color x:Key="StrokeSearch">#2B2D43</Color>
             <Color x:Key="StrokeFilter">#CFF6FF</Color>
+            <Color x:Key="StrokeIconOverlay">#62B6E8</Color>
             
             <Color x:Key="Today">#CFF6FF</Color>
             <Color x:Key="All">#F8FAFF</Color>
@@ -32,6 +34,7 @@
             <Color x:Key="Text">#E8EFFF</Color>
             <Color x:Key="SearchText">#324762</Color>
             <Color x:Key="TaskSecondaryText">#427898</Color>
+            <Color x:Key="TextOverlaySecondary">#578FB0</Color>
             
             <Color x:Key="ScrollBarThumb">#153548</Color>
             
@@ -44,22 +47,14 @@
             
             <Color x:Key="Default">#333333</Color>
             <Color x:Key="Red">#FF8D8F</Color>
-            <Color x:Key="Green">#78DA8D</Color>
-            <Color x:Key="Yellow">#F6E18D</Color>
-            <Color x:Key="Pink">#D683E8</Color>
-            <Color x:Key="Emerald">#83E1E8</Color>
-            <Color x:Key="Blue">#8799F4</Color>
-            <Color x:Key="Purple">#8977EF</Color>
+            <Color x:Key="Orange">#FFC88D</Color>
+            <Color x:Key="Yellow">#FFFF8D</Color>
+            <Color x:Key="Pink">#F08DFF</Color>
+            <Color x:Key="Purple">#B38DFF</Color>
+            <Color x:Key="Green">#ADFF8D</Color>
+            <Color x:Key="Blue">#86C3EF</Color>
+            <Color x:Key="Emerald">#8DFFE8</Color>
             
-            <x:String x:Key="Cubes">avares://PlanIt/Assets/Images/cubes.svg</x:String>
-            <x:String x:Key="Box">avares://PlanIt/Assets/Images/box.svg</x:String>
-            <x:String x:Key="Edit">avares://PlanIt/Assets/Images/edit.svg</x:String>
-            <x:String x:Key="Trash">avares://PlanIt/Assets/Images/trash.svg</x:String>
-            <x:String x:Key="CalendarDay">avares://PlanIt/Assets/Images/calendar_day.svg</x:String>
-            <x:String x:Key="CalendarMany">avares://PlanIt/Assets/Images/calendar_many.svg</x:String>
-            <x:String x:Key="Exclamation">avares://PlanIt/Assets/Images/exclamation.svg</x:String>
-            <x:String x:Key="Logo">avares://PlanIt/Assets/Images/Logo.svg</x:String>
-            <x:String x:Key="Plus">avares://PlanIt/Assets/Images/plus.svg</x:String>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

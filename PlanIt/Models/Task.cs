@@ -1,15 +1,51 @@
 ﻿using System;
-
-namespace PlanIt.Models;
+using MongoDB.Bson.Serialization.Attributes;
+using ReactiveUI;
 using MongoDB.Bson;
 
-public class Task
+namespace PlanIt.Models;
+
+public class Task : ReactiveObject
 {
-    public ObjectId Id { get; set; }
-    public required string Title { get; set; }
-    public string Description { get; set; } = "";
-    public DateTime? CompleteDate { get; set; }
-    public bool IsDone { get; set; } = false;
-    public bool IsImportant { get; set; } = false;
-    public ObjectId? Notification { get; set; }
+    [BsonId] public ObjectId Id { get; set; }
+    [BsonElement("title")] private string title;
+    [BsonElement("description")] private string description = "";
+    [BsonElement("completed")] private DateTime? completeDate;
+    [BsonElement("done")] private bool isDone;
+    [BsonElement("important")] private bool isImportant;
+    [BsonElement("notification")] public ObjectId? Notification { get; set; }
+
+    [BsonIgnore] public required string Title
+    {
+        get => title;
+        set => this.RaiseAndSetIfChanged(ref title, value);
+    }
+
+    [BsonIgnore]
+    public string Description
+    {
+        get => description;
+        set => this.RaiseAndSetIfChanged(ref description, value);
+    }
+
+    [BsonIgnore]
+    public DateTime? CompleteDate
+    {
+        get => completeDate;
+        set => this.RaiseAndSetIfChanged(ref completeDate, value);
+    }
+
+    [BsonIgnore]
+    public bool IsDone
+    {
+        get => isDone;
+        set => this.RaiseAndSetIfChanged(ref isDone, value);
+    }
+
+    [BsonIgnore]
+    public bool IsImportant
+    {
+        get => isImportant;
+        set => this.RaiseAndSetIfChanged(ref isImportant, value);
+    }
 }

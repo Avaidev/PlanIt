@@ -3,7 +3,7 @@
              x:Class="PlanIt.App"
              xmlns:local="using:PlanIt"
              xmlns:converters="clr-namespace:PlanIt.Converters"
-             RequestedThemeVariant="Default">
+             RequestedThemeVariant="Dark">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
@@ -19,5 +19,6 @@
         <converters:FilterBlockResponsiveWidthConverter x:Key="FilterBlockResponsiveWidthConverter"></converters:FilterBlockResponsiveWidthConverter>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"></converters:BoolToVisibilityConverter>
         <converters:DividerResponsiveWidthConverter x:Key="DividerResponsiveWidthConverter"></converters:DividerResponsiveWidthConverter>
+        <converters:ResourceLookupConverter x:Key="ResourceLookupConverter"></converters:ResourceLookupConverter>
     </Application.Resources>
 </Application>

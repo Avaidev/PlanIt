@@ -1,13 +1,14 @@
 ﻿using System;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace PlanIt.Models;
 using MongoDB.Bson;
 
 public class Notification
 {
-    public ObjectId Id { get; set; }
-    public string Title { get; set; } = "PlanIt Notification";
-    public required string Message { get; set; }
-    public DateTime Date { get; set; }
-    public ObjectId? Task { get; set; }
+    [BsonId] public ObjectId Id { get; set; }
+    [BsonElement("title")] public string Title { get; set; } = "PlanIt Notification";
+    [BsonElement("message")] public required string Message { get; set; }
+    [BsonElement("date")] public required DateTime Date { get; set; }
+    [BsonElement("task")] public ObjectId? Task { get; set; }
 }
