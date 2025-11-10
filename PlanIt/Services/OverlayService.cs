@@ -10,8 +10,6 @@ public class OverlayService : ReactiveObject
     //      private
     private bool _isCategoryCreateVisible;
     private bool _isTaskCreateVisible;
-    private Category? _createdCategory;
-    private Task? _createdTask;
     
     //      public
     public bool IsCategoryCreateVisible
@@ -24,19 +22,7 @@ public class OverlayService : ReactiveObject
         get => _isTaskCreateVisible;
         set => this.RaiseAndSetIfChanged(ref _isTaskCreateVisible, value);
     }
-
-    public Category? CreatedCategory
-    {
-        get => _createdCategory;
-        set => this.RaiseAndSetIfChanged(ref _createdCategory, value);
-    }
-
-    public Task? CreatedTask
-    {
-        get => _createdTask;
-        set => this.RaiseAndSetIfChanged(ref _createdTask, value);
-    }
-
+    
     public bool IsAnyVisible => IsCategoryCreateVisible || IsTaskCreateVisible;
 
     // Commands

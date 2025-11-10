@@ -1,26 +1,29 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using PlanIt.Models;
 using PlanIt.Services;
+using PlanIt.Services.DataServices;
 using ReactiveUI;
 
 namespace PlanIt.ViewModels;
 
 public class CategoryCreationViewModel : ViewModelBase
 {
-    // BackEnd
     private readonly OverlayService _overlayService;
-    private readonly DataAccess _db;
+    private readonly DbAccessService _db;
     
-    public  CategoryCreationViewModel(OverlayService overlayService, DataAccess db)
+    public  CategoryCreationViewModel(OverlayService overlayService, DbAccessService db)
     {
         _overlayService = overlayService;
         _db = db;
-        SelectedColor = Colors.First();
-        SelectedIcon = Icons.First();
-        EnteredTitle = "";
+        AddCategoryInteraction = new();
+        
+        NewCategory = new Category{Title = "",  Icon = Icons.First(), Color = Colors.First()};
     }
     
     // ReadOnly Collections
@@ -32,53 +35,48 @@ public class CategoryCreationViewModel : ViewModelBase
         "PizzaIcon", "PillsIcon", "FolderIcon", "WeatherIcon", "CarIcon", "BusIcon", "BanIcon", "AppleIcon",
         "GhostIcon", "KeyIcon"
     ];
-    
-    // Control attributes
-    //      private
-    private string _selectedColor;
-    private string _selectedIcon;
-    private string _enteredTitle;
-    
-    
-    //      public
-    public string SelectedColor
-    {
-        get => _selectedColor;
-        set => this.RaiseAndSetIfChanged(ref _selectedColor, value);
-    }
-    public string SelectedIcon
-    {
-        get => _selectedIcon;
-        set => this.RaiseAndSetIfChanged(ref _selectedIcon, value);
-    }
 
-    public string EnteredTitle
-    {
-        get => _enteredTitle;
-        set => this.RaiseAndSetIfChanged(ref _enteredTitle, value);
-    }
-    
+    #region Private attributes
+    private Category _newCategory;
+    #endregion
 
-    // Commands
+
+    #region Public attributes
+    public Interaction<Category, Unit> AddCategoryInteraction;
+
+    public Category NewCategory
+    {
+        get => _newCategory;
+        set =>  this.RaiseAndSetIfChanged(ref _newCategory, value);
+    }
+    #endregion
+
+    #region Commands
     public ReactiveCommand<Unit, Unit> HideCategoryOverlay => ReactiveCommand.Create(() =>
     {
         _overlayService.ToggleVisibility(0);
-        SelectedColor = Colors.First();
-        SelectedIcon = Icons.First();
-        EnteredTitle = "";
+        NewCategory = new Category { Title = "", Icon = Icons.First(), Color = Colors.First() };
     });
 
-    public ReactiveCommand<Unit, Unit> ApplyCreation => ReactiveCommand.Create(() =>
+    public ReactiveCommand<Category, bool> ApplyCreation => ReactiveCommand.CreateFromTask<Category, bool>(async newCategory =>
     {
-        if (EnteredTitle.Length == 0)
+        if (NewCategory.Title.Length == 0)
         {
-            Console.WriteLine("Enter Title");
-            return;
+            Console.WriteLine("[CategoryCreation] Error: Enter Title");
+            return false;
         }
-        var newCategory = new Category{Title = EnteredTitle, Color = SelectedColor, Icon = SelectedIcon};
-        _db.Categories.InsertOne(newCategory);
-        Console.WriteLine($"[CategoryCreation] Category {newCategory.Title} has been created");
-        _overlayService.CreatedCategory =  newCategory;
+        var inserted = await _db.InsertCategory(newCategory);
+        if (inserted)
+        {
+            Console.WriteLine($"[CategoryCreation] Category {newCategory.Title} has been created");
+            await AddCategoryInteraction.Handle(newCategory);
+        }
+        else
+        { 
+            Console.WriteLine("[ApplyCategoryCreating] Error: Category wasn't created");
+        }
         HideCategoryOverlay.Execute().Subscribe();
+        return inserted;
     });
+    #endregion
 }

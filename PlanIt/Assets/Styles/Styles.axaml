@@ -48,6 +48,14 @@
             <Setter Property="Padding" Value="13"></Setter>
             <Setter Property="CornerRadius" Value="24"></Setter>
         </Style>
+        
+        <Style Selector="^#TaskLayoutBorder">
+            <Setter Property="Background" Value="{DynamicResource BackgroundPrimary}"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource BackgroundUpper}"></Setter>
+            <Setter Property="BorderThickness" Value="2"></Setter>
+            <Setter Property="Padding" Value="13"></Setter>
+            <Setter Property="CornerRadius" Value="24"></Setter>
+        </Style>
     </Style>
     
     <Style Selector="ListBox">
@@ -247,10 +255,15 @@
         </Style>
         
         <Style Selector="^.taskBtn">
-            <Setter Property="Background" Value="{DynamicResource BackgroundTask}"></Setter>
+            <Setter Property="Background" Value="Transparent"></Setter>
             
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource BackgroundTask}"></Setter>
+                <Setter Property="Background" Value="Transparent"></Setter>
+                
+            </Style>
+            
+            <Style Selector="^:pointerover PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource Red}"></Setter>
             </Style>
         </Style>
     </Style>
@@ -298,7 +311,7 @@
         </Style>
     </Style>
     
-    <Style Selector="TextBox.TitleInput">
+    <Style Selector="TextBox.basicInput">
         <Setter Property="CornerRadius" Value="8"></Setter>
         <!-- ... -->
     </Style>

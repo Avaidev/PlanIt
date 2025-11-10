@@ -10,13 +10,11 @@ namespace PlanIt.Models;
 
 public class Category : ReactiveObject
 {
-    [BsonId]
-    public ObjectId Id { get; set; }
-
+    [BsonId] public ObjectId Id { get; } = ObjectId.GenerateNewId();
     [BsonElement("title")] private string _title = "NoNameCategory";
     [BsonElement("color")] private string _color = "Default";
     [BsonElement("icon")] private string _icon = "Cubes";
-    [BsonElement("tasks")] private ObservableCollection<Task> _tasks = [];
+    [BsonElement("tasksCount")] private int  _tasksCount = 0;
     
     [BsonIgnore]
     public required string Title
@@ -38,18 +36,18 @@ public class Category : ReactiveObject
         get => _icon;
         set => this.RaiseAndSetIfChanged(ref _icon, value);
     }
-
+    
     [BsonIgnore]
-    public int TasksCount => Tasks.Count;
-
-    [BsonIgnore]
-    public ObservableCollection<Task> Tasks
+    public int TasksCount { get => _tasksCount; set => this.RaiseAndSetIfChanged(ref _tasksCount, value);}
+    
+    public override string ToString() => Title;
+    public override bool Equals(object? obj)
     {
-        get => _tasks;
-        set => this.RaiseAndSetIfChanged(ref _tasks, value);
+        return Id == (obj as Category)?.Id;
     }
 
-    public ReactiveCommand<Task, Unit> AddTask => ReactiveCommand.Create<Task>(task => Tasks.Add(task));
-    public ReactiveCommand<Task, Unit> RemoveTask => ReactiveCommand.Create<Task>(task => Tasks.Remove(task));
-
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
 }
