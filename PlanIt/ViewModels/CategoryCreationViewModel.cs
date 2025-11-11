@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 using PlanIt.Models;
 using PlanIt.Services;
 using PlanIt.Services.DataServices;
@@ -16,25 +13,19 @@ public class CategoryCreationViewModel : ViewModelBase
 {
     private readonly OverlayService _overlayService;
     private readonly DbAccessService _db;
+    private readonly ViewRepository _viewRepository;
     
-    public  CategoryCreationViewModel(OverlayService overlayService, DbAccessService db)
+    
+    public  CategoryCreationViewModel(OverlayService overlayService, DbAccessService db, ViewRepository repository)
     {
         _overlayService = overlayService;
         _db = db;
-        AddCategoryInteraction = new();
+        _viewRepository = repository;
+        var icons = _viewRepository.Icons;
+        var colors = _viewRepository.Colors;
         
-        NewCategory = new Category{Title = "",  Icon = Icons.First(), Color = Colors.First()};
+        NewCategory = new Category{Title = "",  Icon = icons.First(), Color = colors.First()};
     }
-    
-    // ReadOnly Collections
-    public ObservableCollection<string> Colors { get; } = ["Default", "Red", "Orange", "Yellow", "Pink", "Purple", "Green", "Blue", "Emerald"];
-
-    public ObservableCollection<string> Icons { get; } =
-    [
-        "CubesIcon", "EnvelopeIcon", "SmileIcon", "StarIcon", "MusicIcon", "BookIcon", "CardIcon", "DollarIcon",
-        "PizzaIcon", "PillsIcon", "FolderIcon", "WeatherIcon", "CarIcon", "BusIcon", "BanIcon", "AppleIcon",
-        "GhostIcon", "KeyIcon"
-    ];
 
     #region Private attributes
     private Category _newCategory;
@@ -42,8 +33,6 @@ public class CategoryCreationViewModel : ViewModelBase
 
 
     #region Public attributes
-    public Interaction<Category, Unit> AddCategoryInteraction;
-
     public Category NewCategory
     {
         get => _newCategory;
@@ -55,28 +44,27 @@ public class CategoryCreationViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> HideCategoryOverlay => ReactiveCommand.Create(() =>
     {
         _overlayService.ToggleVisibility(0);
-        NewCategory = new Category { Title = "", Icon = Icons.First(), Color = Colors.First() };
+        var icons = _viewRepository.Icons;
+        var colors = _viewRepository.Colors; 
+        NewCategory = new Category { Title = "", Icon = icons.First(), Color = colors.First() };
     });
 
     public ReactiveCommand<Category, bool> ApplyCreation => ReactiveCommand.CreateFromTask<Category, bool>(async newCategory =>
     {
         if (NewCategory.Title.Length == 0)
         {
-            Console.WriteLine("[CategoryCreation] Error: Enter Title");
+            await MessageService.ErrorMessage("Enter category title!");
             return false;
         }
-        var inserted = await _db.InsertCategory(newCategory);
-        if (inserted)
+        if (await _db.InsertCategory(newCategory))
         {
-            Console.WriteLine($"[CategoryCreation] Category {newCategory.Title} has been created");
-            await AddCategoryInteraction.Handle(newCategory);
+            Console.WriteLine($"[CategoryCreation] Category '{newCategory.Title}' was created");
+            _viewRepository.CategoriesCollection.Add(newCategory);
+            HideCategoryOverlay.Execute().Subscribe();
+            return true;
         }
-        else
-        { 
-            Console.WriteLine("[ApplyCategoryCreating] Error: Category wasn't created");
-        }
-        HideCategoryOverlay.Execute().Subscribe();
-        return inserted;
+        Console.WriteLine("[CategoryCreation] Error: Category wasn't created");
+        return false;
     });
     #endregion
 }

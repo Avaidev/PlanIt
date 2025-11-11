@@ -3,11 +3,13 @@ using PlanIt.Services;
 using PlanIt.Models;
 using ReactiveUI;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Styling;
+using MongoDB.Bson;
 using PlanIt.Services.DataServices;
 using Task = System.Threading.Tasks.Task;
 
@@ -17,14 +19,14 @@ public class WindowViewModel : ViewModelBase
 {
     private readonly OverlayService _overlayService;
     private readonly DbAccessService _db;
+    private readonly ViewRepository _viewRepository;
 
-    public WindowViewModel(OverlayService overlayService, DbAccessService db)
+    public WindowViewModel(OverlayService overlayService, DbAccessService db, ViewRepository repository)
     {
         _overlayService = overlayService;
         _db = db;
-        ShowCategoriesInteraction = new();
-        ShowTasksInteraction = new();
-        RemoveCategoryInteraction = new();
+        _viewRepository =  repository;
+        LoadCategoriesAsync();
         
         this.WhenAnyValue(x => x.IsDarkTheme)
             .Subscribe(isDark =>
@@ -37,22 +39,21 @@ public class WindowViewModel : ViewModelBase
 
     #region Private attributes
     private bool _isDarkTheme = true;
-    private Category? _workingCategory = null;
-
     private bool _panelVisible;
     private string _panelText;
     private string _panelIcon;
     private string _panelColor;
     private bool _panelPlusIsVisible;
+
     #endregion
 
     #region Public attributes
 
     public Category? WorkingCategory
     {
-        get => _workingCategory;
+        get => _viewRepository.SelectedCategory;
         set {
-            this.RaiseAndSetIfChanged(ref _workingCategory, value);
+            _viewRepository.SelectedCategory = value;
             if (value != null)
             {
                 PanelText = value.Title;
@@ -60,6 +61,7 @@ public class WindowViewModel : ViewModelBase
                 PanelColor = value.Color;
                 PanelPlusIsVisible = true;
                 PanelVisible = true;
+                LoadTasksByCategoryAsync();
             }
             else
             {
@@ -70,10 +72,6 @@ public class WindowViewModel : ViewModelBase
             }
         }   
     }
-    public Interaction<List<Category>, Unit> ShowCategoriesInteraction { get; }
-    public Interaction<List<Task>, Unit> ShowTasksInteraction { get; }
-    public Interaction<Category, Unit> RemoveCategoryInteraction { get; }
-    
 
     public bool IsDarkTheme
     {
@@ -124,26 +122,25 @@ public class WindowViewModel : ViewModelBase
 
     public async Task LoadCategoriesAsync()
     {
-        var categories = await _db.GetAllCategories();
-        
-        _workingCategory ??= categories.First();
-        await ShowCategoriesInteraction.Handle(categories);
+        _viewRepository.CategoriesCollection = new ObservableCollection<Category>(await _db.GetAllCategories());
+        WorkingCategory ??= _viewRepository.CategoriesCollection.First();
     }
 
-    public async Task LoadTasksAsync()
+    public async Task LoadTasksByCategoryAsync()
     {
-        
+        _viewRepository.TasksCollection = new ObservableCollection<TaskItem>(await _db.GetTasksByCategory(WorkingCategory!));
     }
 
     public ReactiveCommand<Category, bool> RemoveCategory => ReactiveCommand.CreateFromTask<Category, bool>(async category =>
     {
         if (await _db.CountCategories() == 1)
         {
-            await MessageService.ErrorMessage("You can't delete last category");
+            await MessageService.ErrorMessage("You can't delete last category!");
             
             return false;
         }
-        if (category.TasksCount == 0 || category.TasksCount != 0 && await MessageService.AskYesNoMessage("To continue you must delete all tasks of this category. Would you like to delete them"))
+        if (!await MessageService.AskYesNoMessage($"Do you want to remove '{category.Title}' category?")) return false;
+        if (category.TasksCount == 0 || category.TasksCount != 0 && await MessageService.AskYesNoMessage("To continue you must delete all tasks of this category. Would you like to delete them?"))
         {
             if (category.TasksCount != 0)
             {
@@ -155,11 +152,29 @@ public class WindowViewModel : ViewModelBase
             if (await _db.RemoveCategory(category))
             {
                 Console.WriteLine($"[WindowVM > RemoveCategory] {category.Title} was removed");
-                await RemoveCategoryInteraction.Handle(category);
+                _viewRepository.CategoriesCollection.Remove(category);
                 return true;
             }
             Console.WriteLine($"[WindowVM > RemoveCategory] Error: {category.Title} was not removed");
         }
+        return false;
+    });
+
+    public ReactiveCommand<TaskItem, bool> RemoveTask => ReactiveCommand.CreateFromTask<TaskItem, bool>( async task =>
+    {
+        if (!await MessageService.AskYesNoMessage($"Do you want to delete '{task.Title}' task?")) return false;
+        var notificationRemove = task.Notification != null ? _db.RemoveNotification((ObjectId)task.Notification) : null;
+        var taskRemove = _db.RemoveTask(task);
+        WorkingCategory!.TasksCount--;
+        var updateCategory = _db.UpdateCategory(WorkingCategory!);
+
+        if (notificationRemove == null || await notificationRemove && await taskRemove && await updateCategory)
+        {
+            Console.WriteLine($"[WindowVM > RemoveTask] Task '{task.Title}' was removed");
+            _viewRepository.TasksCollection.Remove(task);
+            return true;
+        }
+        Console.WriteLine($"[WindowVM > RemoveTask] Error: '{task.Title}' was not removed");
         return false;
     });
 

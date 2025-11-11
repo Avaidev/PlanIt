@@ -14,13 +14,15 @@ public class MainViewModel : ViewModelBase
     
     public OverlayService OverlayService { get; }
     public DbAccessService Db { get; }
+    public ViewRepository ViewRepository { get; }
     
     public MainViewModel()
     {
         Db = new DbAccessService();
         OverlayService = new OverlayService();
-        WindowVM = new WindowViewModel(OverlayService, Db);
-        CategoryCreationVM = new CategoryCreationViewModel(OverlayService, Db);
-        TaskCreationVM = new TaskCreationViewModel(OverlayService, Db);
+        ViewRepository = new ViewRepository();
+        WindowVM = new WindowViewModel(OverlayService, Db, ViewRepository);
+        CategoryCreationVM = new CategoryCreationViewModel(OverlayService, Db, ViewRepository);
+        TaskCreationVM = new TaskCreationViewModel(OverlayService, Db, ViewRepository);
     }
 }

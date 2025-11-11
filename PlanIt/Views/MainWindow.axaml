@@ -19,26 +19,7 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs)-->
         <vm:MainViewModel/>
     </Design.DataContext>
-    
-    <!-- <Window.DataTemplates> -->
-    <!--     <DataTemplate> -->
-    <!--         <Border Classes="task"> -->
-    <!--             <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto, Auto, Auto"> -->
-    <!--                 <ToggleButton Width="32" Height="32" Classes="taskToggle" VerticalAlignment="Center" HorizontalAlignment="Left"></ToggleButton> -->
-    <!--                 <TextBlock Grid.Column="1" Classes="t-20 t-m" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap" Margin="12 0">Some task title</TextBlock> -->
-    <!--                 <TextBlock Grid.Column="2" VerticalAlignment="Center" Classes="t-16 second">21.06.2026</TextBlock> -->
-    <!--                 <TextBlock Grid.Column="3" VerticalAlignment="Center" Classes="t-16 second" Margin="6 0">/</TextBlock> -->
-    <!--                 <TextBlock  Grid.Column="4" VerticalAlignment="Center" Classes="t-16 second" Margin="0 0 16 0">17:00</TextBlock> -->
-    <!--                 <Button Grid.Column="5" Width="24" Height="24" Classes="taskBtn"> -->
-    <!--                     <Svg Path="../Assets/Images/edit.svg" Height="24" Width="24"></Svg> -->
-    <!--                 </Button> -->
-    <!--                 <Button Grid.Column="6" Width="24" Height="24" Classes="taskBtn"> -->
-    <!--                     <Svg Path="../Assets/Images/trash.svg" Height="24" Width="24"></Svg> -->
-    <!--                 </Button> -->
-    <!--             </Grid> -->
-    <!--         </Border> -->
-    <!--     </DataTemplate> -->
-    <!-- </Window.DataTemplates> -->
+
     <Grid>
         <Grid x:Name="MainWindowLayout" ZIndex="1">
             <Grid.ColumnDefinitions>
@@ -135,7 +116,7 @@
                                             <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource Text}"></PathIcon>
                                         </Button>
                                     </Grid>
-                                    <ListBox x:Name="CategoryListBox" Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectedItem="{Binding WindowVM.WorkingCategory}">
+                                    <ListBox x:Name="CategoryListBox" Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectedItem="{Binding WindowVM.WorkingCategory}" ItemsSource="{Binding ViewRepository.CategoriesCollection}">
                                         <ListBox.ItemTemplate>
                                             <DataTemplate DataType="models:Category">
                                                 <Grid ColumnDefinitions="Auto, *, Auto, Auto" HorizontalAlignment="Stretch" VerticalAlignment="Center" ColumnSpacing="5">
@@ -184,7 +165,26 @@
                     
                     <Border Grid.Row="1" Padding="17 0">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AllowAutoHide="False" Classes="mainScroll">
-                            <ItemsControl x:Name="TasksItemsControl">
+                            <ItemsControl x:Name="TasksItemsControl" ItemsSource="{Binding ViewRepository.TasksCollection}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="models:TaskItem">
+                                        <Border Classes="task">
+                                            <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto, Auto, Auto">
+                                                <ToggleButton Width="32" Height="32" Classes="taskToggle" VerticalAlignment="Center" HorizontalAlignment="Left"></ToggleButton>
+                                                <TextBlock Grid.Column="1" Classes="t-20 t-m" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap" Margin="12 0" Text="{Binding Title}"></TextBlock>
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Classes="t-16 second" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToDateConverter}}"></TextBlock>
+                                                <TextBlock Grid.Column="3" VerticalAlignment="Center" Classes="t-16 second" Margin="6 0">/</TextBlock>
+                                                <TextBlock Grid.Column="4" VerticalAlignment="Center" Classes="t-16 second" Margin="0 0 16 0" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToTimeConverter}}"></TextBlock>
+                                                <Button Grid.Column="5" Width="24" Height="24" Classes="taskBtn">
+                                                    <PathIcon Width="20" Height="20" Data="{StaticResource EditIcon}" Foreground="{DynamicResource TaskSecondaryText}"></PathIcon>
+                                                </Button>
+                                                <Button Grid.Column="6" Width="24" Height="24" Classes="taskBtn" Command="{Binding Path=DataContext.WindowVM.RemoveTask, ElementName=MainWindowLayout}" CommandParameter="{Binding }">
+                                                    <PathIcon Width="20" Height="20" Data="{StaticResource TrashIcon}" Foreground="{DynamicResource TaskTrash}"></PathIcon>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
                     </Border>
@@ -210,7 +210,7 @@
                     </Grid>
                     <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
                         <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Colors</TextBlock>
-                        <ListBox Grid.Row="1" x:Name="CategoryColorsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding CategoryCreationVM.NewCategory.Color, Mode=TwoWay}" ItemsSource="{Binding CategoryCreationVM.Colors}">
+                        <ListBox Grid.Row="1" x:Name="CategoryColorsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding CategoryCreationVM.NewCategory.Color, Mode=TwoWay}" ItemsSource="{Binding ViewRepository.Colors}">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Columns="9" RowSpacing="7" ColumnSpacing="7"></UniformGrid>
@@ -225,7 +225,7 @@
                     </Grid>
                     <Grid Grid.Row="3" RowDefinitions="Auto, Auto">
                         <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Icons</TextBlock>
-                        <ListBox Grid.Row="1" x:Name="CategoryIconsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding CategoryCreationVM.NewCategory.Icon, Mode=TwoWay}" ItemsSource="{Binding CategoryCreationVM.Icons}">
+                        <ListBox Grid.Row="1" x:Name="CategoryIconsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding CategoryCreationVM.NewCategory.Icon, Mode=TwoWay}" ItemsSource="{Binding ViewRepository.Icons}">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Rows="2" Columns="9" RowSpacing="7" ColumnSpacing="7"></UniformGrid>
@@ -245,41 +245,40 @@
             </Border>
         </Grid>
         <Grid x:Name="TaskCreateLayout" ZIndex="2" IsHitTestVisible="True" IsVisible="{Binding OverlayService.IsTaskCreateVisible}">
-            <!-- {Binding OverlayService.IsTaskCreateVisible} -->
             <Border Background="Black" Opacity="0.4" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></Border>
             <Border VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="TaskLayoutBorder">
                 <Grid RowDefinitions="Auto, Auto" RowSpacing="10">
                     <Grid ColumnDefinitions="Auto, *, Auto">
-                        <Button Classes="btn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
+                        <Button Classes="btn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding TaskCreationVM.HideTaskOverlay}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
                         <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="t-b t-14" Foreground="{DynamicResource Text}">New Task</TextBlock>
-                        <Button Grid.Column="2" Classes="btn" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource AcceptIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
+                        <Button Grid.Column="2" Classes="btn" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding TaskCreationVM.ApplyCreation}" CommandParameter="{Binding TaskCreationVM.NewTaskItem}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource AcceptIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
                     </Grid>
                     <Grid Grid.Row="1" RowDefinitions="Auto, Auto, Auto, Auto" ColumnDefinitions="*, Auto" RowSpacing="4" ColumnSpacing="10">
                         <Grid RowDefinitions="Auto, Auto">
                             <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Title</TextBlock>
-                            <TextBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Classes="basicInput" MinWidth="227"></TextBox>
+                            <TextBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Classes="basicInput" MinWidth="227" Text="{Binding TaskCreationVM.NewTaskItem.Title}"></TextBox>
                         </Grid>
                         <Grid Grid.Row="1" Grid.Column="0" Grid.RowSpan="3" RowDefinitions="Auto, *" VerticalAlignment="Stretch">
                             <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Description</TextBlock>
-                            <TextBox Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Classes="basicInput" TextWrapping="Wrap" AcceptsReturn="True" MinWidth="227"></TextBox>
+                            <TextBox Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Classes="basicInput" TextWrapping="Wrap" AcceptsReturn="True" MinWidth="227" Text="{Binding TaskCreationVM.NewTaskItem.Description}"></TextBox>
                         </Grid>
-                        <Grid Grid.Row="0" Grid.Column="1" Grid.RowDefinitions="Auto, Auto">
+                        <Grid Grid.Row="0" Grid.Column="1" RowDefinitions="Auto, Auto">
                             <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Date</TextBlock>
-                            <DatePicker Grid.Row="1" Width="300"></DatePicker>
+                            <DatePicker Grid.Row="1" Width="300" x:Name="TaskDatePicker"></DatePicker>
                         </Grid>
                         <Grid Grid.Row="1" Grid.Column="1" RowDefinitions="Auto, Auto">
                             <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Time</TextBlock>
-                            <TimePicker Grid.Row="1" Width="300"></TimePicker>
+                            <TimePicker Grid.Row="1" Width="300" x:Name="TaskTimePicker"></TimePicker>
                         </Grid>
                         <Grid Grid.Row="2" Grid.Column="1" RowDefinitions="Auto, Auto" ColumnDefinitions="50*, 50*" ColumnSpacing="6">
                             <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Repeat</TextBlock>
                             <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Notify</TextBlock>
-                            <ComboBox Grid.Row="1" Grid.Column="0" Width="147"></ComboBox>
-                            <ComboBox Grid.Row="1" Grid.Column="1" Width="147"></ComboBox>
+                            <ComboBox Grid.Row="1" Grid.Column="0" Width="147" ItemsSource="{Binding ViewRepository.RepeatComboCollection}" SelectedIndex="{Binding TaskCreationVM.SelectedRepeatIndex}"></ComboBox>
+                            <ComboBox Grid.Row="1" Grid.Column="1" Width="147" ItemsSource="{Binding ViewRepository.NotifyBeforeComboCollection}" SelectedIndex="{Binding TaskCreationVM.SelectedNotifyIndex}"></ComboBox>
                         </Grid>
                         <Grid Grid.Row="3" Grid.Column="1" RowDefinitions="Auto, Auto">
                             <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Priority</TextBlock>
-                            <ComboBox Grid.Row="1" HorizontalAlignment="Left" Width="147"></ComboBox>
+                            <ComboBox Grid.Row="1" HorizontalAlignment="Left" Width="147" ItemsSource="{Binding ViewRepository.ImportanceComboCollection}" SelectedIndex="{Binding TaskCreationVM.SelectedImportanceIndex}"></ComboBox>
                         </Grid>
                     </Grid>
                 </Grid>

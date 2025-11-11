@@ -5,17 +5,26 @@ using MongoDB.Bson;
 
 namespace PlanIt.Models;
 
-public class Task : ReactiveObject
+public class TaskItem : ReactiveObject
 {
-    [BsonId] public ObjectId Id { get; } = ObjectId.GenerateNewId();
-    [BsonElement("title")] private string _title = "NoNameTask";
-    [BsonElement("description")] private string _description = "";
-    [BsonElement("completed")] private DateTime? _completeDate;
-    [BsonElement("repeat")] private DateTime? _repeat;
-    [BsonElement("done")] private bool _isDone;
-    [BsonElement("important")] private bool _isImportant;
-    [BsonElement("notification")] public ObjectId? Notification { get; set; }
-    [BsonElement("category")] private ObjectId? _category;
+    [BsonId] 
+        public ObjectId Id { get; set; } = ObjectId.GenerateNewId();
+    [BsonElement("title")]
+        private string _title = "NoNameTask";
+    [BsonElement("description")] 
+        private string _description = "";
+    [BsonElement("completed")] 
+        private DateTime _completeDate = DateTime.Now.ToUniversalTime();
+    [BsonElement("repeat")] 
+        private int? _repeat;
+    [BsonElement("done")] 
+        private bool _isDone;
+    [BsonElement("important")] 
+        private bool _isImportant;
+    [BsonElement("notification")] 
+        public ObjectId? Notification { get; set; }
+    [BsonElement("category")] 
+        private ObjectId? _category;
 
     [BsonIgnore] public required string Title
     {
@@ -31,14 +40,14 @@ public class Task : ReactiveObject
     }
 
     [BsonIgnore]
-    public DateTime? CompleteDate
+    public DateTime CompleteDate
     {
-        get => _completeDate;
-        set => this.RaiseAndSetIfChanged(ref _completeDate, value);
+        get => _completeDate.ToLocalTime();
+        set => this.RaiseAndSetIfChanged(ref _completeDate, value.ToUniversalTime());
     }
 
     [BsonIgnore]
-    public DateTime? Repeat
+    public int? Repeat
     {
         get => _repeat;
         set => this.RaiseAndSetIfChanged(ref _repeat, value);
@@ -72,7 +81,7 @@ public class Task : ReactiveObject
 
     public override bool Equals(object? obj)
     {
-        return Id ==  (obj as Task)?.Id;
+        return Id ==  (obj as TaskItem)?.Id;
     }
 
     public override int GetHashCode()

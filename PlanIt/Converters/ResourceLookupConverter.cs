@@ -15,16 +15,11 @@ public class ResourceLookupConverter : IValueConverter
         {
             var theme = Application.Current?.RequestedThemeVariant;
             var styles = Application.Current?.Styles;
-            Console.WriteLine($"[Converter] Resource key: {key}");
-            Console.WriteLine($"[Converter] Resource theme: {theme}");
-            Console.WriteLine($"[Converter] Resource styles: {styles}");
             
             foreach (var style in styles)
             {
-                Console.WriteLine("Style: " + style);
                 if (style.TryGetResource(key, theme, out var resource))
                 {
-                    Console.WriteLine($"[Converter] Resource {resource} found for key: {key}\n");
                     switch (resource)
                     {
                         case Color color:
@@ -38,7 +33,7 @@ public class ResourceLookupConverter : IValueConverter
             }
         }
         
-        Console.WriteLine($"[Converter] Resource not found for key: {value}\n");
+        Console.WriteLine($"[ResourceConverter] Resource not found for key: {value}\n");
 
         return AvaloniaProperty.UnsetValue;
 

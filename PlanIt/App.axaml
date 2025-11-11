@@ -17,8 +17,10 @@
              
     <Application.Resources>
         <converters:FilterBlockResponsiveWidthConverter x:Key="FilterBlockResponsiveWidthConverter"></converters:FilterBlockResponsiveWidthConverter>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"></converters:BoolToVisibilityConverter>
         <converters:DividerResponsiveWidthConverter x:Key="DividerResponsiveWidthConverter"></converters:DividerResponsiveWidthConverter>
         <converters:ResourceLookupConverter x:Key="ResourceLookupConverter"></converters:ResourceLookupConverter>
+        <converters:DateTimeToDateConverter x:Key="DateTimeToDateConverter"></converters:DateTimeToDateConverter>
+        <converters:DateTimeToTimeConverter x:Key="DateTimeToTimeConverter"></converters:DateTimeToTimeConverter>
+        <converters:ShowKeyFromPairConverter x:Key="ShowKeyFromPairConverter"></converters:ShowKeyFromPairConverter>
     </Application.Resources>
 </Application>

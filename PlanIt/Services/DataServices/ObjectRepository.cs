@@ -19,12 +19,12 @@ public class DataContainer<T>
     }
 }
 
-public class Repository<T> where T : class
+public class ObjectRepository<T> where T : class
 {
     private readonly string _dataBasePath;
     private List<T>? _cache { get; set; } = null;
     
-    public Repository(string dataBasePath)
+    public ObjectRepository(string dataBasePath)
     {
         _dataBasePath = dataBasePath;
 
@@ -45,12 +45,13 @@ public class Repository<T> where T : class
         try
         {
             var bsonData = await File.ReadAllBytesAsync(_dataBasePath);
+            if (bsonData.Length == 0) return [];
             var container = BsonSerializer.Deserialize<DataContainer<T>>(bsonData);
             return container.Items;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ObjectRepository > LoadAsync] Error in getting data from {_dataBasePath}: {ex.Message}");
+            Console.WriteLine($"[ObjectRepository > LoadAsync] Error in getting data from {_dataBasePath}: {ex.Source} - {ex.Message}");
             return [];
         }
     }
@@ -66,7 +67,7 @@ public class Repository<T> where T : class
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ObjectRepository > SaveAsync] Error saving data to {_dataBasePath}: {ex.Message}");
+            Console.WriteLine($"[ObjectRepository > SaveAsync] Error saving data to {_dataBasePath}: {ex.Source} - {ex.Message}");
             return false;
         }
     }
@@ -86,7 +87,7 @@ public class Repository<T> where T : class
         if (!useCache)
         {
             _cache = null;
-            return (await LoadAsync()).ToList();
+            return await LoadAsync();
         }
         _cache ??= await LoadAsync();
         return _cache;
@@ -116,9 +117,11 @@ public class Repository<T> where T : class
     {
         if (_cache != null)
         {
+
             _cache.Add(entity);
             return await SaveAsync(_cache);
         }
+
         var entities = await GetEntitiesAsync();
         entities.Add(entity);
         return await SaveAsync(entities);
@@ -136,8 +139,9 @@ public class Repository<T> where T : class
 
         if (toChange != null)
         {
-            entities.Remove(toChange);
-            entities.Add(toChange);
+            var index = entities.IndexOf(toChange);
+            entities.RemoveAt(index);
+            entities.Insert(index, toChange);
             return await SaveAsync(entities);
         }
         Console.WriteLine($"[ObjectRepository > Add] Entity {typeof(T).Name} was not updated");
@@ -146,11 +150,15 @@ public class Repository<T> where T : class
     
     public async  Task<bool> DeleteAsync(T  entity)
     {
+        return await DeleteAsync(GetId(entity));
+    }
+
+    public async Task<bool> DeleteAsync(ObjectId id)
+    {
         List<T> entities;
         if (_cache != null) entities = _cache;
         else entities = await GetEntitiesAsync();
-        
-        var toDelete = entities.FirstOrDefault(e => e == entity);
+        var toDelete = entities.FirstOrDefault(e => GetId(e) == id);
         if (toDelete != null)
         {
             entities.Remove(toDelete);

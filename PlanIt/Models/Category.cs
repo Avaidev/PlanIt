@@ -10,11 +10,16 @@ namespace PlanIt.Models;
 
 public class Category : ReactiveObject
 {
-    [BsonId] public ObjectId Id { get; } = ObjectId.GenerateNewId();
-    [BsonElement("title")] private string _title = "NoNameCategory";
-    [BsonElement("color")] private string _color = "Default";
-    [BsonElement("icon")] private string _icon = "Cubes";
-    [BsonElement("tasksCount")] private int  _tasksCount = 0;
+    [BsonId] 
+        public ObjectId Id { get; set; } = ObjectId.GenerateNewId();
+    [BsonElement("title")] 
+        private string _title = "NoNameCategory";
+    [BsonElement("color")] 
+        private string _color = "Default";
+    [BsonElement("icon")] 
+        private string _icon = "Cubes";
+    [BsonElement("tasksCount")] 
+        private int  _tasksCount = 0;
     
     [BsonIgnore]
     public required string Title

@@ -11,7 +11,7 @@ public class MessageService
     public static async Task ErrorMessage(string message)
     {
         var messageBox = MessageBoxManager.GetMessageBoxStandard("Error",
-            message, ButtonEnum.Ok, Icon.Error);
+            message + " ", ButtonEnum.Ok, Icon.Error);
         await messageBox.ShowAsync();
     }
 
