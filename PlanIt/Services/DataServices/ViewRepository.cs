@@ -13,6 +13,7 @@ public class ViewRepository : ReactiveObject
     private ObservableCollection<TaskItem> _tasksCollection;
     private Category? _selectedCategory;
     
+    public Panel Panel { get; set; } = new Panel();    
     public ObservableCollection<Category> CategoriesCollection
     {
         get => _categoriesCollection;
@@ -28,7 +29,24 @@ public class ViewRepository : ReactiveObject
     public Category? SelectedCategory
     {
         get => _selectedCategory;
-        set => this.RaiseAndSetIfChanged(ref _selectedCategory, value);
+        set {
+            this.RaiseAndSetIfChanged(ref _selectedCategory, value);
+            if (value != null)
+            {
+                Panel.Text = value.Title;
+                Panel.Icon = value.Icon;
+                Panel.Color = value.Color;
+                Panel.PlusIsVisible = true;
+                Panel.Visible = true;
+            }
+            else
+            {
+                Panel.Text = "";
+                Panel.Icon = "";
+                Panel.Color = "";
+                Panel.Visible = false;
+            }
+        }
     }
     
     public ObservableCollection<string> Colors { get; } = ["Default", "Red", "Orange", "Yellow", "Pink", "Purple", "Green", "Blue", "Emerald"];

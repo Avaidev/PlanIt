@@ -26,7 +26,20 @@ public class TaskItem : ReactiveObject
     [BsonElement("category")] 
         private ObjectId? _category;
 
-    [BsonIgnore] public required string Title
+    public TaskItem(){}
+    public TaskItem(TaskItem other)
+    {
+        Id = other.Id;
+        Title = other.Title;
+        Description = other.Description;
+        CompleteDate = other.CompleteDate;
+        Repeat = other.Repeat;
+        IsDone = other.IsDone;
+        IsImportant = other.IsImportant;
+        Notification = other.Notification;
+    }
+        
+    [BsonIgnore] public string Title
     {
         get => _title;
         set => this.RaiseAndSetIfChanged(ref _title, value);
@@ -81,7 +94,7 @@ public class TaskItem : ReactiveObject
 
     public override bool Equals(object? obj)
     {
-        return Id ==  (obj as TaskItem)?.Id;
+        return Id == (obj as TaskItem)?.Id;
     }
 
     public override int GetHashCode()

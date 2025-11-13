@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using PlanIt.Models;
 
 namespace PlanIt.Services.DataServices;
 
@@ -13,6 +14,7 @@ public class DataContainer<T>
 {
     public List<T> Items { get; set; } = new();
 
+    public DataContainer(){}
     public DataContainer(List<T> items)
     {
         Items = items;
@@ -47,6 +49,7 @@ public class ObjectRepository<T> where T : class
             var bsonData = await File.ReadAllBytesAsync(_dataBasePath);
             if (bsonData.Length == 0) return [];
             var container = BsonSerializer.Deserialize<DataContainer<T>>(bsonData);
+            
             return container.Items;
         }
         catch (Exception ex)
@@ -140,8 +143,7 @@ public class ObjectRepository<T> where T : class
         if (toChange != null)
         {
             var index = entities.IndexOf(toChange);
-            entities.RemoveAt(index);
-            entities.Insert(index, toChange);
+            entities[index] = entity;
             return await SaveAsync(entities);
         }
         Console.WriteLine($"[ObjectRepository > Add] Entity {typeof(T).Name} was not updated");

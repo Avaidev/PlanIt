@@ -68,6 +68,11 @@ public class DbAccessService
         return await _taskRepo.DeleteAsync(task);
     }
 
+    public async Task<bool> UpdateTask(TaskItem task)
+    {
+        return await _taskRepo.UpdateAsync(task);
+    }
+
     public async Task<bool> RemoveTasksMany(List<TaskItem> tasks)
     {
         bool allDeleted = true;
@@ -84,6 +89,10 @@ public class DbAccessService
     }
 
     //Notifications
+    public async Task<Notification?> GetNotification(ObjectId notificationId)
+    {
+        return await _notificationRepo.GetByIdAsync(notificationId);
+    }
     public async Task<bool> InsertNotification(Notification notification)
     {
         return await _notificationRepo.AddAsync(notification);

@@ -27,7 +27,7 @@ public partial class MainWindow : ReactiveWindow<MainViewModel>
                 vm => vm.TaskCreationVM.SelectedTimePart,
                 view => view.TaskTimePicker.SelectedTime)
                 .DisposeWith(disposable);
-
+            
 #if DEBUG
             this.AttachDevTools();
 #endif

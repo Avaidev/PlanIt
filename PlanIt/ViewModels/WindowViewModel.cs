@@ -2,11 +2,9 @@
 using PlanIt.Services;
 using PlanIt.Models;
 using ReactiveUI;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Styling;
 using MongoDB.Bson;
@@ -39,12 +37,6 @@ public class WindowViewModel : ViewModelBase
 
     #region Private attributes
     private bool _isDarkTheme = true;
-    private bool _panelVisible;
-    private string _panelText;
-    private string _panelIcon;
-    private string _panelColor;
-    private bool _panelPlusIsVisible;
-
     #endregion
 
     #region Public attributes
@@ -54,22 +46,8 @@ public class WindowViewModel : ViewModelBase
         get => _viewRepository.SelectedCategory;
         set {
             _viewRepository.SelectedCategory = value;
-            if (value != null)
-            {
-                PanelText = value.Title;
-                PanelIcon = value.Icon;
-                PanelColor = value.Color;
-                PanelPlusIsVisible = true;
-                PanelVisible = true;
-                LoadTasksByCategoryAsync();
-            }
-            else
-            {
-                PanelText = "";
-                PanelIcon = "";
-                PanelColor = "";
-                PanelVisible = false;
-            }
+            if(value != null) LoadTasksByCategoryAsync();
+            Console.WriteLine();
         }   
     }
 
@@ -77,35 +55,6 @@ public class WindowViewModel : ViewModelBase
     {
         get => _isDarkTheme;
         set => this.RaiseAndSetIfChanged(ref _isDarkTheme, value);
-    }
-
-    public bool PanelVisible
-    {
-        get => _panelVisible;
-        set => this.RaiseAndSetIfChanged(ref _panelVisible, value);
-    }
-    public string PanelText
-    {
-        get => _panelText;
-        set => this.RaiseAndSetIfChanged(ref _panelText, value);
-    }
-
-    public string PanelIcon
-    {
-        get => _panelIcon;
-        set => this.RaiseAndSetIfChanged(ref _panelIcon, value);
-    }
-
-    public string PanelColor
-    {
-        get => _panelColor;
-        set => this.RaiseAndSetIfChanged(ref _panelColor, value);
-    }
-
-    public bool PanelPlusIsVisible
-    {
-        get => _panelPlusIsVisible;
-        set => this.RaiseAndSetIfChanged(ref _panelPlusIsVisible, value);
     }
     #endregion
 
@@ -153,6 +102,7 @@ public class WindowViewModel : ViewModelBase
             {
                 Console.WriteLine($"[WindowVM > RemoveCategory] {category.Title} was removed");
                 _viewRepository.CategoriesCollection.Remove(category);
+                WorkingCategory = _viewRepository.CategoriesCollection.First();
                 return true;
             }
             Console.WriteLine($"[WindowVM > RemoveCategory] Error: {category.Title} was not removed");
@@ -160,15 +110,21 @@ public class WindowViewModel : ViewModelBase
         return false;
     });
 
+    public ReactiveCommand<Category, Unit> EditCategory => ReactiveCommand.Create<Category, Unit>(category =>
+    {
+        _overlayService.ToggleVisibility(0, category);
+        return Unit.Default;
+    });
+
     public ReactiveCommand<TaskItem, bool> RemoveTask => ReactiveCommand.CreateFromTask<TaskItem, bool>( async task =>
     {
         if (!await MessageService.AskYesNoMessage($"Do you want to delete '{task.Title}' task?")) return false;
-        var notificationRemove = task.Notification != null ? _db.RemoveNotification((ObjectId)task.Notification) : null;
+        var notificationRemove = task.Notification == null ? null : _db.RemoveNotification((ObjectId)task.Notification);
         var taskRemove = _db.RemoveTask(task);
         WorkingCategory!.TasksCount--;
         var updateCategory = _db.UpdateCategory(WorkingCategory!);
 
-        if (notificationRemove == null || await notificationRemove && await taskRemove && await updateCategory)
+        if ((notificationRemove == null || await notificationRemove) && await taskRemove && await updateCategory)
         {
             Console.WriteLine($"[WindowVM > RemoveTask] Task '{task.Title}' was removed");
             _viewRepository.TasksCollection.Remove(task);
@@ -176,6 +132,12 @@ public class WindowViewModel : ViewModelBase
         }
         Console.WriteLine($"[WindowVM > RemoveTask] Error: '{task.Title}' was not removed");
         return false;
+    });
+
+    public ReactiveCommand<TaskItem, Unit> EditTask => ReactiveCommand.Create<TaskItem, Unit>(task =>
+    {
+        _overlayService.ToggleVisibility(1, task);
+        return Unit.Default;
     });
 
     #endregion

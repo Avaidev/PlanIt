@@ -6,21 +6,16 @@ using MongoDB.Bson;
 
 public class Notification
 {
-    [BsonId] 
-        public ObjectId Id { get; set; } = ObjectId.GenerateNewId();
-    [BsonElement("title")] 
-        public string Title { get; set; } = "PlanIt Notification";
-    [BsonElement("message")] 
-        public required string Message { get; set; }
+    [BsonId] public ObjectId Id { get; set; } = ObjectId.GenerateNewId();
+    [BsonElement("title")] public string Title { get; set; } = "PlanIt Notification";
+    [BsonElement("message")] public required string Message { get; set; }
 
-    [BsonElement("notify")] private DateTime notify;
-    [BsonElement("repeat")] 
-        public int? Repeat { get; set; }
+    [BsonElement("notify")] private DateTime _notify;
+    [BsonElement("repeat")] public int? Repeat { get; set; }
 
-    [BsonIgnore]
-    public required DateTime Notify
+    [BsonIgnore] public required DateTime Notify
     {
-        get => notify.ToLocalTime();
-        set => notify = value.ToUniversalTime();
+        get => _notify.ToLocalTime();
+        set => _notify = value.ToUniversalTime();
     }
 }

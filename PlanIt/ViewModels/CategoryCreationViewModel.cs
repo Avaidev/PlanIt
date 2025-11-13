@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Threading.Tasks;
 using PlanIt.Models;
 using PlanIt.Services;
 using PlanIt.Services.DataServices;
@@ -21,10 +22,7 @@ public class CategoryCreationViewModel : ViewModelBase
         _overlayService = overlayService;
         _db = db;
         _viewRepository = repository;
-        var icons = _viewRepository.Icons;
-        var colors = _viewRepository.Colors;
-        
-        NewCategory = new Category{Title = "",  Icon = icons.First(), Color = colors.First()};
+        ReturnToDefault();
     }
 
     #region Private attributes
@@ -41,21 +39,20 @@ public class CategoryCreationViewModel : ViewModelBase
     #endregion
 
     #region Commands
+
+    private void ReturnToDefault()
+    {
+        NewCategory = new Category { Title = ""};
+    }
+    
     public ReactiveCommand<Unit, Unit> HideCategoryOverlay => ReactiveCommand.Create(() =>
     {
         _overlayService.ToggleVisibility(0);
-        var icons = _viewRepository.Icons;
-        var colors = _viewRepository.Colors; 
-        NewCategory = new Category { Title = "", Icon = icons.First(), Color = colors.First() };
+        ReturnToDefault();
     });
 
-    public ReactiveCommand<Category, bool> ApplyCreation => ReactiveCommand.CreateFromTask<Category, bool>(async newCategory =>
+    private async Task<bool> CreateNewCategory(Category newCategory)
     {
-        if (NewCategory.Title.Length == 0)
-        {
-            await MessageService.ErrorMessage("Enter category title!");
-            return false;
-        }
         if (await _db.InsertCategory(newCategory))
         {
             Console.WriteLine($"[CategoryCreation] Category '{newCategory.Title}' was created");
@@ -65,6 +62,33 @@ public class CategoryCreationViewModel : ViewModelBase
         }
         Console.WriteLine("[CategoryCreation] Error: Category wasn't created");
         return false;
+    }
+
+    private async Task<bool> UpdateCategory(Category newCategory)
+    {
+        if (await _db.UpdateCategory(newCategory))
+        {
+            Console.WriteLine($"[CategoryCreation] Category '{newCategory.Title}' was updated");
+            var index = _viewRepository.CategoriesCollection.IndexOf(newCategory);
+            _viewRepository.CategoriesCollection[index] = newCategory;
+            _viewRepository.SelectedCategory = newCategory;
+            HideCategoryOverlay.Execute().Subscribe();
+            return true;
+        }
+        Console.WriteLine("[CategoryCreation] Error: Category wasn't updated");
+        return false;
+    }
+
+    public ReactiveCommand<Category, bool> ApplyCreation => ReactiveCommand.CreateFromTask<Category, bool>(async newCategory =>
+    {
+        if (NewCategory.Title.Length == 0)
+        {
+            await MessageService.ErrorMessage("Enter category title!");
+            return false;
+        }
+
+        if (_overlayService.ToEditObject != null) return await UpdateCategory(newCategory);
+        return await CreateNewCategory(newCategory);
     });
     #endregion
 }

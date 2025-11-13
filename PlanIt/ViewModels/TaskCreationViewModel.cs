@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reactive;
+using System.Threading.Tasks;
+using MongoDB.Bson;
 using PlanIt.Models;
 using PlanIt.Services;
 using PlanIt.Services.DataServices;
@@ -35,7 +37,12 @@ public class TaskCreationViewModel : ViewModelBase
     public TaskItem NewTaskItem
     {
         get => _newTaskItem;
-        set => this.RaiseAndSetIfChanged(ref _newTaskItem, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _newTaskItem, value);
+            this.RaisePropertyChanged(nameof(SelectedDatePart));
+            this.RaisePropertyChanged(nameof(SelectedTimePart));
+        }
     }
 
     public DateTimeOffset SelectedDatePart
@@ -89,6 +96,49 @@ public class TaskCreationViewModel : ViewModelBase
     private static DateTime CalculateOffsetToDateTime(int offset, DateTime dateTime) => 
         offset < 0 ? dateTime.AddHours(offset) : dateTime.AddDays(-1 * offset);
 
+    private async Task<bool> CreateNewTask(TaskItem newTask, Notification? notification)
+    {
+        newTask.Notification = notification?.Id;
+        _viewRepository.SelectedCategory!.TasksCount++;
+        
+        var insertTask = _db.InsertTask(newTask);
+        var insertNotification = notification == null ? null : _db.InsertNotification(notification);
+        var updateCategory = _db.UpdateCategory(_viewRepository.SelectedCategory);
+
+        if (await insertTask && (insertNotification == null || await insertNotification) && await updateCategory)
+        {
+            _viewRepository.TasksCollection.Add(newTask);
+            HideTaskOverlay.Execute().Subscribe();
+            Console.WriteLine($"[TaskCreation] Task '{newTask.Title}' was created");
+            return true;
+        }
+        Console.WriteLine("[TaskCreation] Error: Task wasn't created!");
+        return false;
+    }
+
+    private async Task<bool> UpdateTask(TaskItem newTask, Notification? notification)
+    {
+        var oldNotification = newTask.Notification;
+        newTask.Notification = notification?.Id;
+        Console.WriteLine("TOREMOVE: " + oldNotification);
+        Console.WriteLine("NEW: " + newTask.Notification);
+
+        var updateTask = _db.UpdateTask(newTask);
+        bool? removeOldNotification = oldNotification == null ? null : await _db.RemoveNotification((ObjectId)oldNotification);
+        var insertNotification = notification == null ? null : _db.InsertNotification(notification);
+
+        if (await updateTask && (removeOldNotification == null || (bool)removeOldNotification!) && (insertNotification == null || await insertNotification))
+        {
+            var index = _viewRepository.TasksCollection.IndexOf(newTask);
+            _viewRepository.TasksCollection[index] = newTask;
+            HideTaskOverlay.Execute().Subscribe();
+            Console.WriteLine($"[TaskCreation] Task '{newTask.Title}' was updated");
+            return true;
+        }
+        Console.WriteLine("[TaskCreation] Error: Task wasn't updated!");
+        return false;
+    }
+    
     public ReactiveCommand<TaskItem, bool> ApplyCreation => ReactiveCommand.CreateFromTask<TaskItem, bool>(async
         newTask =>
     {
@@ -124,22 +174,8 @@ public class TaskCreationViewModel : ViewModelBase
                 { Title = newTask.Title, Message = newTask.Description, Repeat = repeat, Notify = notificationDate };
         }
 
-        newTask.Notification = notification?.Id;
-        _viewRepository.SelectedCategory!.TasksCount++;
-        
-        var insertTask = _db.InsertTask(newTask);
-        var insertNotification = notification != null ? _db.InsertNotification(notification) : null;
-        var updateCategory = _db.UpdateCategory(_viewRepository.SelectedCategory);
-
-        if (await insertTask && (insertNotification == null || await insertNotification) && await updateCategory)
-        {
-            Console.WriteLine($"[TaskCreation] Task '{newTask.Title}' was created");
-            _viewRepository.TasksCollection.Add(newTask);
-            HideTaskOverlay.Execute().Subscribe();
-            return true;
-        }
-        Console.WriteLine("[TaskCreation] Error: Task wasn't created!");
-        return true;
+        if (_overlayService.ToEditObject != null) return await UpdateTask(newTask, notification);
+        return await CreateNewTask(newTask, notification);
     });
 
     #endregion

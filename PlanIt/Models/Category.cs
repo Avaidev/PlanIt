@@ -17,12 +17,24 @@ public class Category : ReactiveObject
     [BsonElement("color")] 
         private string _color = "Default";
     [BsonElement("icon")] 
-        private string _icon = "Cubes";
+        private string _icon = "CubesIcon";
     [BsonElement("tasksCount")] 
         private int  _tasksCount = 0;
     
+    public Category(){}
+
+    public Category(Category other)
+    {
+        Id = other.Id;
+        Title = other.Title;
+        Color = other.Color;
+        Icon = other.Icon;
+        TasksCount = other.TasksCount;
+    }
+        
+
     [BsonIgnore]
-    public required string Title
+    public string Title
     {
         get => _title;
         set => this.RaiseAndSetIfChanged(ref _title, value);
