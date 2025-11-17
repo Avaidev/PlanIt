@@ -10,30 +10,19 @@ using Notification = PlanIt.Models.Notification;
 
 namespace PlanIt.ViewModels;
 
-public class TaskCreationViewModel : ViewModelBase
+public class TaskManagerViewModel : ViewModelBase
 {
-    private readonly OverlayService _overlayService;
-    private readonly DbAccessService _db;
-    private readonly ViewRepository _viewRepository;
-    
-
-    public TaskCreationViewModel(OverlayService overlayService,  DbAccessService db, ViewRepository repository)
-    {
-        _overlayService = overlayService;
-        _db = db;
-        _viewRepository = repository;
-        
-        ReturnToDefault();
-    }
-
     #region Private attributes
+    private readonly DbAccessService _db;
     private TaskItem _newTaskItem;
     private int _selectedRepeatIndex;
     private int _selectedNotifyIndex;
     private int _selectedImportanceIndex;
     #endregion
-    
+     
     #region Public attributes
+    public OverlayService OverlayService { get; }
+    public ViewRepository ViewRepository { get; }
     public TaskItem NewTaskItem
     {
         get => _newTaskItem;
@@ -77,8 +66,15 @@ public class TaskCreationViewModel : ViewModelBase
 
     #endregion
     
-    #region Commands
-
+    public TaskManagerViewModel(OverlayService overlayService,  DbAccessService db, ViewRepository repository)
+    {
+        OverlayService = overlayService;
+        _db = db;
+        ViewRepository = repository;
+        
+        ReturnToDefault();
+    }
+    
     private void ReturnToDefault()
     {
         NewTaskItem = new TaskItem { Title = "" };
@@ -89,7 +85,7 @@ public class TaskCreationViewModel : ViewModelBase
     
     public ReactiveCommand<Unit, Unit> HideTaskOverlay => ReactiveCommand.Create(() =>
     {
-        _overlayService.ToggleVisibility(1);
+        OverlayService.ToggleVisibility(1);
         ReturnToDefault();
     });
 
@@ -99,15 +95,16 @@ public class TaskCreationViewModel : ViewModelBase
     private async Task<bool> CreateNewTask(TaskItem newTask, Notification? notification)
     {
         newTask.Notification = notification?.Id;
-        _viewRepository.SelectedCategory!.TasksCount++;
+        ViewRepository.SelectedCategory!.TasksCount++;
         
         var insertTask = _db.InsertTask(newTask);
         var insertNotification = notification == null ? null : _db.InsertNotification(notification);
-        var updateCategory = _db.UpdateCategory(_viewRepository.SelectedCategory);
+        var updateCategory = _db.UpdateCategory(ViewRepository.SelectedCategory);
 
         if (await insertTask && (insertNotification == null || await insertNotification) && await updateCategory)
         {
-            _viewRepository.TasksCollection.Add(newTask);
+            ViewRepository.TasksCollection.Add(newTask);
+            ViewRepository.AddingTask(newTask);
             HideTaskOverlay.Execute().Subscribe();
             Console.WriteLine($"[TaskCreation] Task '{newTask.Title}' was created");
             return true;
@@ -120,8 +117,6 @@ public class TaskCreationViewModel : ViewModelBase
     {
         var oldNotification = newTask.Notification;
         newTask.Notification = notification?.Id;
-        Console.WriteLine("TOREMOVE: " + oldNotification);
-        Console.WriteLine("NEW: " + newTask.Notification);
 
         var updateTask = _db.UpdateTask(newTask);
         bool? removeOldNotification = oldNotification == null ? null : await _db.RemoveNotification((ObjectId)oldNotification);
@@ -129,8 +124,10 @@ public class TaskCreationViewModel : ViewModelBase
 
         if (await updateTask && (removeOldNotification == null || (bool)removeOldNotification!) && (insertNotification == null || await insertNotification))
         {
-            var index = _viewRepository.TasksCollection.IndexOf(newTask);
-            _viewRepository.TasksCollection[index] = newTask;
+            var index = ViewRepository.TasksCollection.IndexOf(newTask);
+            ViewRepository.TasksCollection[index] = newTask;
+            ViewRepository.RemovingTask(newTask); //TODO Change
+            ViewRepository.AddingTask(newTask); //TODO Change
             HideTaskOverlay.Execute().Subscribe();
             Console.WriteLine($"[TaskCreation] Task '{newTask.Title}' was updated");
             return true;
@@ -154,11 +151,11 @@ public class TaskCreationViewModel : ViewModelBase
             return false;
         }
         
-        newTask.Category ??= _viewRepository.SelectedCategory!.Id;
+        newTask.Category ??= ViewRepository.SelectedCategory!.Id;
         Notification? notification = null;
-        var importance = _viewRepository.ImportanceComboValues[SelectedImportanceIndex];
-        var repeat = _viewRepository.RepeatComboValues[SelectedRepeatIndex];
-        var notify = _viewRepository.NotifyBeforeComboValues[SelectedNotifyIndex];
+        var importance = ViewRepository.ImportanceComboValues[SelectedImportanceIndex];
+        var repeat = ViewRepository.RepeatComboValues[SelectedRepeatIndex];
+        var notify = ViewRepository.NotifyBeforeComboValues[SelectedNotifyIndex];
         
         newTask.IsImportant = importance;
         newTask.Repeat = repeat;
@@ -174,9 +171,7 @@ public class TaskCreationViewModel : ViewModelBase
                 { Title = newTask.Title, Message = newTask.Description, Repeat = repeat, Notify = notificationDate };
         }
 
-        if (_overlayService.ToEditObject != null) return await UpdateTask(newTask, notification);
+        if (OverlayService.EditMode) return await UpdateTask(newTask, notification);
         return await CreateNewTask(newTask, notification);
     });
-
-    #endregion
 }

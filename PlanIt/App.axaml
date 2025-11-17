@@ -1,13 +1,35 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="PlanIt.App"
+             xmlns:vm="clr-namespace:PlanIt.ViewModels"
+             xmlns:views="clr-namespace:PlanIt.Views"
              xmlns:local="using:PlanIt"
              xmlns:converters="clr-namespace:PlanIt.Converters"
              RequestedThemeVariant="Dark">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
-        <local:ViewLocator/>
+        <DataTemplate DataType="vm:WindowViewModel">
+            <views:WindowView></views:WindowView>
+        </DataTemplate>
+        <DataTemplate DataType="vm:FilterTodayViewModel">
+            <views:FilterTodayView></views:FilterTodayView>
+        </DataTemplate>
+        <DataTemplate DataType="vm:FilterScheduledViewModel">
+            <views:FilterScheduledView></views:FilterScheduledView>
+        </DataTemplate>
+        <DataTemplate DataType="vm:FilterImportantViewModel">
+            <views:FilterImportantView></views:FilterImportantView>
+        </DataTemplate>
+        <DataTemplate DataType="vm:FilterAllViewModel">
+            <views:FilterAllView></views:FilterAllView>
+        </DataTemplate>
+        <DataTemplate DataType="vm:TaskManagerViewModel">
+            <views:TaskCreationView></views:TaskCreationView>
+        </DataTemplate>
+        <DataTemplate DataType="vm:CategoryManagerViewModel">
+            <views:CategoryCreationView></views:CategoryCreationView>
+        </DataTemplate>
     </Application.DataTemplates>
   
     <Application.Styles>

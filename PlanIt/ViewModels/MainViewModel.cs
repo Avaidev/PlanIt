@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Styling;
 using MongoDB.Bson;
 using PlanIt.Models;
 using PlanIt.Services;
@@ -12,53 +16,90 @@ namespace PlanIt.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {
-    public CategoryCreationViewModel CategoryCreationVM { get; }
-    public TaskCreationViewModel TaskCreationVM { get; }
+    #region Private attributes
+    private ViewModelBase _currentViewModel;
+    private FilterTodayViewModel? _filterTodayVM;
+    private FilterScheduledViewModel? _filterScheduledVM;
+    private FilterImportantViewModel? _filterImportantVM;
+    private FilterAllViewModel? _filterAllVM;
+    
+    private DbAccessService _db { get; }
+    #endregion
+    
+    #region Public attributes
+    public CategoryManagerViewModel CategoryManagerVM { get; }
+    public TaskManagerViewModel TaskManagerVM { get; }
     public WindowViewModel WindowVM { get; }
+    public ViewModelBase CurrentViewModel
+    {
+        get => _currentViewModel;
+        set => this.RaiseAndSetIfChanged(ref _currentViewModel, value);
+    }
 
     public OverlayService OverlayService { get; }
-    public DbAccessService Db { get; }
     public ViewRepository ViewRepository { get; }
+    #endregion
     
     public MainViewModel()
     {
-        Db = new DbAccessService();
+        _db = new DbAccessService();
         OverlayService = new OverlayService();
-        ViewRepository = new ViewRepository();
-        WindowVM = new WindowViewModel(OverlayService, Db, ViewRepository);
-        CategoryCreationVM = new CategoryCreationViewModel(OverlayService, Db, ViewRepository);
-        TaskCreationVM = new TaskCreationViewModel(OverlayService, Db, ViewRepository);
+        ViewRepository = new ViewRepository(_db);
 
-        OverlayService.WhenAnyValue(x => x.ToEditObject!)
-            .OfType<TaskItem>()
-            .Subscribe(async taskItem =>
+        TaskManagerVM = new TaskManagerViewModel(OverlayService, _db, ViewRepository);
+        CategoryManagerVM = new CategoryManagerViewModel(OverlayService, _db, ViewRepository);
+        WindowVM = new WindowViewModel(OverlayService, _db, ViewRepository, TaskManagerVM);
+        
+        CurrentViewModel = WindowVM;
+        
+        ViewRepository.WhenAnyValue(x => x.SelectedCategory)
+            .Subscribe(_ =>
             {
-                TaskCreationVM.NewTaskItem = new TaskItem(taskItem);
-                TaskCreationVM.SelectedImportanceIndex = taskItem.IsImportant ? 1 : 0;
-                TaskCreationVM.SelectedRepeatIndex = ViewRepository.RepeatComboValues.IndexOf(taskItem.Repeat);
-                if (taskItem.Notification == null) TaskCreationVM.SelectedNotifyIndex = 0;
-                else
-                {
-                    var notification = await Db.GetNotification((ObjectId)taskItem.Notification);
-                    if (notification == null)
-                    {
-                        TaskCreationVM.SelectedNotifyIndex = 0;
-                        TaskCreationVM.NewTaskItem.Notification = null;
-                        Console.WriteLine("[ToEditObject : TaskItem] Invalid find notification that is not null");
-                    }
-                    else
-                    {
-                        var difference = taskItem.CompleteDate - notification.Notify;
-                        TaskCreationVM.SelectedNotifyIndex = difference.Days == 0 
-                            ? ViewRepository.NotifyBeforeComboValues.IndexOf(-difference.Hours) 
-                            : ViewRepository.NotifyBeforeComboValues.IndexOf(difference.Days);
-                    }
-                }
+                if (CurrentViewModel.GetType() != typeof(Category)) CurrentViewModel = WindowVM;
             });
         
-        OverlayService.WhenAnyValue(x => x.ToEditObject!)
-            .OfType<Category>()
-            .Subscribe(category => CategoryCreationVM.NewCategory = new Category(category));
-            
+        ViewRepository.WhenAnyValue(x => x.IsDarkTheme)
+            .Subscribe(isDark =>
+            {
+                Application.Current!.RequestedThemeVariant = isDark
+                    ? ThemeVariant.Dark
+                    : ThemeVariant.Light;
+            });
     }
+
+    #region Commands
+    public ReactiveCommand<Unit, Unit> ShowTodayFilterView => ReactiveCommand.Create(() =>
+    {
+        _filterTodayVM ??= new FilterTodayViewModel();
+        ViewRepository.SelectedCategory = null;
+        CurrentViewModel = _filterTodayVM;
+    });
+    
+    public ReactiveCommand<Unit, Unit> ShowScheduledFilterView => ReactiveCommand.Create(() =>
+    {
+        _filterScheduledVM ??= new FilterScheduledViewModel();
+        ViewRepository.SelectedCategory = null;
+        CurrentViewModel = _filterScheduledVM;
+    });
+    
+    public ReactiveCommand<Unit, Unit> ShowImportantFilterView => ReactiveCommand.Create(() =>
+    {
+        _filterImportantVM ??= new FilterImportantViewModel();
+        ViewRepository.SelectedCategory = null;
+        CurrentViewModel = _filterImportantVM;
+    });
+    
+    public ReactiveCommand<Unit, Unit> ShowAllFilterView => ReactiveCommand.Create(() =>
+    {
+        _filterAllVM ??= new FilterAllViewModel(ViewRepository, _db, OverlayService, TaskManagerVM);
+        ViewRepository.SelectedCategory = null;
+        CurrentViewModel = _filterAllVM;
+        ViewRepository.LoadNodesForAllAsync();
+    });
+    
+    public ReactiveCommand<Unit, Unit> ShowCategoryOverlay => ReactiveCommand.Create(() =>
+    {
+        OverlayService.ToggleVisibility(0);
+    });
+    #endregion
 }

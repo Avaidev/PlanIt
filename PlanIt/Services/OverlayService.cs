@@ -6,13 +6,10 @@ namespace PlanIt.Services;
 
 public class OverlayService : ReactiveObject
 {
-    // Control attributes
-    //      private
     private bool _isCategoryCreateVisible;
     private bool _isTaskCreateVisible;
-    private object? _toEditObject;
+    private bool _editMode;
     
-    //      public
     public bool IsCategoryCreateVisible
     {
         get => _isCategoryCreateVisible;
@@ -24,18 +21,17 @@ public class OverlayService : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _isTaskCreateVisible, value);
     }
 
-    public object? ToEditObject
+    public bool EditMode
     {
-        get =>  _toEditObject;
-        set => this.RaiseAndSetIfChanged(ref _toEditObject, value);
+        get => _editMode;
+        set => this.RaiseAndSetIfChanged(ref _editMode, value);
     }
     
     public bool IsAnyVisible => IsCategoryCreateVisible || IsTaskCreateVisible;
 
-    // Commands
-    public void ToggleVisibility(int overlay, object? toEdit = null)
+    public void ToggleVisibility(int overlay, bool edit=false)
     {
-        ToEditObject = toEdit;
+        EditMode = edit;
         switch (overlay)
         {
             case 0:

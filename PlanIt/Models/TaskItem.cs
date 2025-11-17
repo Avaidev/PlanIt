@@ -23,7 +23,7 @@ public class TaskItem : ReactiveObject
         private bool _isImportant;
     [BsonElement("notification")] 
         public ObjectId? Notification { get; set; }
-    [BsonElement("category")] 
+    [BsonElement("categoryId")] 
         private ObjectId? _category;
 
     public TaskItem(){}
@@ -86,6 +86,9 @@ public class TaskItem : ReactiveObject
         get => _category;
         set => this.RaiseAndSetIfChanged(ref _category, value);
     }
+    
+    [BsonIgnore]
+    public Category? CategoryObject { get; set; }
 
     public override string ToString()
     {

@@ -10,7 +10,16 @@
         <entry key="Assets/Styles/Styles.xaml" value="PlanIt.csproj" />
         <entry key="Assets/Styles/Themes.axaml" value="PlanIt.csproj" />
         <entry key="Assets/Styles/Themes.xaml" value="PlanIt.csproj" />
+        <entry key="Views/CategoryCreationView.axaml" value="PlanIt.csproj" />
+        <entry key="Views/DefaultView.axaml" value="PlanIt.csproj" />
+        <entry key="Views/FilterAllView.axaml" value="PlanIt.csproj" />
+        <entry key="Views/FilterImportantView.axaml" value="PlanIt.csproj" />
+        <entry key="Views/FilterScheduledView.axaml" value="PlanIt.csproj" />
+        <entry key="Views/FilterTodayView.axaml" value="PlanIt.csproj" />
+        <entry key="Views/MainView.axaml" value="PlanIt.csproj" />
         <entry key="Views/MainWindow.axaml" value="PlanIt.csproj" />
+        <entry key="Views/TaskCreationView.axaml" value="PlanIt.csproj" />
+        <entry key="Views/WindowView.axaml" value="PlanIt.csproj" />
       </map>
     </option>
   </component>

@@ -2,132 +2,79 @@
 using PlanIt.Services;
 using PlanIt.Models;
 using ReactiveUI;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reactive;
-using Avalonia;
-using Avalonia.Styling;
+using System.Reactive.Linq;
 using MongoDB.Bson;
 using PlanIt.Services.DataServices;
-using Task = System.Threading.Tasks.Task;
 
 namespace PlanIt.ViewModels;
 
 public class WindowViewModel : ViewModelBase
 {
-    private readonly OverlayService _overlayService;
-    private readonly DbAccessService _db;
-    private readonly ViewRepository _viewRepository;
-
-    public WindowViewModel(OverlayService overlayService, DbAccessService db, ViewRepository repository)
-    {
-        _overlayService = overlayService;
-        _db = db;
-        _viewRepository =  repository;
-        LoadCategoriesAsync();
-        
-        this.WhenAnyValue(x => x.IsDarkTheme)
-            .Subscribe(isDark =>
-            {
-                Application.Current!.RequestedThemeVariant = isDark
-                    ? ThemeVariant.Dark
-                    : ThemeVariant.Light;
-            });
-    }
-
     #region Private attributes
-    private bool _isDarkTheme = true;
+    private DbAccessService _db { get;  }
+    private TaskManagerViewModel TaskManagerVm { get; }
     #endregion
-
+    
     #region Public attributes
-
-    public Category? WorkingCategory
-    {
-        get => _viewRepository.SelectedCategory;
-        set {
-            _viewRepository.SelectedCategory = value;
-            if(value != null) LoadTasksByCategoryAsync();
-            Console.WriteLine();
-        }   
-    }
-
-    public bool IsDarkTheme
-    {
-        get => _isDarkTheme;
-        set => this.RaiseAndSetIfChanged(ref _isDarkTheme, value);
-    }
+    public OverlayService OverlayService { get; }
+    public ViewRepository ViewRepository { get;  }
     #endregion
-
-    #region Commands
-    public ReactiveCommand<Unit, Unit> ShowCategoryOverlay => ReactiveCommand.Create(() =>
+    
+    public WindowViewModel(OverlayService overlayService, DbAccessService db, ViewRepository repository, TaskManagerViewModel taskManagerViewModel)
     {
-        _overlayService.ToggleVisibility(0);
-    });
-
+        OverlayService = overlayService;
+        _db = db;
+        ViewRepository = repository;
+        TaskManagerVm = taskManagerViewModel;
+        
+        // OverlayService.WhenAnyValue(x => x.ToEditObject!)
+        //     .OfType<TaskItem>()
+        //     .Subscribe(async taskItem =>
+        //     {
+        //         TaskManagerVm.NewTaskItem = new TaskItem(taskItem);
+        //         TaskManagerVm.SelectedImportanceIndex = taskItem.IsImportant ? 1 : 0;
+        //         TaskManagerVm.SelectedRepeatIndex = ViewRepository.RepeatComboValues.IndexOf(taskItem.Repeat);
+        //         if (taskItem.Notification == null) TaskManagerVm.SelectedNotifyIndex = 0;
+        //         else
+        //         {
+        //             var notification = await _db.GetNotification((ObjectId)taskItem.Notification);
+        //             if (notification == null)
+        //             {
+        //                 TaskManagerVm.SelectedNotifyIndex = 0;
+        //                 TaskManagerVm.NewTaskItem.Notification = null;
+        //                 Console.WriteLine("[ToEditObject : TaskItem] Invalid in finding notification that is not null");
+        //             }
+        //             else
+        //             {
+        //                 var difference = taskItem.CompleteDate - notification.Notify;
+        //                 TaskManagerVm.SelectedNotifyIndex = difference.Days == 0 
+        //                     ? ViewRepository.NotifyBeforeComboValues.IndexOf(-difference.Hours) 
+        //                     : ViewRepository.NotifyBeforeComboValues.IndexOf(difference.Days);
+        //             }
+        //         }
+        //     });
+    }
+    
+    #region Commands
     public ReactiveCommand<Unit, Unit> ShowTaskOverlay => ReactiveCommand.Create(() =>
     {
-        _overlayService.ToggleVisibility(1);
+        OverlayService.ToggleVisibility(1);
     });
-
-    public async Task LoadCategoriesAsync()
-    {
-        _viewRepository.CategoriesCollection = new ObservableCollection<Category>(await _db.GetAllCategories());
-        WorkingCategory ??= _viewRepository.CategoriesCollection.First();
-    }
-
-    public async Task LoadTasksByCategoryAsync()
-    {
-        _viewRepository.TasksCollection = new ObservableCollection<TaskItem>(await _db.GetTasksByCategory(WorkingCategory!));
-    }
-
-    public ReactiveCommand<Category, bool> RemoveCategory => ReactiveCommand.CreateFromTask<Category, bool>(async category =>
-    {
-        if (await _db.CountCategories() == 1)
-        {
-            await MessageService.ErrorMessage("You can't delete last category!");
-            
-            return false;
-        }
-        if (!await MessageService.AskYesNoMessage($"Do you want to remove '{category.Title}' category?")) return false;
-        if (category.TasksCount == 0 || category.TasksCount != 0 && await MessageService.AskYesNoMessage("To continue you must delete all tasks of this category. Would you like to delete them?"))
-        {
-            if (category.TasksCount != 0)
-            {
-                if (await _db.RemoveTasksMany(await _db.GetTasksByCategory(category)))
-                    Console.WriteLine($"[WindowVM > RemoveCategory] All tasks of {category.Title} were removed");
-                else return false;
-            }
-            
-            if (await _db.RemoveCategory(category))
-            {
-                Console.WriteLine($"[WindowVM > RemoveCategory] {category.Title} was removed");
-                _viewRepository.CategoriesCollection.Remove(category);
-                WorkingCategory = _viewRepository.CategoriesCollection.First();
-                return true;
-            }
-            Console.WriteLine($"[WindowVM > RemoveCategory] Error: {category.Title} was not removed");
-        }
-        return false;
-    });
-
-    public ReactiveCommand<Category, Unit> EditCategory => ReactiveCommand.Create<Category, Unit>(category =>
-    {
-        _overlayService.ToggleVisibility(0, category);
-        return Unit.Default;
-    });
-
+    
     public ReactiveCommand<TaskItem, bool> RemoveTask => ReactiveCommand.CreateFromTask<TaskItem, bool>( async task =>
     {
         if (!await MessageService.AskYesNoMessage($"Do you want to delete '{task.Title}' task?")) return false;
         var notificationRemove = task.Notification == null ? null : _db.RemoveNotification((ObjectId)task.Notification);
         var taskRemove = _db.RemoveTask(task);
-        WorkingCategory!.TasksCount--;
-        var updateCategory = _db.UpdateCategory(WorkingCategory!);
+        ViewRepository.SelectedCategory!.TasksCount--;
+        var updateCategory = _db.UpdateCategory(ViewRepository.SelectedCategory!);
 
         if ((notificationRemove == null || await notificationRemove) && await taskRemove && await updateCategory)
         {
             Console.WriteLine($"[WindowVM > RemoveTask] Task '{task.Title}' was removed");
-            _viewRepository.TasksCollection.Remove(task);
+            ViewRepository.RemovingTask(task);
+            ViewRepository.TasksCollection.Remove(task);
             return true;
         }
         Console.WriteLine($"[WindowVM > RemoveTask] Error: '{task.Title}' was not removed");
@@ -136,7 +83,7 @@ public class WindowViewModel : ViewModelBase
 
     public ReactiveCommand<TaskItem, Unit> EditTask => ReactiveCommand.Create<TaskItem, Unit>(task =>
     {
-        _overlayService.ToggleVisibility(1, task);
+        OverlayService.ToggleVisibility(1, true);
         return Unit.Default;
     });
 

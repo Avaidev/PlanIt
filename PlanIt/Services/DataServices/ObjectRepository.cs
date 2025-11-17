@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
-using PlanIt.Models;
 
 namespace PlanIt.Services.DataServices;
 
@@ -15,38 +14,44 @@ public class DataContainer<T>
     public List<T> Items { get; set; } = new();
 
     public DataContainer(){}
-    public DataContainer(List<T> items)
+    public DataContainer(IEnumerable<T> items)
     {
-        Items = items;
+        Items.Clear();
+        foreach (var item in items)
+        {
+            Items.Add(item);
+        }
     }
 }
 
 public class ObjectRepository<T> where T : class
 {
-    private readonly string _dataBasePath;
-    private List<T>? _cache { get; set; } = null;
-    
+    private readonly string _dbPath;
+    private Dictionary<string, (DateTime timestamp, IEnumerable<T> data)> _cache;
+    private const int CACHE_LIFETIME = 5;
+
     public ObjectRepository(string dataBasePath)
     {
-        _dataBasePath = dataBasePath;
-
-        var directory = Path.GetDirectoryName(_dataBasePath);
+        _dbPath = dataBasePath;
+        _cache = new Dictionary<string, (DateTime timestamp, IEnumerable<T> data)>();
+        
+        var directory = Path.GetDirectoryName(_dbPath);
         if (!string.IsNullOrEmpty(directory))
         {
             Directory.CreateDirectory(directory);
         }
 
-        if (!File.Exists(_dataBasePath))
+        if (!File.Exists(_dbPath))
         {
-            File.Create(_dataBasePath);
+            File.Create(_dbPath);
         }
     }
 
-    private async Task<List<T>> LoadAsync()
+    private async Task<List<T>> LoadFromDbAsync()
     {
         try
         {
-            var bsonData = await File.ReadAllBytesAsync(_dataBasePath);
+            var bsonData = await File.ReadAllBytesAsync(_dbPath);
             if (bsonData.Length == 0) return [];
             var container = BsonSerializer.Deserialize<DataContainer<T>>(bsonData);
             
@@ -54,27 +59,27 @@ public class ObjectRepository<T> where T : class
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ObjectRepository > LoadAsync] Error in getting data from {_dataBasePath}: {ex.Source} - {ex.Message}");
+            Console.WriteLine($"[ObjectRepository > LoadFromDbAsync] Error in getting data from {_dbPath}: {ex.Source} - {ex.Message}");
             return [];
         }
     }
-    
-    private async Task<bool> SaveAsync(List<T> data)
+
+    private async Task<bool> SaveToDbAsync(IEnumerable<T> data)
     {
         try
         {
             var container = new DataContainer<T>(data);
             var bsonData = container.ToBson();
-            await File.WriteAllBytesAsync(_dataBasePath, bsonData);
+            await File.WriteAllBytesAsync(_dbPath, bsonData);
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ObjectRepository > SaveAsync] Error saving data to {_dataBasePath}: {ex.Source} - {ex.Message}");
+            Console.WriteLine($"[ObjectRepository > SaveAsync] Error saving data to {_dbPath}: {ex.Source} - {ex.Message}");
             return false;
         }
     }
-    
+
     private ObjectId GetId(T entity)
     {
         var property = typeof(T).GetProperty("Id");
@@ -85,58 +90,77 @@ public class ObjectRepository<T> where T : class
         throw new InvalidOperationException($"[ObjectRepository > GetId] Entity {typeof(T).Name} does not have a string Id property");
     }
 
-    private async Task<List<T>> GetEntitiesAsync(bool useCache = false)
+    private IEnumerable<T>? GetFromCache(string cacheKey)
     {
-        if (!useCache)
+        if (_cache.TryGetValue(cacheKey, out var cached) &&
+            DateTime.UtcNow - cached.timestamp < TimeSpan.FromMinutes(CACHE_LIFETIME))
         {
-            _cache = null;
-            return await LoadAsync();
+            return cached.data;
         }
-        _cache ??= await LoadAsync();
-        return _cache;
+        return null;
     }
 
-    public async Task<List<T>> GetAllAsync(bool useCache = false)
+    private void CleanOldCacheEntries()
     {
-        return (await GetEntitiesAsync(useCache)).ToList();
+        var expired = _cache.Where(pair => DateTime.UtcNow - pair.Value.timestamp > TimeSpan.FromMinutes(CACHE_LIFETIME * 2))
+            .Select(pair => pair.Key).ToList();
+
+        foreach (var key in expired)
+        {
+            _cache.Remove(key);
+        }
     }
 
-    public async Task<T?> GetByIdAsync(ObjectId id, bool useCache = false)
+    private void CleanFullCache()
     {
-        return (await GetEntitiesAsync(useCache)).FirstOrDefault(e => GetId(e) == id);
+        _cache.Clear();
     }
 
-    public async Task<T?> FindAsync(Expression<Func<T, bool>> predicate, bool useCache = false)
+    private async Task<List<T>> GetEntitiesAsync(string? cacheKey = null)
     {
-        return (await GetEntitiesAsync(useCache)).FirstOrDefault(predicate.Compile());
+        if (cacheKey != null && GetFromCache(cacheKey) is { } cached)
+        {
+            return cached.ToList();
+        }
+
+        var data = await LoadFromDbAsync();
+        if (cacheKey != null) _cache[cacheKey] = (DateTime.UtcNow, data);
+        CleanOldCacheEntries();
+        return data.ToList();
     }
 
-    public async Task<List<T>> FindManyAsync(Expression<Func<T, bool>> predicate, bool useCache = false)
+    public async Task<List<T>> GetAllAsync(string? cacheKey = null)
     {
-        return (await GetEntitiesAsync(useCache)).Where(predicate.Compile()).ToList();
+        return await GetEntitiesAsync(cacheKey);
+    }
+
+    public async Task<T?> GetByIdAsync(ObjectId id, string? cacheKey = null)
+    {
+        return (await GetEntitiesAsync(cacheKey)).FirstOrDefault(e => GetId(e) == id);
+    }
+
+    public async Task<T?> FindAsync(Expression<Func<T, bool>> predicate, string? cacheKey = null)
+    {
+        return (await GetEntitiesAsync(cacheKey)).FirstOrDefault(predicate.Compile());
+    }
+
+    public async Task<List<T>> FindManyAsync(Expression<Func<T, bool>> predicate, string? cacheKey = null)
+    {
+        return (await GetEntitiesAsync(cacheKey)).Where(predicate.Compile()).ToList();
     }
 
     public async Task<bool> AddAsync(T entity)
     {
-        if (_cache != null)
-        {
-
-            _cache.Add(entity);
-            return await SaveAsync(_cache);
-        }
-
+        CleanFullCache();
         var entities = await GetEntitiesAsync();
         entities.Add(entity);
-        return await SaveAsync(entities);
-        
+        return await SaveToDbAsync(entities);
     }
-    
+
     public async Task<bool> UpdateAsync(T entity)
     {
-        List<T> entities;
-        if (_cache != null) entities = _cache;
-        else entities = await GetEntitiesAsync();
-        
+        CleanFullCache();
+        var entities = await GetEntitiesAsync();
         var entityId = GetId(entity);
         var toChange = entities.FirstOrDefault(e => GetId(e) == entityId);
 
@@ -144,41 +168,40 @@ public class ObjectRepository<T> where T : class
         {
             var index = entities.IndexOf(toChange);
             entities[index] = entity;
-            return await SaveAsync(entities);
+            return await SaveToDbAsync(entities);
         }
-        Console.WriteLine($"[ObjectRepository > Add] Entity {typeof(T).Name} was not updated");
+        Console.WriteLine($"[ObjectRepository > Update] Entity {typeof(T).Name} was not found and updated");
         return false;
     }
-    
-    public async  Task<bool> DeleteAsync(T  entity)
+
+    public async Task<bool> DeleteAsync(T entity)
     {
         return await DeleteAsync(GetId(entity));
     }
 
     public async Task<bool> DeleteAsync(ObjectId id)
     {
-        List<T> entities;
-        if (_cache != null) entities = _cache;
-        else entities = await GetEntitiesAsync();
+        CleanFullCache();
+        var entities = await GetEntitiesAsync();
         var toDelete = entities.FirstOrDefault(e => GetId(e) == id);
         if (toDelete != null)
         {
             entities.Remove(toDelete);
-            return await SaveAsync(entities);
+            return await SaveToDbAsync(entities);
         }
         Console.WriteLine($"[ObjectRepository > Delete] Entity {typeof(T).Name} was not deleted");
         return false;
     }
-
-    public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
+    
+    public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, string? cacheKey = null)
     {
-        var entities = await LoadAsync();
+        var entities = await GetEntitiesAsync(cacheKey);
         return predicate == null ? entities.Count : entities.Count(predicate.Compile());
     }
 
-    public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+    public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate, string? cacheKey = null)
     {
-        var entities = await LoadAsync();
+        var entities = await GetEntitiesAsync(cacheKey);
         return entities.Any(predicate.Compile());
-    }
+    } 
 }

@@ -1,0 +1,57 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:PlanIt.ViewModels"
+             xmlns:models="clr-namespace:PlanIt.Models"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="PlanIt.Views.FilterAllView"
+             x:DataType="vm:FilterAllViewModel"
+             x:Name="FilterAllUserControl">
+    
+    <Design.DataContext>
+        <vm:FilterAllViewModel></vm:FilterAllViewModel>
+    </Design.DataContext>
+    
+    <Grid RowDefinitions="Auto, *" RowSpacing="2">
+        <Border Padding="25 8" HorizontalAlignment="Stretch">
+            <Grid>
+                <TextBlock Classes="t-b t-18" Foreground="{DynamicResource Text}">All Tasks</TextBlock>
+            </Grid>
+        </Border>
+        <Border Grid.Row="1" Padding="17 0">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AllowAutoHide="False" Classes="mainScroll">
+                <ItemsControl ItemsSource="{Binding ViewRepository.NodesCollection}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="models:Node">
+                            <Grid RowDefinitions="Auto, *">
+                                <TextBlock Text="{Binding Category.Title}" Classes="t-sb t-16" Foreground="{DynamicResource Text}"></TextBlock>
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding Tasks}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="models:TaskItem">
+                                            <Border Classes="task">
+                                                <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto, Auto, Auto">
+                                                    <ToggleButton Width="32" Height="32" Classes="taskToggle" VerticalAlignment="Center" HorizontalAlignment="Left"></ToggleButton>
+                                                    <TextBlock Grid.Column="1" Classes="t-20 t-m" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap" Margin="12 0" Text="{Binding Title}"></TextBlock>
+                                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Classes="t-16 second" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToDateConverter}}"></TextBlock>
+                                                    <TextBlock Grid.Column="3" VerticalAlignment="Center" Classes="t-16 second" Margin="6 0">/</TextBlock>
+                                                    <TextBlock Grid.Column="4" VerticalAlignment="Center" Classes="t-16 second" Margin="0 0 16 0" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToTimeConverter}}"></TextBlock>
+                                                    <Button Grid.Column="5" Width="24" Height="24" Classes="taskBtn">
+                                                        <PathIcon Width="20" Height="20" Data="{StaticResource EditIcon}" Foreground="{DynamicResource TaskSecondaryText}"></PathIcon>
+                                                    </Button>
+                                                    <Button Grid.Column="6" Width="24" Height="24" Classes="taskBtn">
+                                                        <PathIcon Width="20" Height="20" Data="{StaticResource TrashIcon}" Foreground="{DynamicResource TaskTrash}"></PathIcon>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
