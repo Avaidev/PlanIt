@@ -21,7 +21,7 @@
         </Border>
         <Border Grid.Row="1" Padding="17 0">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AllowAutoHide="False" Classes="mainScroll">
-                <ItemsControl ItemsSource="{Binding ViewRepository.NodesCollection}">
+                <ItemsControl ItemsSource="{Binding ViewController.NodesCollection}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="models:Node">
                             <Grid RowDefinitions="Auto, *">
@@ -41,7 +41,7 @@
                                                     </Button>
                                                     <Button Grid.Column="6" Width="24" Height="24" Classes="taskBtn">
                                                         <PathIcon Width="20" Height="20" Data="{StaticResource TrashIcon}" Foreground="{DynamicResource TaskTrash}"></PathIcon>
-                                                    </Button>
+                                                    </Button> <!--TODO Design remake -->
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>

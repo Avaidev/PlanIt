@@ -56,6 +56,14 @@ public class Category : ReactiveObject
     
     [BsonIgnore]
     public int TasksCount { get => _tasksCount; set => this.RaiseAndSetIfChanged(ref _tasksCount, value);}
+
+    public void ChangeObject(Category newVariant)
+    {
+        Title = newVariant.Title;
+        Color = newVariant.Color;
+        Icon = newVariant.Icon;
+        TasksCount = newVariant.TasksCount;
+    }
     
     public override string ToString() => Title;
     public override bool Equals(object? obj)

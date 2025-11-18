@@ -26,10 +26,7 @@ public class DataContainer<T>
 
 public class ObjectRepository<T> where T : class
 {
-    private readonly string _dbPath;
-    private Dictionary<string, (DateTime timestamp, IEnumerable<T> data)> _cache;
-    private const int CACHE_LIFETIME = 5;
-
+    #region Initialization
     public ObjectRepository(string dataBasePath)
     {
         _dbPath = dataBasePath;
@@ -46,6 +43,13 @@ public class ObjectRepository<T> where T : class
             File.Create(_dbPath);
         }
     }
+    #endregion
+
+    #region Attributes
+    private readonly string _dbPath;
+    private Dictionary<string, (DateTime timestamp, IEnumerable<T> data)> _cache;
+    private const int CACHE_LIFETIME = 5;
+    #endregion
 
     private async Task<List<T>> LoadFromDbAsync()
     {
@@ -144,9 +148,9 @@ public class ObjectRepository<T> where T : class
         return (await GetEntitiesAsync(cacheKey)).FirstOrDefault(predicate.Compile());
     }
 
-    public async Task<List<T>> FindManyAsync(Expression<Func<T, bool>> predicate, string? cacheKey = null)
+    public async Task<IEnumerable<T>> FindManyAsync(Expression<Func<T, bool>> predicate, string? cacheKey = null)
     {
-        return (await GetEntitiesAsync(cacheKey)).Where(predicate.Compile()).ToList();
+        return (await GetEntitiesAsync(cacheKey)).Where(predicate.Compile());
     }
 
     public async Task<bool> AddAsync(T entity)

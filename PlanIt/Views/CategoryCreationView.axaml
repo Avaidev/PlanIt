@@ -17,7 +17,7 @@
         <Border Width="352" Height="290" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="CategoryLayoutBorder">
             <Grid RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="7">
                 <Grid ColumnDefinitions="Auto, *, Auto">
-                    <Button Classes="btn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding HideCategoryOverlay}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
+                    <Button Classes="btn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding HideOverlay}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
                     <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="t-b t-14" Foreground="{DynamicResource Text}">New Category</TextBlock>
                     <Button Grid.Column="2" Classes="btn" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding ApplyCreation}" CommandParameter="{Binding NewCategory}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource AcceptIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
                 </Grid>
@@ -30,7 +30,7 @@
                 </Grid>
                 <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
                     <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Colors</TextBlock>
-                    <ListBox Grid.Row="1" x:Name="CategoryColorsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding NewCategory.Color, Mode=TwoWay}" ItemsSource="{Binding ViewRepository.Colors}">
+                    <ListBox Grid.Row="1" x:Name="CategoryColorsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding NewCategory.Color, Mode=TwoWay}" ItemsSource="{Binding ViewController.Colors}">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <UniformGrid Columns="9" RowSpacing="7" ColumnSpacing="7"></UniformGrid>
@@ -45,7 +45,7 @@
                 </Grid>
                 <Grid Grid.Row="3" RowDefinitions="Auto, Auto">
                     <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Icons</TextBlock>
-                    <ListBox Grid.Row="1" x:Name="CategoryIconsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding NewCategory.Icon, Mode=TwoWay}" ItemsSource="{Binding ViewRepository.Icons}">
+                    <ListBox Grid.Row="1" x:Name="CategoryIconsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding NewCategory.Icon, Mode=TwoWay}" ItemsSource="{Binding ViewController.Icons}">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <UniformGrid Rows="2" Columns="9" RowSpacing="7" ColumnSpacing="7"></UniformGrid>

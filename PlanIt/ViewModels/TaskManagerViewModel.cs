@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using MongoDB.Bson;
@@ -12,17 +13,35 @@ namespace PlanIt.ViewModels;
 
 public class TaskManagerViewModel : ViewModelBase
 {
-    #region Private attributes
+    #region Initialization
+    public TaskManagerViewModel(DbAccessService db, ViewController controller)
+    {
+        _db = db;
+        ViewController = controller;
+        ReturnToDefault();
+    }
+    
+    private void ReturnToDefault()
+    {
+        NewTaskItem = new TaskItem { Title = "" };
+        SelectedRepeatIndex = 0;
+        SelectedNotifyIndex = 0;
+        SelectedImportanceIndex = 0;
+        SelectedCategoryIndex = 0;
+        _editMode = false;
+    }
+    #endregion
+    
+    #region Attributes
     private readonly DbAccessService _db;
     private TaskItem _newTaskItem;
     private int _selectedRepeatIndex;
     private int _selectedNotifyIndex;
     private int _selectedImportanceIndex;
-    #endregion
-     
-    #region Public attributes
-    public OverlayService OverlayService { get; }
-    public ViewRepository ViewRepository { get; }
+    private int _selectedCategoryIndex;
+    private bool _editMode;
+    
+    public ViewController ViewController { get; }
     public TaskItem NewTaskItem
     {
         get => _newTaskItem;
@@ -64,56 +83,112 @@ public class TaskManagerViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedImportanceIndex, value);
     }
 
+    public int SelectedCategoryIndex
+    {
+        get => _selectedCategoryIndex;
+        set => this.RaiseAndSetIfChanged(ref _selectedCategoryIndex, value);
+    }
+
     #endregion
-    
-    public TaskManagerViewModel(OverlayService overlayService,  DbAccessService db, ViewRepository repository)
+
+    public void SetStartParameters(bool editMode = false, Category? category = null, bool? isImportant = null)
     {
-        OverlayService = overlayService;
-        _db = db;
-        ViewRepository = repository;
-        
-        ReturnToDefault();
+        _editMode = editMode;
+        if (category != null) SelectedCategoryIndex = ViewController.CategoriesCollection.IndexOf(category);
+        if (isImportant != null) SelectedImportanceIndex = (bool)isImportant ? 1 : 0;
     }
     
-    private void ReturnToDefault()
+    public ReactiveCommand<Unit, Unit> HideOverlay => ReactiveCommand.Create(() =>
     {
-        NewTaskItem = new TaskItem { Title = "" };
-        SelectedRepeatIndex = 0;
-        SelectedNotifyIndex = 0;
-        SelectedImportanceIndex = 0;
-    }
-    
-    public ReactiveCommand<Unit, Unit> HideTaskOverlay => ReactiveCommand.Create(() =>
-    {
-        OverlayService.ToggleVisibility(1);
+        ViewController.CloseTaskOverlay();
         ReturnToDefault();
     });
 
+    public ReactiveCommand<TaskItem, bool> RemoveTask => ReactiveCommand.CreateFromTask<TaskItem, bool>( async task =>
+    {
+        if (!await MessageService.AskYesNoMessage($"Do you want to delete '{task.Title}' task?")) return false;
+        var category = ViewController.CategoriesCollection.FirstOrDefault(c => c.Id == task.Category);
+        if (category == null)
+        {
+            Console.WriteLine($"[TaskManager > RemoveTask] Error in finding category for task '{task.Title}'. Removing stopped!");
+            return false;
+        }
+        category.TasksCount--;
+        var updateCategory = _db.UpdateCategory(category);
+        var notificationRemove = task.Notification == null ? null : _db.RemoveNotification((ObjectId)task.Notification);
+        var taskRemove = _db.RemoveTask(task);
+
+        if ((notificationRemove == null || await notificationRemove) && await taskRemove && await updateCategory)
+        {
+            Console.WriteLine($"[TaskManager > RemoveTask] Task '{task.Title}' was removed");
+            ViewController.RemoveTaskFromView(task);
+            return true;
+        }
+        Console.WriteLine($"[TaskManager > RemoveTask] Error: '{task.Title}' was not removed");
+        return false;
+    });
+
+    public ReactiveCommand<TaskItem, bool> EditTask => ReactiveCommand.CreateFromTask<TaskItem, bool>(async task =>
+    {
+        var category = ViewController.CategoriesCollection.FirstOrDefault(c => c.Id == task.Category);
+        if (category == null)
+        {
+            Console.WriteLine($"[TaskManager > EditTask] Invalid in finding category for task");
+            return false;
+        }
+        NewTaskItem = new TaskItem(task);
+        SelectedCategoryIndex = ViewController.CategoriesCollection.IndexOf(category);
+        SelectedImportanceIndex = task.IsImportant ? 1 : 0;
+        SelectedRepeatIndex = ViewController.RepeatComboValues.IndexOf(task.Repeat);
+        if (task.Notification == null) SelectedNotifyIndex = 0;
+        else
+        {
+            var notification = await _db.GetNotification((ObjectId)task.Notification);
+            if (notification == null)
+            {
+                SelectedNotifyIndex = 0;
+                NewTaskItem.Notification = null;
+                Console.WriteLine("[TaskManager > EditTask : TaskItem] Invalid in finding notification that is not null");
+            }
+            else
+            {
+                var difference = task.CompleteDate - notification.Notify;
+                SelectedNotifyIndex = difference.Days == 0
+                    ? ViewController.NotifyBeforeComboValues.IndexOf(-difference.Hours)
+                    : ViewController.NotifyBeforeComboValues.IndexOf(difference.Days);
+            }
+        }
+        SetStartParameters(true);
+        ViewController.OpenTaskOverlay();
+        return true;
+    });
+    
     private static DateTime CalculateOffsetToDateTime(int offset, DateTime dateTime) => 
         offset < 0 ? dateTime.AddHours(offset) : dateTime.AddDays(-1 * offset);
 
-    private async Task<bool> CreateNewTask(TaskItem newTask, Notification? notification)
+    private async Task<bool> Create(TaskItem newTask, Notification? notification, Category category)
     {
+        category.TasksCount++;
         newTask.Notification = notification?.Id;
-        ViewRepository.SelectedCategory!.TasksCount++;
         
         var insertTask = _db.InsertTask(newTask);
         var insertNotification = notification == null ? null : _db.InsertNotification(notification);
-        var updateCategory = _db.UpdateCategory(ViewRepository.SelectedCategory);
+        var updateCategory = _db.UpdateCategory(category);
 
         if (await insertTask && (insertNotification == null || await insertNotification) && await updateCategory)
         {
-            ViewRepository.TasksCollection.Add(newTask);
-            ViewRepository.AddingTask(newTask);
-            HideTaskOverlay.Execute().Subscribe();
+            newTask.CategoryObject = category;
+            ViewController.AddTaskToView(newTask);
+            HideOverlay.Execute().Subscribe();
             Console.WriteLine($"[TaskCreation] Task '{newTask.Title}' was created");
             return true;
         }
         Console.WriteLine("[TaskCreation] Error: Task wasn't created!");
+        await MessageService.ErrorMessage($"Error: Task '{newTask.Title}' wasn't created!");
         return false;
     }
 
-    private async Task<bool> UpdateTask(TaskItem newTask, Notification? notification)
+    private async Task<bool> Update(TaskItem newTask, Notification? notification, Category category)
     {
         var oldNotification = newTask.Notification;
         newTask.Notification = notification?.Id;
@@ -122,13 +197,11 @@ public class TaskManagerViewModel : ViewModelBase
         bool? removeOldNotification = oldNotification == null ? null : await _db.RemoveNotification((ObjectId)oldNotification);
         var insertNotification = notification == null ? null : _db.InsertNotification(notification);
 
-        if (await updateTask && (removeOldNotification == null || (bool)removeOldNotification!) && (insertNotification == null || await insertNotification))
+        if (await updateTask && (removeOldNotification == null || (bool)removeOldNotification) && (insertNotification == null || await insertNotification))
         {
-            var index = ViewRepository.TasksCollection.IndexOf(newTask);
-            ViewRepository.TasksCollection[index] = newTask;
-            ViewRepository.RemovingTask(newTask); //TODO Change
-            ViewRepository.AddingTask(newTask); //TODO Change
-            HideTaskOverlay.Execute().Subscribe();
+            newTask.CategoryObject = category;
+            ViewController.ChangeTaskInView(newTask);
+            HideOverlay.Execute().Subscribe();
             Console.WriteLine($"[TaskCreation] Task '{newTask.Title}' was updated");
             return true;
         }
@@ -151,12 +224,13 @@ public class TaskManagerViewModel : ViewModelBase
             return false;
         }
         
-        newTask.Category ??= ViewRepository.SelectedCategory!.Id;
         Notification? notification = null;
-        var importance = ViewRepository.ImportanceComboValues[SelectedImportanceIndex];
-        var repeat = ViewRepository.RepeatComboValues[SelectedRepeatIndex];
-        var notify = ViewRepository.NotifyBeforeComboValues[SelectedNotifyIndex];
-        
+        var importance = ViewController.ImportanceComboValues[SelectedImportanceIndex];
+        var repeat = ViewController.RepeatComboValues[SelectedRepeatIndex];
+        var notify = ViewController.NotifyBeforeComboValues[SelectedNotifyIndex];
+        var category = ViewController.CategoriesCollection[SelectedCategoryIndex];
+
+        newTask.Category = category.Id;
         newTask.IsImportant = importance;
         newTask.Repeat = repeat;
         if (notify != null)
@@ -171,7 +245,7 @@ public class TaskManagerViewModel : ViewModelBase
                 { Title = newTask.Title, Message = newTask.Description, Repeat = repeat, Notify = notificationDate };
         }
 
-        if (OverlayService.EditMode) return await UpdateTask(newTask, notification);
-        return await CreateNewTask(newTask, notification);
+        if (_editMode) return await Update(newTask, notification, category);
+        return await Create(newTask, notification, category);
     });
 }

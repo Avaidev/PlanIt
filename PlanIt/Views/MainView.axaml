@@ -36,7 +36,7 @@
                                 </Border>
                                 <TextBlock VerticalAlignment="Center" Classes="t-b t-22">PlanIt</TextBlock>
                             </StackPanel>
-                            <ToggleSwitch Grid.Column="1" x:Name="ThemeChanger" OnContent="" OffContent="" IsChecked="{Binding ViewRepository.IsDarkTheme, Mode=TwoWay}"></ToggleSwitch>
+                            <ToggleSwitch Grid.Column="1" x:Name="ThemeChanger" OnContent="" OffContent="" IsChecked="{Binding ViewController.IsDarkTheme, Mode=TwoWay}"></ToggleSwitch>
                         </Grid>
                     </Border>
                     <Border Grid.Row="1" Padding="11 8 0 8">
@@ -61,7 +61,7 @@
                                                 <TextBlock Classes="t-16 today t-sb" HorizontalAlignment="Left">Today</TextBlock>
                                             </StackPanel>
                                             <DockPanel Grid.Column="1" HorizontalAlignment="Right">
-                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 today t-b" Text="{Binding ViewRepository.TodayFilterCounter}"></TextBlock>
+                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 today t-b" Text="{Binding ViewController.TodayFilterCounter}"></TextBlock>
                                             </DockPanel>
                                         </Grid>
                                     </Button>
@@ -75,7 +75,7 @@
                                                 <TextBlock Classes="t-16 scheduled t-sb" HorizontalAlignment="Left">Scheduled</TextBlock>
                                             </StackPanel>
                                             <DockPanel Grid.Column="1" HorizontalAlignment="Right">
-                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 scheduled t-b"  Text="{Binding ViewRepository.ScheduleFilterCounter}"></TextBlock>
+                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 scheduled t-b"  Text="{Binding ViewController.ScheduleFilterCounter}"></TextBlock>
                                             </DockPanel>
                                         </Grid>
                                     </Button>
@@ -89,7 +89,7 @@
                                                 <TextBlock Classes="t-16 all t-sb" HorizontalAlignment="Left">All</TextBlock>
                                             </StackPanel>
                                             <DockPanel Grid.Column="1" HorizontalAlignment="Right">
-                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 all t-b" x:Name="AllFilterBlock" Text="{Binding ViewRepository.AllFilterCounter}"></TextBlock>
+                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 all t-b" x:Name="AllFilterBlock" Text="{Binding ViewController.AllFilterCounter}"></TextBlock>
                                             </DockPanel>
                                         </Grid>
                                     </Button>
@@ -103,7 +103,7 @@
                                                 <TextBlock Classes="t-16 important t-sb" HorizontalAlignment="Left">Important</TextBlock>
                                             </StackPanel>
                                             <DockPanel Grid.Column="1" HorizontalAlignment="Right">
-                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 important t-b" Text="{Binding ViewRepository.ImportantFilterCounter}"></TextBlock>
+                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 important t-b" Text="{Binding ViewController.ImportantFilterCounter}"></TextBlock>
                                             </DockPanel>
                                         </Grid>
                                     </Button>
@@ -111,11 +111,11 @@
                                 <Grid Grid.Row="2" RowDefinitions="Auto, *" RowSpacing="8">
                                     <Grid ColumnDefinitions="*, Auto">
                                         <TextBlock Classes="t-b t-22" HorizontalAlignment="Left" VerticalAlignment="Center">Categories</TextBlock>
-                                        <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="30" Classes="btn" Command="{Binding ShowCategoryOverlay}">
+                                        <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="30" Classes="btn" Command="{Binding AddNewCategory}">
                                             <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource Text}"></PathIcon>
                                         </Button>
                                     </Grid>
-                                    <ListBox x:Name="CategoryListBox" Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectedItem="{Binding ViewRepository.SelectedCategory}" ItemsSource="{Binding ViewRepository.CategoriesCollection}">
+                                    <ListBox x:Name="CategoryListBox" Grid.Row="1" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectedItem="{Binding ViewController.SelectedCategory}" ItemsSource="{Binding ViewController.CategoriesCollection}">
                                         <ListBox.ItemTemplate>
                                             <DataTemplate DataType="models:Category">
                                                 <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto" HorizontalAlignment="Stretch" VerticalAlignment="Center" ColumnSpacing="5">
@@ -141,8 +141,8 @@
                 <ContentControl Content="{Binding CurrentViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></ContentControl>
             </Border>
         </Grid>
-        <Grid x:Name="InputBlocker" Background="Transparent" IsHitTestVisible="True" IsVisible="{Binding OverlayService.IsAnyVisible}"></Grid>
-        <views:CategoryCreationView DataContext="{Binding CategoryManagerVM}" ZIndex="2" IsHitTestVisible="True" IsVisible="{Binding OverlayService.IsCategoryCreateVisible}"></views:CategoryCreationView>
-        <views:TaskCreationView DataContext="{Binding TaskManagerVM}" ZIndex="2" IsHitTestVisible="True" IsVisible="{Binding OverlayService.IsTaskCreateVisible}"></views:TaskCreationView>
+        <Grid x:Name="InputBlocker" Background="Transparent" IsHitTestVisible="True" IsVisible="{Binding ViewController.IsAnyOverlayVisible}"></Grid>
+        <views:CategoryCreationView DataContext="{Binding CategoryManagerVM}" ZIndex="2" IsHitTestVisible="True" IsVisible="{Binding ViewController.IsCategoryOverlayVisible}"></views:CategoryCreationView>
+        <views:TaskCreationView DataContext="{Binding TaskManagerVM}" ZIndex="2" IsHitTestVisible="True" IsVisible="{Binding ViewController.IsTaskOverlayVisible}"></views:TaskCreationView>
     </Grid>
 </Window>

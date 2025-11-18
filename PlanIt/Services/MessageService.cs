@@ -4,10 +4,8 @@ using MsBox.Avalonia.Enums;
 
 namespace PlanIt.Services;
 
-public class MessageService
+public static class MessageService
 {
-    public MessageService() {}
-
     public static async Task ErrorMessage(string message)
     {
         var messageBox = MessageBoxManager.GetMessageBoxStandard("Error",

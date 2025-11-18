@@ -16,7 +16,7 @@
         <Border VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="TaskLayoutBorder">
             <Grid RowDefinitions="Auto, Auto" RowSpacing="10">
                 <Grid ColumnDefinitions="Auto, *, Auto">
-                    <Button Classes="btn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding HideTaskOverlay}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
+                    <Button Classes="btn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding HideOverlay}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
                     <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="t-b t-14" Foreground="{DynamicResource Text}">New Task</TextBlock>
                     <Button Grid.Column="2" Classes="btn" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding ApplyCreation}" CommandParameter="{Binding NewTaskItem}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource AcceptIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
                 </Grid>
@@ -40,12 +40,14 @@
                     <Grid Grid.Row="2" Grid.Column="1" RowDefinitions="Auto, Auto" ColumnDefinitions="50*, 50*" ColumnSpacing="6">
                         <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Repeat</TextBlock>
                         <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Notify</TextBlock>
-                        <ComboBox Grid.Row="1" Grid.Column="0" Width="147" ItemsSource="{Binding ViewRepository.RepeatComboCollection}" SelectedIndex="{Binding SelectedRepeatIndex}"></ComboBox>
-                        <ComboBox Grid.Row="1" Grid.Column="1" Width="147" ItemsSource="{Binding ViewRepository.NotifyBeforeComboCollection}" SelectedIndex="{Binding SelectedNotifyIndex}"></ComboBox>
+                        <ComboBox Grid.Row="1" Grid.Column="0" Width="147" ItemsSource="{Binding ViewController.RepeatComboCollection}" SelectedIndex="{Binding SelectedRepeatIndex}"></ComboBox>
+                        <ComboBox Grid.Row="1" Grid.Column="1" Width="147" ItemsSource="{Binding ViewController.NotifyBeforeComboCollection}" SelectedIndex="{Binding SelectedNotifyIndex}"></ComboBox>
                     </Grid>
-                    <Grid Grid.Row="3" Grid.Column="1" RowDefinitions="Auto, Auto">
+                    <Grid Grid.Row="3" Grid.Column="1" RowDefinitions="Auto, Auto" ColumnDefinitions="50*, 50*" ColumnSpacing="6">
                         <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Priority</TextBlock>
-                        <ComboBox Grid.Row="1" HorizontalAlignment="Left" Width="147" ItemsSource="{Binding ViewRepository.ImportanceComboCollection}" SelectedIndex="{Binding SelectedImportanceIndex}"></ComboBox>
+                        <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Category</TextBlock>
+                        <ComboBox Grid.Row="1" Grid.Column="0" Width="147" ItemsSource="{Binding ViewController.ImportanceComboCollection}" SelectedIndex="{Binding SelectedImportanceIndex}"></ComboBox>
+                        <ComboBox Grid.Row="1" Grid.Column="1" Width="147" ItemsSource="{Binding ViewController.CategoriesCollection}" SelectedIndex="{Binding SelectedCategoryIndex}"></ComboBox>
                     </Grid>
                 </Grid>
             </Grid>

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 using PlanIt.Models;
 using PlanIt.Services;
 using PlanIt.Services.DataServices;
@@ -12,37 +13,38 @@ namespace PlanIt.ViewModels;
 
 public class CategoryManagerViewModel : ViewModelBase
 {
-    #region Private attributes
-    private Category _newCategory;
-    private readonly DbAccessService _db;
-    #endregion
-    
-    #region Public attributes
-    public Category NewCategory
+    #region Initialization
+    public  CategoryManagerViewModel(DbAccessService db, ViewController controller)
     {
-        get => _newCategory;
-        set =>  this.RaiseAndSetIfChanged(ref _newCategory, value);
-    }
-    public ViewRepository ViewRepository { get; }
-    public OverlayService OverlayService { get; }
-    #endregion
-    
-    public  CategoryManagerViewModel(OverlayService overlayService, DbAccessService db, ViewRepository repository)
-    {
-        OverlayService = overlayService;
         _db = db;
-        ViewRepository = repository;
+        ViewController = controller;
         ReturnToDefault();
     }
     
     private void ReturnToDefault()
     {
         NewCategory = new Category { Title = "" };
+        _editMode = false;
     }
+    #endregion
+    
+    #region Attributes
+    private Category _newCategory;
+    private readonly DbAccessService _db;
+    
+    private bool _editMode;
+    
+    public Category NewCategory
+    {
+        get => _newCategory;
+        set =>  this.RaiseAndSetIfChanged(ref _newCategory, value);
+    }
+    public ViewController ViewController { get; }
+    #endregion
 
     public ReactiveCommand<Category, bool> RemoveCategory => ReactiveCommand.CreateFromTask<Category,bool>(async category =>
     {
-        if (ViewRepository.CategoriesCollection.Count == 1)
+        if (ViewController.CategoriesCollection.Count == 1)
         {
             await MessageService.ErrorMessage("You can't delete last category!");
             return false;
@@ -53,62 +55,69 @@ public class CategoryManagerViewModel : ViewModelBase
             if (category.TasksCount != 0)
             {
                 var tasks = await _db.GetTasksByCategory(category);
+                foreach (var task in tasks)
+                {
+                    if (task.Notification != null) await _db.RemoveNotification((ObjectId)task.Notification);
+                }
                 if (await _db.RemoveTasksMany(tasks))
                 {
-                    ViewRepository.RemovingTasksMany(tasks);
-                    Console.WriteLine($"[WindowVM > RemoveCategory] All tasks of {category.Title} were removed");
+                    ViewController.AfterRemovingTasksMany(tasks);
+                    Console.WriteLine($"[CategoryManager > RemoveCategory] All tasks of {category.Title} were removed");
                 }
                 else return false;
             }
             
             if (await _db.RemoveCategory(category))
             {
-                Console.WriteLine($"[WindowVM > RemoveCategory] {category.Title} was removed");
-                ViewRepository.CategoriesCollection.Remove(category);
-                if (ViewRepository.SelectedCategory != null && ViewRepository.SelectedCategory.Equals(category)) ViewRepository.SelectedCategory = null;
+                Console.WriteLine($"[CategoryManager > RemoveCategory] {category.Title} was removed");
+                ViewController.RemoveCategoryFromView(category);
                 return true;
             }
             Console.WriteLine($"[WindowVM > RemoveCategory] Error: {category.Title} was not removed");
+            await MessageService.ErrorMessage($"Error: {category.Title} was not removed");
         }
         return false;
     });
 
-    public ReactiveCommand<Category, Unit> EditCategory => ReactiveCommand.Create<Category, Unit>(category =>
+    public ReactiveCommand<Category, bool> EditCategory => ReactiveCommand.Create<Category, bool>(category =>
     {
         NewCategory = new Category(category);
-        OverlayService.ToggleVisibility(0, true);
-        return Unit.Default;
+        _editMode = true;
+        ViewController.OpenCategoryOverlay();
+        return true;
     });
     
-    public ReactiveCommand<Unit, Unit> HideCategoryOverlay => ReactiveCommand.Create(() =>
+    public ReactiveCommand<Unit, Unit> HideOverlay => ReactiveCommand.Create(() =>
     {
-        OverlayService.ToggleVisibility(0);
+        ViewController.CloseCategoryOverlay();
         ReturnToDefault();
     });
-    private async Task<bool> CreateNewCategory(Category newCategory)
+    
+    private async Task<bool> Create(Category newCategory)
     {
         if (await _db.InsertCategory(newCategory))
         {
-            Console.WriteLine($"[CategoryCreation] Category '{newCategory.Title}' was created");
-            ViewRepository.CategoriesCollection.Add(newCategory);
-            HideCategoryOverlay.Execute().Subscribe();
+            Console.WriteLine($"[CategoryManager > CreateNew] Category '{newCategory.Title}' was created");
+            ViewController.AddCategoryToView(newCategory);
+            HideOverlay.Execute().Subscribe();
             return true;
         }
-        Console.WriteLine("[CategoryCreation] Error: Category wasn't created");
+        Console.WriteLine("[CategoryManager > CreateNew] Error: Category wasn't created");
+        await MessageService.ErrorMessage($"Error: {newCategory.Title} was not created");
         return false;
     }
 
-    private async Task<bool> UpdateCategory(Category newCategory)
+    private async Task<bool> Update(Category newCategory)
     {
         if (await _db.UpdateCategory(newCategory))
         {
-            Console.WriteLine($"[CategoryCreation] Category '{newCategory.Title}' was updated");
-            var index = ViewRepository.CategoriesCollection.IndexOf(newCategory);
-            ViewRepository.CategoriesCollection[index] = newCategory;
-            HideCategoryOverlay.Execute().Subscribe();
+            Console.WriteLine($"[CategoryManager > Update] Category '{newCategory.Title}' was updated");
+            ViewController.ChangeCategoryInView(newCategory);
+            HideOverlay.Execute().Subscribe();
             return true;
         }
-        Console.WriteLine("[CategoryCreation] Error: Category wasn't updated");
+        Console.WriteLine("[CategoryManager > Update] Error: Category wasn't updated");
+        await MessageService.ErrorMessage($"Error: {newCategory.Title} was not updated");
         return false;
     }
 
@@ -120,7 +129,7 @@ public class CategoryManagerViewModel : ViewModelBase
             return false;
         }
 
-        if (OverlayService.EditMode) return await UpdateCategory(newCategory);
-        return await CreateNewCategory(newCategory);
+        if (_editMode) return await Update(newCategory);
+        return await Create(newCategory);
     });
 }

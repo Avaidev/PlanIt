@@ -16,17 +16,43 @@ namespace PlanIt.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {
-    #region Private attributes
+    #region Initialization
+    public MainViewModel()
+    {
+        _db = new DbAccessService();
+        ViewController = new ViewController(_db);
+
+        TaskManagerVM = new TaskManagerViewModel(_db, ViewController);
+        CategoryManagerVM = new CategoryManagerViewModel(_db, ViewController);
+        WindowVM = new WindowViewModel(_db, ViewController, TaskManagerVM);
+        
+        CurrentViewModel = WindowVM;
+        ViewController.ViewState = ViewController.ViewStates.CATEGORY;
+        
+        ViewController.WhenAnyValue(x => x.SelectedCategory)
+            .Subscribe(_ =>
+            {
+                if (CurrentViewModel.GetType() != typeof(Category)) CurrentViewModel = WindowVM;
+            });
+        
+        ViewController.WhenAnyValue(x => x.IsDarkTheme)
+            .Subscribe(isDark =>
+            {
+                Application.Current!.RequestedThemeVariant = isDark
+                    ? ThemeVariant.Dark
+                    : ThemeVariant.Light;
+            });
+    }
+    #endregion
+    
+    #region Attributes
+    private DbAccessService _db { get; }
     private ViewModelBase _currentViewModel;
     private FilterTodayViewModel? _filterTodayVM;
     private FilterScheduledViewModel? _filterScheduledVM;
     private FilterImportantViewModel? _filterImportantVM;
     private FilterAllViewModel? _filterAllVM;
     
-    private DbAccessService _db { get; }
-    #endregion
-    
-    #region Public attributes
     public CategoryManagerViewModel CategoryManagerVM { get; }
     public TaskManagerViewModel TaskManagerVM { get; }
     public WindowViewModel WindowVM { get; }
@@ -35,71 +61,44 @@ public class MainViewModel : ViewModelBase
         get => _currentViewModel;
         set => this.RaiseAndSetIfChanged(ref _currentViewModel, value);
     }
-
-    public OverlayService OverlayService { get; }
-    public ViewRepository ViewRepository { get; }
+    public ViewController ViewController { get; }
     #endregion
-    
-    public MainViewModel()
-    {
-        _db = new DbAccessService();
-        OverlayService = new OverlayService();
-        ViewRepository = new ViewRepository(_db);
 
-        TaskManagerVM = new TaskManagerViewModel(OverlayService, _db, ViewRepository);
-        CategoryManagerVM = new CategoryManagerViewModel(OverlayService, _db, ViewRepository);
-        WindowVM = new WindowViewModel(OverlayService, _db, ViewRepository, TaskManagerVM);
-        
-        CurrentViewModel = WindowVM;
-        
-        ViewRepository.WhenAnyValue(x => x.SelectedCategory)
-            .Subscribe(_ =>
-            {
-                if (CurrentViewModel.GetType() != typeof(Category)) CurrentViewModel = WindowVM;
-            });
-        
-        ViewRepository.WhenAnyValue(x => x.IsDarkTheme)
-            .Subscribe(isDark =>
-            {
-                Application.Current!.RequestedThemeVariant = isDark
-                    ? ThemeVariant.Dark
-                    : ThemeVariant.Light;
-            });
-    }
-
-    #region Commands
     public ReactiveCommand<Unit, Unit> ShowTodayFilterView => ReactiveCommand.Create(() =>
     {
         _filterTodayVM ??= new FilterTodayViewModel();
-        ViewRepository.SelectedCategory = null;
+        ViewController.SelectedCategory = null;
+        ViewController.ViewState = ViewController.ViewStates.TODAY;
         CurrentViewModel = _filterTodayVM;
     });
     
     public ReactiveCommand<Unit, Unit> ShowScheduledFilterView => ReactiveCommand.Create(() =>
     {
         _filterScheduledVM ??= new FilterScheduledViewModel();
-        ViewRepository.SelectedCategory = null;
+        ViewController.SelectedCategory = null;
+        ViewController.ViewState = ViewController.ViewStates.SCHEDULED;
         CurrentViewModel = _filterScheduledVM;
     });
     
     public ReactiveCommand<Unit, Unit> ShowImportantFilterView => ReactiveCommand.Create(() =>
     {
         _filterImportantVM ??= new FilterImportantViewModel();
-        ViewRepository.SelectedCategory = null;
+        ViewController.SelectedCategory = null;
+        ViewController.ViewState = ViewController.ViewStates.IMPORTANT;
         CurrentViewModel = _filterImportantVM;
     });
     
     public ReactiveCommand<Unit, Unit> ShowAllFilterView => ReactiveCommand.Create(() =>
     {
-        _filterAllVM ??= new FilterAllViewModel(ViewRepository, _db, OverlayService, TaskManagerVM);
-        ViewRepository.SelectedCategory = null;
+        _filterAllVM ??= new FilterAllViewModel(ViewController, _db, TaskManagerVM);
+        ViewController.SelectedCategory = null;
+        ViewController.ViewState = ViewController.ViewStates.ALL;
         CurrentViewModel = _filterAllVM;
-        ViewRepository.LoadNodesForAllAsync();
+        ViewController.LoadNodesForAllAsync();
     });
     
-    public ReactiveCommand<Unit, Unit> ShowCategoryOverlay => ReactiveCommand.Create(() =>
+    public ReactiveCommand<Unit, Unit> AddNewCategory => ReactiveCommand.Create(() =>
     {
-        OverlayService.ToggleVisibility(0);
+        ViewController.OpenCategoryOverlay();
     });
-    #endregion
 }

@@ -90,6 +90,19 @@ public class TaskItem : ReactiveObject
     [BsonIgnore]
     public Category? CategoryObject { get; set; }
 
+    public void ChangeObject(TaskItem newVariant)
+    {
+        Title = newVariant.Title;
+        Description = newVariant.Description;
+        CompleteDate = newVariant.CompleteDate;
+        Repeat = newVariant.Repeat;
+        IsDone = newVariant.IsDone;
+        IsImportant = newVariant.IsImportant;
+        Notification = newVariant.Notification;
+        Category = newVariant.Category;
+        CategoryObject = newVariant.CategoryObject;
+    }
+    
     public override string ToString()
     {
         return Title;

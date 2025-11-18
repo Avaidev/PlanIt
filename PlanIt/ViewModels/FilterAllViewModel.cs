@@ -14,15 +14,13 @@ public class FilterAllViewModel : ViewModelBase
     #endregion
     
     #region Public attributes
-    public ViewRepository ViewRepository { get; }
-    public OverlayService OverlayService { get; }
+    public ViewController ViewController { get; }
     #endregion
     
-    public FilterAllViewModel(ViewRepository viewRepository, DbAccessService db, OverlayService overlayService, TaskManagerViewModel taskManagerViewModel)
+    public FilterAllViewModel(ViewController viewController, DbAccessService db, TaskManagerViewModel taskManagerViewModel)
     {
-        ViewRepository = viewRepository;
+        ViewController = viewController;
         _db = db;
-        OverlayService = overlayService;
         TaskManagerVm = taskManagerViewModel;
     }
 

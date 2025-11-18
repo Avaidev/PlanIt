@@ -10,11 +10,7 @@ namespace PlanIt.Services.DataServices;
 
 public class DbAccessService
 {
-    private string _baseDirectory { get; set; }
-    private ObjectRepository<TaskItem> _taskRepo;
-    private ObjectRepository<Category> _categoryRepo;
-    private ObjectRepository<Notification> _notificationRepo;
-
+    #region Initialization
     public DbAccessService()
     {
         _baseDirectory = GetDataDirectory();
@@ -22,6 +18,14 @@ public class DbAccessService
         _categoryRepo = new ObjectRepository<Category>(Path.Combine(_baseDirectory, "categories.bson"));
         _notificationRepo = new ObjectRepository<Notification>(Path.Combine(_baseDirectory, "notifications.bson"));
     }
+    #endregion
+
+    #region Attributes
+    private string _baseDirectory { get; set; }
+    private ObjectRepository<TaskItem> _taskRepo;
+    private ObjectRepository<Category> _categoryRepo;
+    private ObjectRepository<Notification> _notificationRepo;
+    #endregion
 
     private static string GetDataDirectory()
     {   
@@ -31,8 +35,13 @@ public class DbAccessService
         
         return Path.Combine(fullPath, "Data");
     }
+
+    #region Categories
+    public async Task<Category?> GetCategoryById(ObjectId id)
+    {
+        return await _categoryRepo.FindAsync(c => c.Id == id);
+    }
     
-    //Categories
     public async Task<List<Category>> GetAllCategories()
     {
         return await _categoryRepo.GetAllAsync("all");
@@ -57,8 +66,9 @@ public class DbAccessService
     {
         return await _categoryRepo.CountAsync();
     }
+    #endregion
 
-    //Tasks
+    #region Tasks
     public async Task<bool> InsertTask(TaskItem task)
     {
         return await _taskRepo.AddAsync(task);
@@ -86,13 +96,13 @@ public class DbAccessService
 
     public async Task<List<TaskItem>> GetTasksByCategory(Category category)
     {
-        return await _taskRepo.FindManyAsync(task => task.Category == category.Id, $"category_{category.Id}");
+        return (await _taskRepo.FindManyAsync(task => task.Category == category.Id, $"category_{category.Id}")).ToList();
     }
 
-    public async Task<List<TaskItem>> GetTasksForToday()
+    public async Task<List<TaskItem>> GetTasksForTodayWithCategories(IEnumerable<Category> enumerable)
     {
-        var todayTasks = await _taskRepo.FindManyAsync(task => task.CompleteDate.Date == DateTime.Now.Date, "today");
-        var categories = await GetAllCategories();
+        var categories = enumerable.ToList();
+        var todayTasks = (await _taskRepo.FindManyAsync(task => Utils.CheckDateForToday(task.CompleteDate), "today")).ToList();
         foreach (var task in todayTasks)
         {
             var category = categories.FirstOrDefault(c => c.Id == task.Category);
@@ -102,10 +112,10 @@ public class DbAccessService
         return todayTasks;
     }
 
-    public async Task<List<TaskItem>> GetTasksForImportant()
+    public async Task<List<TaskItem>> GetTasksForImportantWithCategories(IEnumerable<Category> enumerable)
     {
-        var importantTasks = await _taskRepo.FindManyAsync(task => task.IsImportant == true, "important");
-        var categories = await GetAllCategories();
+        var categories = enumerable.ToList();
+        var importantTasks = (await _taskRepo.FindManyAsync(task => task.IsImportant == true, "important")).ToList();
         foreach (var task in importantTasks)
         {
             var category =  categories.FirstOrDefault(c => c.Id == task.Category);
@@ -114,49 +124,67 @@ public class DbAccessService
         return importantTasks;
     }
 
-    public async Task<List<Node>> GetNodesForAll()
+    public async Task<List<Node>> GetNodesForAllByCategories(IEnumerable<Category> categories)
     {
-        var categories = await GetAllCategories();
         var nodes = new List<Node>();
         foreach (var category in categories)
         {
             var tasks = await GetTasksByCategory(category);
+            Utils.OrderTasks(tasks);
             nodes.Add(new Node(category, tasks));
         }
 
         return nodes;
     }
-
-    public async Task<List<Node>> GetNodesForScheduled()
+   
+    public async Task<List<Node>> GetNodesForScheduledWithCategories(IEnumerable<Category> enumerable)
     {
-        var nodes = new List<Node>();
-        for (var i = 0; i < 3; i++)
+        List<Node> nodes = [new Node("Today", []), new Node("Tomorrow", []), new Node("Others", [])];
+        var categories = enumerable.ToList();
+        foreach (var node in nodes)
         {
-            switch (i)
+            switch (node.NodeTitle)
             {
-                case 0:
-                    nodes.Add(new Node("Today", await _taskRepo.FindManyAsync(t => t.CompleteDate.Date == DateTime.Now.Date && t.CompleteDate.TimeOfDay > DateTime.Now.TimeOfDay)));
+                case "Today":
+                    foreach (var task in await _taskRepo.FindManyAsync(t => Utils.CheckDateForToday(t.CompleteDate), "today"))
+                    {
+                        task.CategoryObject = categories.FirstOrDefault(c => c.Id == task.Category);
+                        node.Tasks.Add(task);
+                    }
+
                     break;
-                case 1:
-                    nodes.Add(new Node("Tomorrow", await _taskRepo.FindManyAsync(t => t.CompleteDate.AddDays(1).Date == DateTime.Now.AddDays(1).Date)));
+                
+                case "Tomorrow":
+                    foreach (var task in await _taskRepo.FindManyAsync(t => Utils.CheckDateForTomorrow(t.CompleteDate), "tomorrow"))
+                    {
+                        task.CategoryObject = categories.FirstOrDefault(c => c.Id == task.Category);
+                        node.Tasks.Add(task);
+                    }
+
                     break;
-                default:
-                    nodes.Add(new Node("Others", await _taskRepo.FindManyAsync(t => t.CompleteDate.Date >= DateTime.Now.AddDays(2).Date)));
+                
+                case "Others":
+                    foreach (var task in await _taskRepo.FindManyAsync(t => Utils.CheckDateForLater(t.CompleteDate)))
+                    {
+                        task.CategoryObject = categories.FirstOrDefault(c => c.Id == task.Category);
+                        node.Tasks.Add(task);
+                    }
+
                     break;
             }
+            Utils.OrderTasks(node.Tasks);
         }
-
         return nodes;
     }
 
     public async Task<int> CountTodayTasks()
     {
-        return await _taskRepo.CountAsync(t => t.CompleteDate.Date == DateTime.Now.Date, "today");
+        return await _taskRepo.CountAsync(t => Utils.CheckDateForToday(t.CompleteDate), "today");
     }
 
     public async Task<int> CountScheduledTasks()
     {
-        return await _taskRepo.CountAsync(t => t.CompleteDate > DateTime.Now, "scheduled");
+        return await _taskRepo.CountAsync(t => Utils.CheckDateForScheduled(t.CompleteDate), "scheduled");
     }
 
     public async Task<int> CountAllTasks()
@@ -168,8 +196,9 @@ public class DbAccessService
     {
         return await _taskRepo.CountAsync(t => t.IsImportant == true, "important");
     }
+    #endregion
 
-    //Notifications
+    #region Notifications
     public async Task<Notification?> GetNotification(ObjectId notificationId)
     {
         return await _notificationRepo.GetByIdAsync(notificationId);
@@ -183,4 +212,5 @@ public class DbAccessService
     {
         return await _notificationRepo.DeleteAsync(notificationId);
     }
+    #endregion
 }
