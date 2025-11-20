@@ -12,9 +12,8 @@ namespace PlanIt.ViewModels;
 public class WindowViewModel : ViewModelBase
 {
     #region Initialization
-    public WindowViewModel(DbAccessService db, ViewController controller, TaskManagerViewModel taskManagerViewModel)
+    public WindowViewModel(ViewController controller, TaskManagerViewModel taskManagerViewModel)
     {
-        _db = db;
         ViewController = controller;
         TaskManagerVM = taskManagerViewModel;
     }
@@ -23,7 +22,6 @@ public class WindowViewModel : ViewModelBase
     #region Attributes
     public TaskManagerViewModel TaskManagerVM { get; }
     public ViewController ViewController { get;  }
-    private DbAccessService _db { get;  }
     #endregion
     
     public ReactiveCommand<Unit, Unit> AddNewTask => ReactiveCommand.Create(() =>

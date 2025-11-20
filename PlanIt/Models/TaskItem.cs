@@ -37,6 +37,8 @@ public class TaskItem : ReactiveObject
         IsDone = other.IsDone;
         IsImportant = other.IsImportant;
         Notification = other.Notification;
+        Category = other.Category;
+        CategoryObject = other.CategoryObject;
     }
         
     [BsonIgnore] public string Title

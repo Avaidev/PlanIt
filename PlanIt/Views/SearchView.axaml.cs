@@ -1,13 +1,12 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using PlanIt.ViewModels;
 
 namespace PlanIt.Views;
 
-public partial class FilterAllView : UserControl
+public partial class SearchView : UserControl
 {
-    public FilterAllView()
+    public SearchView()
     {
         InitializeComponent();
     }

@@ -8,20 +8,22 @@ namespace PlanIt.ViewModels;
 
 public class FilterAllViewModel : ViewModelBase
 {
-    #region Private attributes
-    private DbAccessService _db { get; }
-    private TaskManagerViewModel TaskManagerVm { get; }
+    #region Initialization
+    public FilterAllViewModel(ViewController viewController, TaskManagerViewModel taskManagerViewModel)
+    {
+        ViewController = viewController;
+        TaskManagerVM = taskManagerViewModel;
+    }
+
     #endregion
-    
-    #region Public attributes
+
+    #region Attributes
+    public TaskManagerViewModel TaskManagerVM { get; }
     public ViewController ViewController { get; }
     #endregion
     
-    public FilterAllViewModel(ViewController viewController, DbAccessService db, TaskManagerViewModel taskManagerViewModel)
+    public ReactiveCommand<Unit, Unit> AddNewTask => ReactiveCommand.Create(() =>
     {
-        ViewController = viewController;
-        _db = db;
-        TaskManagerVm = taskManagerViewModel;
-    }
-
+        ViewController.OpenTaskOverlay();
+    });
 }

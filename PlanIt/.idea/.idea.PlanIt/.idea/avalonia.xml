@@ -18,6 +18,7 @@
         <entry key="Views/FilterTodayView.axaml" value="PlanIt.csproj" />
         <entry key="Views/MainView.axaml" value="PlanIt.csproj" />
         <entry key="Views/MainWindow.axaml" value="PlanIt.csproj" />
+        <entry key="Views/SearchView.axaml" value="PlanIt.csproj" />
         <entry key="Views/TaskCreationView.axaml" value="PlanIt.csproj" />
         <entry key="Views/WindowView.axaml" value="PlanIt.csproj" />
       </map>

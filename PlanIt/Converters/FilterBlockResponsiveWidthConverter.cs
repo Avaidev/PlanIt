@@ -23,7 +23,9 @@ namespace PlanIt.Converters
         private double CalculateResponsiveWidth(double panelWidth, int digitCount)
         {
             var half = panelWidth / 2 - 6;
-            return half < DEFAULT_FILTER_BTN_LEN + DIGIT_PIXELS * digitCount
+            var len = DEFAULT_FILTER_BTN_LEN + DIGIT_PIXELS * digitCount;
+            if (len < 105) len = 105;
+            return half < len
                 ? panelWidth
                 : half;
         }

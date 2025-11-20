@@ -11,11 +11,13 @@ public class ResourceLookupConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is string key)
+        if (value is string key && !string.IsNullOrEmpty(key))
         {
+            key = key.Trim();
+            if (parameter?.ToString()?.ToLower() == "hover") key += "Hover";
             var theme = Application.Current?.RequestedThemeVariant;
             var styles = Application.Current?.Styles;
-            
+
             foreach (var style in styles)
             {
                 if (style.TryGetResource(key, theme, out var resource))
@@ -32,13 +34,9 @@ public class ResourceLookupConverter : IValueConverter
                 }
             }
         }
-        
-        Console.WriteLine($"[ResourceConverter] Resource not found for key: {value}\n");
-
         return AvaloniaProperty.UnsetValue;
-
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => throw new NotImplementedException();
+        => throw new NotSupportedException();
 }

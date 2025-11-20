@@ -5,56 +5,56 @@
             
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
-            <Color x:Key="BackgroundPrimary">#356480</Color>
-            <Color x:Key="BackgroundSecondary">#2C5A75</Color>
-            <Color x:Key="BackgroundUpper">#214A63</Color>
-            <Color x:Key="BackgroundButton">#007085</Color>
-            <Color x:Key="BackgroundCategory">#6682AA</Color>
-            <Color x:Key="BackgroundSearch">#47648A</Color>
-            <Color x:Key="BackgroundFilter">#618CA9</Color>
-            <Color x:Key="BackgroundTask">#2D5872</Color>
-            <Color x:Key="BackgroundIconOverlay">#62B6E8</Color>
+            <Color x:Key="BackgroundMain">#4B4B54</Color>
+            <Color x:Key="BackgroundSide">#44444E</Color>
+            <Color x:Key="BackgroundUpper">#37353E</Color>
+            <Color x:Key="BackgroundItems">#2E3138</Color>
+            <Color x:Key="BackgroundDark">#333333</Color>
+            <Color x:Key="BackgroundFocus">#3A3E47</Color>
+            <Color x:Key="BackgroundHover">#1A1D24</Color>
             
-            <Color x:Key="ButtonHover">#0189A3</Color>
-            <Color x:Key="CategoryHover">#749AC7</Color>
-            <Color x:Key="SearchHover">#5879A5</Color>
-            <Color x:Key="FilterHover">#71A5C7</Color>
-            <Color x:Key="TaskHover">#417B9F</Color>
+            <Color x:Key="BorderLogo">#747888</Color>
+            <Color x:Key="BorderItems">#24272D</Color>
             
-            <Color x:Key="StrokeButton">#052228</Color>
-            <Color x:Key="StrokeSearch">#2B2D43</Color>
-            <Color x:Key="StrokeFilter">#CFF6FF</Color>
-            <Color x:Key="StrokeIconOverlay">#62B6E8</Color>
+            <Color x:Key="TextMain">#DADADA</Color>
+            <Color x:Key="TextMainHover">#787878</Color>
+            <Color x:Key="TextSecondaryMainBar">#585863</Color>
+            <Color x:Key="TextSecondaryMainBarHover">#40404A</Color>
+            <Color x:Key="TextSecondary">#828290</Color>
+            <Color x:Key="TextSecondaryHover">#6D6D7B</Color>
+            <Color x:Key="TextTrash">#9A6464</Color>
+            <Color x:Key="TextTrashHover">#724949</Color>
+            <Color x:Key="TextTrashSideBar">#E28D8D</Color>
+            <Color x:Key="TextTrashSideBarHover">#A55F5F</Color>
+            <Color x:Key="TextToday">#A8D7EB</Color>
+            <Color x:Key="TextScheduled">#F4A7AC</Color>
+            <Color x:Key="TextImportant">#F6EBBC</Color>
+            <Color x:Key="TextAll">#E8E8E8</Color>
             
-            <Color x:Key="Today">#CFF6FF</Color>
-            <Color x:Key="All">#F8FAFF</Color>
-            <Color x:Key="Shed">#F1CADF</Color>
-            <Color x:Key="Important">#FFF7D6</Color>
+            <Color x:Key="TextTodayHover">#779DAD</Color>
+            <Color x:Key="TextScheduledHover">#B77F83</Color>
+            <Color x:Key="TextImportantHover">#B1A985</Color>
+            <Color x:Key="TextAllHover">#A2A2A2</Color>
             
-            <Color x:Key="Text">#E8EFFF</Color>
-            <Color x:Key="SearchText">#324762</Color>
-            <Color x:Key="TaskSecondaryText">#427898</Color>
-            <Color x:Key="TextOverlaySecondary">#578FB0</Color>
+            <Color x:Key="Default">#E6E3DD</Color>
+            <Color x:Key="Red">#F96767</Color>
+            <Color x:Key="Orange">#F9B367</Color>
+            <Color x:Key="Yellow">#F9F467</Color>
+            <Color x:Key="Pink">#E76AB5</Color>
+            <Color x:Key="Purple">#DE90FF</Color>
+            <Color x:Key="Green">#91E989</Color>
+            <Color x:Key="Blue">#95A7E6</Color>
+            <Color x:Key="Emerald">#59CDDA</Color>
             
-            <Color x:Key="ScrollBarThumb">#153548</Color>
-            
-            <Color x:Key="PanelDivider">#13384F</Color>
-            
-            <Color x:Key="TaskToggle">#366683</Color>
-            <Color x:Key="TaskToggleInner">#2D5A76</Color>
-            <Color x:Key="TaskToggleInnerImportant">#EAE2C0</Color>
-            <Color x:Key="TaskTrash">#722D2D</Color>
-            
-            <Color x:Key="Default">#333333</Color>
-            <Color x:Key="Red">#FF8D8F</Color>
-            <Color x:Key="Orange">#FFC88D</Color>
-            <Color x:Key="Yellow">#FFFF8D</Color>
-            <Color x:Key="Pink">#F08DFF</Color>
-            <Color x:Key="Purple">#B38DFF</Color>
-            <Color x:Key="Green">#ADFF8D</Color>
-            <Color x:Key="Blue">#86C3EF</Color>
-            <Color x:Key="Emerald">#8DFFE8</Color>
-            
+            <Color x:Key="DefaultHover">#A7A195</Color>
+            <Color x:Key="RedHover">#AF4848</Color>
+            <Color x:Key="OrangeHover">#C48E53</Color>
+            <Color x:Key="YellowHover">#B7B349</Color>
+            <Color x:Key="PinkHover">#C25797</Color>
+            <Color x:Key="PurpleHover">#9D65B5</Color>
+            <Color x:Key="GreenHover">#6EBA67</Color>
+            <Color x:Key="BlueHover">#7582B1</Color>
+            <Color x:Key="EmeraldHover">#43A8B4</Color>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

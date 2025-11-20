@@ -19,49 +19,69 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
     
-        <Border Padding="8" HorizontalAlignment="Stretch">
+        <Border Padding="17 10" HorizontalAlignment="Stretch">
             <Grid>
-                <TextBlock Padding="6" Classes="t-b t-20" Foreground="{DynamicResource TaskSecondaryText}" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding ViewController.SelectedCategory, Converter={x:Static ObjectConverters.IsNull}}">Choose Category</TextBlock>
-                <Border Padding="6" x:Name="Panel" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding ViewController.SelectedCategory, Converter={x:Static ObjectConverters.IsNotNull}}">
-                    <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
-                        <Grid VerticalAlignment="Center">
-                            <Ellipse Width="30" Height="30" Fill="{Binding ViewController.SelectedCategory.Color, Converter={StaticResource ResourceLookupConverter}, FallbackValue=Default}"></Ellipse>
-                            <PathIcon Width="14" Height="14" Data="{Binding ViewController.SelectedCategory.Icon, Converter={StaticResource ResourceLookupConverter}, FallbackValue=CubesIcon}" Foreground="{DynamicResource Text}"></PathIcon>
-                        </Grid>
-                        <TextBlock Classes="t-m t-20" VerticalAlignment="Center" Text="{Binding ViewController.SelectedCategory.Title, FallbackValue=NoTitle}"></TextBlock>
-                        <Rectangle Width="1" VerticalAlignment="Stretch" Fill="{DynamicResource PanelDivider}"></Rectangle>
-                        <Button VerticalAlignment="Center" Classes="btn" Width="30" Height="30" Margin="6 0 0 0" Command="{Binding AddNewTask}">
-                           <PathIcon Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource Text}"></PathIcon>
-                        </Button>
-                    </StackPanel>
-                </Border>
+                <TextBlock Padding="6" Classes="t-b t-20" Foreground="{DynamicResource TextSecondaryMainBar}" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding ViewController.SelectedCategory, Converter={x:Static ObjectConverters.IsNull}}">Choose Category</TextBlock>
+                <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding ViewController.SelectedCategory, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <TextBlock Classes="t-sb t-24" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="16 0 0 0" Text="{Binding ViewController.SelectedCategory.Title, FallbackValue=NoTitle}" Foreground="{Binding ViewController.SelectedCategory.Color, FallbackValue=Default, Converter={StaticResource ResourceLookupConverter}}"></TextBlock>
+                    <Button Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Width="30" Height="30" Classes="panelBtn" Command="{Binding AddNewTask}">
+                        <PathIcon Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource BackgroundItems}"></PathIcon>
+                        <Button.Styles>
+                            <Style Selector="">
+                                 <Setter Property="Background" Value="{Binding DataContext.ViewController.SelectedCategory.Color, FallbackValue=Default,  Converter={StaticResource ResourceLookupConverter}, ElementName=WindowUserControl}"></Setter>
+                            </Style>
+                            <Style Selector=":pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                <Setter Property="Background" Value="{Binding DataContext.ViewController.SelectedCategory.Color, FallbackValue=Default, Converter={StaticResource ResourceLookupConverter}, ConverterParameter=Hover, ElementName=WindowUserControl}"></Setter>
+                            </Style>
+                        </Button.Styles>
+                    </Button>
+                </Grid>
             </Grid>
         </Border>
-    
-        <Border Grid.Row="1" Padding="17 0">
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AllowAutoHide="False" Classes="mainScroll">
-                <ItemsControl x:Name="TasksItemsControl" ItemsSource="{Binding ViewController.TasksCollection}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="models:TaskItem">
-                            <Border Classes="task">
-                                <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto, Auto, Auto">
-                                    <ToggleButton Width="32" Height="32" Classes="taskToggle" VerticalAlignment="Center" HorizontalAlignment="Left"></ToggleButton>
-                                    <TextBlock Grid.Column="1" Classes="t-20 t-m" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap" Margin="12 0" Text="{Binding Title}"></TextBlock>
-                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Classes="t-16 second" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToDateConverter}}"></TextBlock>
-                                    <TextBlock Grid.Column="3" VerticalAlignment="Center" Classes="t-16 second" Margin="6 0">/</TextBlock>
-                                    <TextBlock Grid.Column="4" VerticalAlignment="Center" Classes="t-16 second" Margin="0 0 16 0" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToTimeConverter}}"></TextBlock>
-                                    <Button Grid.Column="5" Width="24" Height="24" Classes="taskBtn" Command="{Binding DataContext.TaskManagerVM.EditTask, ElementName=WindowUserControl}" CommandParameter="{Binding}">
-                                        <PathIcon Width="20" Height="20" Data="{StaticResource EditIcon}" Foreground="{DynamicResource TaskSecondaryText}"></PathIcon>
-                                    </Button>
-                                    <Button Grid.Column="6" Width="24" Height="24" Classes="taskBtn" Command="{Binding Path=DataContext.TaskManagerVM.RemoveTask, ElementName=WindowUserControl}" CommandParameter="{Binding }">
-                                        <PathIcon Width="20" Height="20" Data="{StaticResource TrashIcon}" Foreground="{DynamicResource TaskTrash}"></PathIcon>
-                                    </Button>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-        </Border>
+        
+        <Grid Grid.Row="1">
+            <Border Padding="17 0">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" AllowAutoHide="False" Classes="mainScroll">
+                    <ItemsControl x:Name="TasksItemsControl" ItemsSource="{Binding ViewController.TasksCollection}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="models:TaskItem">
+                                <Border Classes.task="True" Classes.important="{Binding IsImportant}">
+                                    <Grid ColumnDefinitions="Auto, *, Auto, Auto, Auto, Auto, Auto">
+                                        <ToggleButton Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <Ellipse Width="16" Height="16"></Ellipse>
+                                            <ToggleButton.Styles>
+                                                <Style Selector=":checked /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="BorderBrush" Value="{Binding DataContext.ViewController.SelectedCategory.Color, FallbackValue=Default, Converter={StaticResource ResourceLookupConverter}, ElementName=WindowUserControl}"></Setter>
+                                                    <Setter Property="Background" Value="Transparent"></Setter>
+                                                </Style>
+                                                <Style Selector=":checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                                    <Setter Property="BorderBrush" Value="{Binding DataContext.ViewController.SelectedCategory.Color, FallbackValue=Default, Converter={StaticResource ResourceLookupConverter}, ConverterParameter=Hover, ElementName=WindowUserControl}"></Setter>
+                                                </Style>
+                                                <Style Selector=":checked Ellipse">
+                                                     <Setter Property="Fill" Value="{Binding Path=DataContext.ViewController.SelectedCategory.Color, FallbackValue=Default, Converter={StaticResource ResourceLookupConverter}, ElementName=WindowUserControl}"></Setter>
+                                                </Style>
+                                                <Style Selector=":checked:pointerover Ellipse">
+                                                     <Setter Property="Fill" Value="{Binding Path=DataContext.ViewController.SelectedCategory.Color, FallbackValue=Default, Converter={StaticResource ResourceLookupConverter}, ConverterParameter=Hover, ElementName=WindowUserControl}"></Setter>
+                                                </Style>
+                                            </ToggleButton.Styles>
+                                        </ToggleButton>
+                                        <TextBlock Grid.Column="1" Classes="taskTitle" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="Wrap" Margin="12 0" Text="{Binding Title}"></TextBlock>
+                                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Classes="dates" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToDateConverter}}"></TextBlock>
+                                        <TextBlock Grid.Column="3" VerticalAlignment="Center" Classes="dates" Margin="6 0">/</TextBlock>
+                                        <TextBlock Grid.Column="4" VerticalAlignment="Center" Classes="dates" Margin="0 0 16 0" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToTimeConverter}}"></TextBlock>
+                                        <Button Grid.Column="5" Width="24" Height="24" Classes="taskEdit" Command="{Binding DataContext.TaskManagerVM.EditTask, ElementName=WindowUserControl}" CommandParameter="{Binding}">
+                                            <PathIcon Width="20" Height="20" Data="{StaticResource EditIcon}"></PathIcon>
+                                        </Button>
+                                        <Button Grid.Column="6" Width="24" Height="24" Classes="taskTrash" Command="{Binding Path=DataContext.TaskManagerVM.RemoveTask, ElementName=WindowUserControl}" CommandParameter="{Binding }">
+                                            <PathIcon Width="20" Height="20" Data="{StaticResource TrashIcon}"></PathIcon>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

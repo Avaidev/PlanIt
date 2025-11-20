@@ -1,5 +1,6 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:PlanIt.Converters">
     
     <Styles.Resources>
         <ResourceDictionary>
@@ -8,11 +9,17 @@
                 <ResourceInclude Source="Icons.axaml"></ResourceInclude>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
+        <converters:FilterBlockResponsiveWidthConverter x:Key="FilterBlockResponsiveWidthConverter"></converters:FilterBlockResponsiveWidthConverter>
+        <converters:DividerResponsiveWidthConverter x:Key="DividerResponsiveWidthConverter"></converters:DividerResponsiveWidthConverter>
+        <converters:ResourceLookupConverter x:Key="ResourceLookupConverter"></converters:ResourceLookupConverter>
+        <converters:DateTimeToDateConverter x:Key="DateTimeToDateConverter"></converters:DateTimeToDateConverter>
+        <converters:DateTimeToTimeConverter x:Key="DateTimeToTimeConverter"></converters:DateTimeToTimeConverter>
+        <converters:ShowKeyFromPairConverter x:Key="ShowKeyFromPairConverter"></converters:ShowKeyFromPairConverter>
     </Styles.Resources>
     
     <Style Selector="Border">
         <Style Selector="^#SideBarBorder">
-            <Setter Property="Background" Value="{ DynamicResource BackgroundSecondary}"></Setter>
+            <Setter Property="Background" Value="{ DynamicResource BackgroundSide}"></Setter>
             <Setter Property="BorderBrush" Value="{ DynamicResource BackgroundUpper}"></Setter>
             <Setter Property="BorderThickness" Value="0 0 2 0"></Setter>
         </Style>
@@ -21,28 +28,19 @@
             <Setter Property="Background" Value="{DynamicResource BackgroundUpper}"></Setter>
         </Style>
         
+        <Style Selector="^#AppLogo">
+            <Setter Property="BorderThickness" Value="2"></Setter>
+            <Setter Property="CornerRadius" Value="32"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"></Setter>
+            <Setter Property="Background" Value="{DynamicResource BackgroundItems}"></Setter>
+        </Style>
+        
         <Style Selector="^#MainBarBorder">
-            <Setter Property="Background" Value="{DynamicResource BackgroundPrimary}"></Setter>
-        </Style>
-        
-        <Style Selector="^#Panel">
-            <Setter Property="Background" Value="{DynamicResource BackgroundUpper}"></Setter>
-            <Setter Property="CornerRadius" Value="64"></Setter>
-        </Style>
-        
-        <Style Selector="^.task">
-            <Setter Property="Background" Value="{DynamicResource BackgroundTask}"></Setter>
-            <Setter Property="CornerRadius" Value="64"></Setter>
-            <Setter Property="Padding" Value="12 10"></Setter>
-            <Setter Property="Margin" Value="0 0 0 5"></Setter>
-            
-            <Style Selector="^.important">
-                <Setter Property="BorderBrush" Value="{DynamicResource Important}"></Setter>
-            </Style>
+            <Setter Property="Background" Value="{DynamicResource BackgroundMain}"></Setter>
         </Style>
         
         <Style Selector="^#CategoryLayoutBorder">
-            <Setter Property="Background" Value="{DynamicResource BackgroundPrimary}"></Setter>
+            <Setter Property="Background" Value="{DynamicResource BackgroundMain}"></Setter>
             <Setter Property="BorderBrush" Value="{DynamicResource BackgroundUpper}"></Setter>
             <Setter Property="BorderThickness" Value="2"></Setter>
             <Setter Property="Padding" Value="13"></Setter>
@@ -50,7 +48,7 @@
         </Style>
         
         <Style Selector="^#TaskLayoutBorder">
-            <Setter Property="Background" Value="{DynamicResource BackgroundPrimary}"></Setter>
+            <Setter Property="Background" Value="{DynamicResource BackgroundMain}"></Setter>
             <Setter Property="BorderBrush" Value="{DynamicResource BackgroundUpper}"></Setter>
             <Setter Property="BorderThickness" Value="2"></Setter>
             <Setter Property="Padding" Value="13"></Setter>
@@ -58,22 +56,160 @@
         </Style>
     </Style>
     
+    <Style Selector="Border.task">
+        <Setter Property="Background" Value="Transparent"></Setter>
+        <Setter Property="BorderBrush" Value="{DynamicResource TextSecondaryMainBar}"></Setter>
+        <Setter Property="BorderThickness" Value="1"></Setter>
+        <Setter Property="CornerRadius" Value="24"></Setter>
+        <Setter Property="Padding" Value="12 10"></Setter>
+        <Setter Property="Margin" Value="0 0 0 8"></Setter>
+        
+        <Style Selector="^ ToggleButton">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Transitions">
+                    <Transitions>
+                        <BrushTransition Property="Background" Duration="0:0:0.1" Easing="SineEaseIn" Delay="0"></BrushTransition>
+                    </Transitions>
+                </Setter>
+            </Style>
+            
+            <Style Selector="^ Ellipse">
+                <Setter Property="Fill" Value="{DynamicResource TextSecondaryMainBar}"></Setter>
+                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+                <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+            </Style>
+            
+            <Style Selector="^:pointerover Ellipse">
+                <Setter Property="Fill" Value="{DynamicResource TextSecondaryMainBarHover}"></Setter>
+            </Style>
+            
+            <Setter Property="CornerRadius" Value="12"></Setter>
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource TextSecondaryMainBar}"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="Padding" Value="0"></Setter>
+    
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource TextSecondaryMainBarHover}"></Setter>
+                <Setter Property="Background" Value="{TemplateBinding Background}"></Setter>
+            </Style>
+        </Style>
+        
+        <Style Selector="^ TextBlock.taskTitle">
+            <Setter Property="FontSize" Value="20"></Setter>
+            <Setter Property="FontWeight" Value="Medium"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}"></Setter>
+        </Style>
+        
+        <Style Selector="^ TextBlock.taskCategory">
+            <Setter Property="FontSize" Value="18"></Setter>
+            <Setter Property="FontWeight" Value="Medium"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"></Setter>
+        </Style>
+        
+        <Style Selector="^ TextBlock.dates">
+            <Setter Property="FontSize" Value="16"></Setter>
+            <Setter Property="FontWeight" Value="Medium"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"></Setter>
+        </Style>
+        
+        <Style Selector="^ Button.taskEdit">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent"></Setter>
+            </Style>
+            
+            <Style Selector="^ PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"></Setter>
+            </Style>
+            
+            <Style Selector="^:pointerover PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryHover}"></Setter>
+            </Style>
+        </Style>
+        
+        <Style Selector="^ Button.taskTrash">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent"></Setter>
+            </Style>
+            
+            <Style Selector="^ PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource TextTrash}"></Setter>
+            </Style>
+            
+            <Style Selector="^:pointerover PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource TextTrashHover}"></Setter>
+            </Style>
+        </Style>
+        
+        <Style Selector="^.important">
+            <Setter Property="BorderBrush" Value="{DynamicResource TextImportant}"></Setter>
+        </Style>
+    </Style>
+    
+    <Style Selector="ListBox#CategoryListBox > ListBoxItem">
+        <Setter Property="Background" Value="{DynamicResource BackgroundItems}"></Setter>
+        <Setter Property="CornerRadius" Value="8"></Setter>
+        <Setter Property="Margin" Value="0  0 0 8"></Setter>
+        <Setter Property="Padding" Value="6"></Setter>
+        <Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
+        
+        <Style Selector="^ Button.categoryEdit">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="Margin" Value="3 0 -2 0"></Setter>
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent"></Setter>
+            </Style>
+            
+            <Style Selector="^ PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource TextMain}"></Setter>
+            </Style>
+            
+            <Style Selector="^:pointerover PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource TextMainHover}"></Setter>
+            </Style>
+        </Style>
+        
+        <Style Selector="^ Button.categoryTrash">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent"></Setter>
+            </Style>
+            
+            <Style Selector="^ PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource TextTrashSideBar}"></Setter>
+            </Style>
+            
+            <Style Selector="^:pointerover PathIcon">
+                <Setter Property="Foreground" Value="{DynamicResource TextTrashSideBarHover}"></Setter>
+            </Style>
+        </Style>
+        
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BackgroundHover}"></Setter>
+            <Setter Property="Cursor" Value="Hand"></Setter>
+        </Style>
+        
+        <Style Selector="^:selected">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{TemplateBinding Background}"></Setter>
+                <Setter Property="BorderBrush" Value="{DynamicResource BackgroundHover}"></Setter>
+                <Setter Property="BorderThickness" Value="2"></Setter>
+            </Style>
+            
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource BackgroundHover}" />
+            </Style>
+        </Style>
+        
+        
+    </Style>
+    
     <Style Selector="ListBox">
         <Setter Property="Background" Value="Transparent"></Setter>
         <Setter Property="Padding" Value="0"></Setter>
-        
-        <Style Selector="^#CategoryListBox > ListBoxItem">
-            <Setter Property="Background" Value="{DynamicResource BackgroundCategory}"></Setter>
-            <Setter Property="CornerRadius" Value="8"></Setter>
-            <Setter Property="Margin" Value="0  0 0 8"></Setter>
-            <Setter Property="Padding" Value="6"></Setter>
-            <Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
-            
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource CategoryHover}"></Setter>
-                <Setter Property="Cursor" Value="Hand"></Setter>
-            </Style>
-        </Style>
         
         <Style Selector="^#CategoryColorsListBox > ListBoxItem">
             <Setter Property="Padding" Value="0"></Setter>
@@ -86,13 +222,23 @@
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="Transparent"></Setter>
                 <Setter Property="Cursor" Value="Hand"></Setter>
-                <Setter Property="BorderBrush" Value="{DynamicResource BackgroundUpper}"></Setter>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"></Setter>
+                <Setter Property="BorderThickness" Value="2"></Setter>
+            </Style>
+            
+            <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent"></Setter>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"></Setter>
+                <Setter Property="BorderThickness" Value="2"></Setter>
+            </Style> 
+            
+            <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="BorderThickness" Value="1"></Setter>
             </Style>
         </Style>
         
         <Style Selector="^#CategoryIconsListBox > ListBoxItem">
-            <Setter Property="Background" Value="{DynamicResource BackgroundIconOverlay}"></Setter>
+            <Setter Property="Background" Value="{DynamicResource BackgroundDark}"></Setter>
             <Setter Property="CornerRadius" Value="15"></Setter>
             <Setter Property="Padding" Value="0"></Setter>
             <Setter Property="Margin" Value="0"></Setter>
@@ -100,9 +246,19 @@
             <Setter Property="Height" Value="30"></Setter>
             
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource BackgroundIconOverlay}"></Setter>
+                <Setter Property="Background" Value="{DynamicResource BackgroundDark}"></Setter>
                 <Setter Property="Cursor" Value="Hand"></Setter>
-                <Setter Property="BorderBrush" Value="{DynamicResource StrokeIconOverlay}"></Setter>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"></Setter>
+                <Setter Property="BorderThickness" Value="2"></Setter>
+            </Style>
+            
+            <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource BackgroundDark}"></Setter>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"></Setter>
+                <Setter Property="BorderThickness" Value="2"></Setter>
+            </Style>
+            
+            <Style Selector="^:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="BorderThickness" Value="1"></Setter>
             </Style>
         </Style>
@@ -110,7 +266,7 @@
     
     <Style Selector="TextBlock">
         <Setter Property="FontFamily" Value="Inter"></Setter>
-        <Setter Property="Foreground" Value="{DynamicResource Text}"></Setter>
+        <Setter Property="Foreground" Value="{DynamicResource TextMain}"></Setter>
         
         <Style Selector="^.t-8">
             <Setter Property="FontSize" Value="10"></Setter>
@@ -140,7 +296,6 @@
             <Setter Property="FontSize" Value="20"></Setter>
         </Style>
         
-        
         <Style Selector="^.t-22">
             <Setter Property="FontSize" Value="22"></Setter>
         </Style>
@@ -154,23 +309,19 @@
         </Style>
         
         <Style Selector="^.today">
-            <Setter Property="Foreground" Value="{DynamicResource Today}"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextToday}"></Setter>
         </Style>
         
         <Style Selector="^.scheduled">
-            <Setter Property="Foreground" Value="{DynamicResource Shed}"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextScheduled}"></Setter>
         </Style>
         
         <Style Selector="^.important">
-            <Setter Property="Foreground" Value="{DynamicResource Important}"></Setter>
-        </Style>
-        
-        <Style Selector="^.second">
-            <Setter Property="Foreground" Value="{DynamicResource TaskSecondaryText}"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextImportant}"></Setter>
         </Style>
         
         <Style Selector="^.all">
-            <Setter Property="Foreground" Value="{DynamicResource All}"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextAll}"></Setter>
         </Style>
         
         <Style Selector="^.t-b">
@@ -192,33 +343,46 @@
     
     <Style Selector="Ellipse">
         <Style Selector="^.today">
-            <Setter Property="Fill" Value="{DynamicResource Today}"></Setter>
+            <Setter Property="Fill" Value="{DynamicResource TextToday}"></Setter>
         </Style>
         
         <Style Selector="^.scheduled">
-            <Setter Property="Fill" Value="{DynamicResource Shed}"></Setter>
+            <Setter Property="Fill" Value="{DynamicResource TextScheduled}"></Setter>
         </Style>
         
         <Style Selector="^.important">
-            <Setter Property="Fill" Value="{DynamicResource Important}"></Setter>
+            <Setter Property="Fill" Value="{DynamicResource TextImportant}"></Setter>
         </Style>
         
         <Style Selector="^.all">
-            <Setter Property="Fill" Value="{DynamicResource All}"></Setter>
-        </Style>
-        
-        <Style Selector="^.taskToggleInner">
-            <Setter Property="Fill" Value="{DynamicResource TaskToggleInner}"></Setter>
-        </Style>
-        
-        <Style Selector="^.taskToggleInnerImportant">
-            <Setter Property="Fill" Value="{DynamicResource TaskToggleInnerImportant}"></Setter>
+            <Setter Property="Fill" Value="{DynamicResource TextAll}"></Setter>
         </Style>
     </Style>
+    
     
     <Style Selector="Button">
         <Setter Property="Padding" Value="0"></Setter>
         <Setter Property="Margin" Value="0"></Setter>
+        
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Cursor" Value="Hand"></Setter>
+            <Setter Property="BorderBrush" Value="{TemplateBinding BorderBrush}"></Setter>
+            <Setter Property="BorderThickness" Value="{TemplateBinding BorderThickness}"></Setter>
+            <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius}"></Setter>
+        </Style>
+        
+        <Style Selector="^:pressed  /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{TemplateBinding Background}" />
+            <Setter Property="BorderBrush" Value="{TemplateBinding BorderBrush}" />
+            <Setter Property="Foreground" Value="{TemplateBinding Foreground}" />
+        </Style>
+        
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{TemplateBinding Background}" />
+            <Setter Property="BorderBrush" Value="{TemplateBinding BorderBrush}" />
+            <Setter Property="Foreground" Value="{TemplateBinding Foreground}" />
+        </Style>
+        
         <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Transitions">
                 <Transitions>
@@ -227,85 +391,79 @@
             </Setter>
         </Style>
         
-        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        
-        <Style Selector="^.btn">
-            <Setter Property="Background" Value="{DynamicResource BackgroundButton}"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource StrokeButton}"></Setter>
+        <Style Selector="^.basicBtn">
+            <Setter Property="Background" Value="{DynamicResource BackgroundItems}"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
-            <Setter Property="CornerRadius" Value="22"></Setter>
+            <Setter Property="CornerRadius" Value="15"></Setter>
             
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource ButtonHover}"></Setter>
-                <Setter Property="BorderBrush" Value="{DynamicResource StrokeButton}"></Setter>
+                <Setter Property="Background" Value="{DynamicResource BackgroundHover}"></Setter>
             </Style>
         </Style>
         
+        <Style Selector="^.confirm">
+            <Setter Property="BorderBrush" Value="{DynamicResource GreenHover}"></Setter>
+        </Style>
+        
+        <Style Selector="^.panelBtn">
+            <Setter Property="BorderBrush" Value="{DynamicResource BackgroundItems}"></Setter>
+            <Setter Property="BorderThickness" Value="1"></Setter>
+            <Setter Property="CornerRadius" Value="15"></Setter>
+        </Style>
+        
         <Style Selector="^.filterBlock">
-            <Setter Property="Background" Value="{DynamicResource BackgroundFilter}"></Setter>
-            <Setter Property="BorderBrush" Value="{DynamicResource StrokeFilter}"></Setter>
+            <Setter Property="Background" Value="{DynamicResource BackgroundItems}"></Setter>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderItems}"></Setter>
             <Setter Property="BorderThickness" Value="1"></Setter>
             <Setter Property="CornerRadius" Value="8"></Setter>
             
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource FilterHover}"/>
+                <Setter Property="Background" Value="{DynamicResource BackgroundHover}"/>
             </Style>
         </Style>
         
-        <Style Selector="^.taskBtn">
-            <Setter Property="Background" Value="Transparent"></Setter>
-            
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent"></Setter>
-                
-            </Style>
-            
-            <Style Selector="^:pointerover PathIcon">
-                <Setter Property="Foreground" Value="{DynamicResource Red}"></Setter>
-            </Style>
-        </Style>
+        
     </Style>
     
     <Style Selector="TextBox#SearchBar">
-        <Setter Property="Background" Value="{DynamicResource BackgroundSearch}"></Setter>
-        <Setter Property="BorderBrush" Value="{DynamicResource StrokeSearch}"></Setter>
+        <Setter Property="Background" Value="{DynamicResource BackgroundItems}"></Setter>
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderItems}"></Setter>
         <Setter Property="BorderThickness" Value="2"></Setter>
-        <Setter Property="Foreground" Value="{DynamicResource SearchText}"></Setter>
+        <Setter Property="Foreground" Value="{DynamicResource TextMain}"></Setter>
         <Setter Property="CornerRadius" Value="8"></Setter>
-        <Setter Property="CaretBrush" Value="{DynamicResource SearchText}"></Setter>
+        <Setter Property="CaretBrush" Value="{DynamicResource TextMain}"></Setter>
         <Setter Property="Padding" Value="9 4"></Setter>
         <Setter Property="FontSize" Value="13"></Setter>
-        <Setter Property="FontWeight" Value="SemiBold"></Setter>
+        <Setter Property="FontWeight" Value="Medium"></Setter>
         
         <Style Selector="^ /template/ TextBlock#PART_Watermark">
-            <Setter Property="Foreground" Value="{DynamicResource SearchText}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}" />
         </Style>
         
         <Style Selector="^:pointerover">
-            <Setter Property="Foreground" Value="{DynamicResource SearchText}"></Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}"></Setter>
             
             <Style Selector="^ /template/ Border#PART_BorderElement">
-                <Setter Property="BorderBrush" Value="{DynamicResource StrokeSearch}"/>
-                <Setter Property="Background" Value="{DynamicResource BackgroundSearch}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderItems}"/>
+                <Setter Property="Background" Value="{DynamicResource BackgroundItems}" />
             </Style>
 
             <Style Selector="^ /template/ TextBlock#PART_Watermark">
-                <Setter Property="Foreground" Value="{DynamicResource SearchText}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextMain}" />
             </Style>
         </Style>
         
         <Style Selector="^:focus">
-            <Setter Property="Foreground" Value="{DynamicResource StrokeSearch}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}" />
 
             <Style Selector="^ /template/ TextBlock#PART_Watermark">
-                <Setter Property="Foreground" Value="{DynamicResource StrokeSearch}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextMain}" />
             </Style>
 
             <Style Selector="^ /template/ Border#PART_BorderElement">
-                <Setter Property="Background" Value="{DynamicResource SearchHover}"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource StrokeSearch}"/>
+                <Setter Property="Background" Value="{DynamicResource BackgroundFocus}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderItems}"/>
                 <Setter Property="BorderThickness" Value="2" />
             </Style>
         </Style>
@@ -313,7 +471,34 @@
     
     <Style Selector="TextBox.basicInput">
         <Setter Property="CornerRadius" Value="8"></Setter>
-        <!-- ... -->
+        <Style Selector="^ /template/ TextBlock#PART_Watermark">
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}"></Setter>
+        </Style>
+        
+        <Style Selector="^ /template/ TextBlock#PART_FloatingWatermark">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"></Setter>
+        </Style>
+        
+        <Style Selector="^:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}" />
+            
+            <Style Selector="^ /template/ TextBlock#PART_Watermark">
+                <Setter Property="Foreground" Value="{DynamicResource TextMain}" />
+            </Style>
+        </Style>
+        
+        <Style Selector="^:focus">
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}" />
+            
+            <Style Selector="^ /template/ TextBlock#PART_Watermark">
+                <Setter Property="Foreground" Value="{DynamicResource TextMain}" />
+            </Style>
+            
+            <Style Selector="^ /template/ Border#PART_BorderElement">
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"/>
+                <Setter Property="BorderThickness" Value="2" />
+            </Style>
+        </Style>
     </Style>
     
     <Style Selector="ScrollViewer ScrollBar:vertical">
@@ -340,33 +525,6 @@
     <Style Selector="ScrollViewer.mainScroll /template/ ScrollContentPresenter#PART_ContentPresenter">
         <Setter Property="Grid.ColumnSpan" Value="1"/>
         <Setter Property="Margin" Value="0 0 6 0"></Setter>
-    </Style>
-    
-    <Style Selector="ToggleButton">
-        <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Transitions">
-                <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.1" Easing="SineEaseIn" Delay="0"></BrushTransition>
-                </Transitions>
-            </Setter>
-        </Style>
-        
-        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-        
-        <Style Selector="^.taskToggle">
-            <Setter Property="CornerRadius" Value="16"></Setter>
-            <Setter Property="Background" Value="{DynamicResource TaskToggle}"></Setter>
-        </Style>
-        
-        <Style Selector="^.important">
-            <Setter Property="Background" Value="{DynamicResource Important}"></Setter>
-        </Style>
-        
-        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-             <Setter Property="Background" Value="{DynamicResource TaskHover}"></Setter>
-        </Style>
     </Style>
     
     <Style Selector="ToggleSwitch">

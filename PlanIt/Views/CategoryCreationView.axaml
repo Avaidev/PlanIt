@@ -17,19 +17,23 @@
         <Border Width="352" Height="290" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="CategoryLayoutBorder">
             <Grid RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="7">
                 <Grid ColumnDefinitions="Auto, *, Auto">
-                    <Button Classes="btn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding HideOverlay}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
-                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="t-b t-14" Foreground="{DynamicResource Text}">New Category</TextBlock>
-                    <Button Grid.Column="2" Classes="btn" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding ApplyCreation}" CommandParameter="{Binding NewCategory}"><PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource AcceptIcon}" Foreground="{DynamicResource Text}"></PathIcon></Button>
+                    <Button Classes="basicBtn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding HideOverlay}">
+                        <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource TextMain}"></PathIcon>
+                    </Button>
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="t-b t-14" Foreground="{DynamicResource TextMain}">New Category</TextBlock>
+                    <Button Grid.Column="2" Classes="basicBtn confirm" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding ApplyCreation}" CommandParameter="{Binding NewCategory}">
+                        <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource AcceptIcon}" Foreground="{DynamicResource TextMain}"></PathIcon>
+                    </Button>
                 </Grid>
                 <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Margin="0 3 0 0" ColumnSpacing="36">
                     <Grid VerticalAlignment="Center" HorizontalAlignment="Left">
                         <Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" Width="80" Height="80" Fill="{Binding NewCategory.Color, Converter={StaticResource ResourceLookupConverter}}"></Ellipse>
-                        <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="36" Height="36" Data="{Binding NewCategory.Icon, Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource Text}"></PathIcon>
+                        <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="36" Height="36" Data="{Binding NewCategory.Icon, Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource BackgroundMain}"></PathIcon>
                     </Grid>
-                    <TextBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Watermark="Title..." Text="{Binding NewCategory.Title, Mode=TwoWay}" Classes="basicInput"></TextBox>
+                    <TextBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Watermark="Title" UseFloatingWatermark="True" Text="{Binding NewCategory.Title, Mode=TwoWay}" Classes="basicInput"></TextBox>
                 </Grid>
                 <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
-                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Colors</TextBlock>
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextSecondary}">Colors</TextBlock>
                     <ListBox Grid.Row="1" x:Name="CategoryColorsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding NewCategory.Color, Mode=TwoWay}" ItemsSource="{Binding ViewController.Colors}">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -44,7 +48,7 @@
                     </ListBox>
                 </Grid>
                 <Grid Grid.Row="3" RowDefinitions="Auto, Auto">
-                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextOverlaySecondary}">Icons</TextBlock>
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextSecondary}">Icons</TextBlock>
                     <ListBox Grid.Row="1" x:Name="CategoryIconsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding NewCategory.Icon, Mode=TwoWay}" ItemsSource="{Binding ViewController.Icons}">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -54,8 +58,8 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{DynamicResource BackgroundIconOverlay}"></Ellipse>
-                                    <PathIcon Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{Binding ., Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource Text}"></PathIcon>
+                                    <Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{DynamicResource BackgroundDark}"></Ellipse>
+                                    <PathIcon Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{Binding ., Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource TextMain}"></PathIcon>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

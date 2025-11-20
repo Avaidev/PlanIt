@@ -30,19 +30,13 @@
         <DataTemplate DataType="vm:CategoryManagerViewModel">
             <views:CategoryCreationView></views:CategoryCreationView>
         </DataTemplate>
+        <DataTemplate DataType="vm:SearchViewModel">
+            <views:SearchView></views:SearchView>
+        </DataTemplate>
     </Application.DataTemplates>
   
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="Assets/Styles/Styles.axaml"></StyleInclude>
     </Application.Styles>
-             
-    <Application.Resources>
-        <converters:FilterBlockResponsiveWidthConverter x:Key="FilterBlockResponsiveWidthConverter"></converters:FilterBlockResponsiveWidthConverter>
-        <converters:DividerResponsiveWidthConverter x:Key="DividerResponsiveWidthConverter"></converters:DividerResponsiveWidthConverter>
-        <converters:ResourceLookupConverter x:Key="ResourceLookupConverter"></converters:ResourceLookupConverter>
-        <converters:DateTimeToDateConverter x:Key="DateTimeToDateConverter"></converters:DateTimeToDateConverter>
-        <converters:DateTimeToTimeConverter x:Key="DateTimeToTimeConverter"></converters:DateTimeToTimeConverter>
-        <converters:ShowKeyFromPairConverter x:Key="ShowKeyFromPairConverter"></converters:ShowKeyFromPairConverter>
-    </Application.Resources>
 </Application>

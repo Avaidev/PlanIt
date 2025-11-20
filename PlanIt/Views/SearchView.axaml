@@ -5,31 +5,18 @@
              xmlns:vm="clr-namespace:PlanIt.ViewModels"
              xmlns:models="clr-namespace:PlanIt.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="PlanIt.Views.FilterTodayView"
-             x:DataType="vm:FilterTodayViewModel"
-             x:Name="FilterTodayUserControl">
+             x:Class="PlanIt.Views.SearchView"
+             x:DataType="vm:SearchViewModel"
+             x:Name="SearchUserControl">
     
     <Design.DataContext>
-        <vm:FilterTodayViewModel></vm:FilterTodayViewModel>
+        <vm:SearchViewModel></vm:SearchViewModel>
     </Design.DataContext>
     
     <Grid RowDefinitions="Auto, *" RowSpacing="2">
-        <Border Padding="17 10" HorizontalAlignment="Stretch">
+        <Border Padding="17 12" HorizontalAlignment="Stretch">
             <Grid>
-                <Grid ColumnDefinitions="*, Auto">
-                    <TextBlock Classes="t-sb t-24" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="16 0 0 0" Text="Today" Foreground="{DynamicResource TextToday}"></TextBlock>
-                    <Button Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Width="30" Height="30" Classes="panelBtn" Command="{Binding AddNewTask}">
-                        <PathIcon Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource BackgroundItems}"></PathIcon>
-                        <Button.Styles>
-                            <Style Selector="">
-                                <Setter Property="Background" Value="{DynamicResource TextToday}"></Setter>
-                            </Style>
-                            <Style Selector=":pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                <Setter Property="Background" Value="{DynamicResource TextTodayHover}"></Setter>
-                            </Style>
-                        </Button.Styles>
-                    </Button>
-                </Grid>
+                <TextBlock Classes="t-m t-18" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="16 0 0 0" Text="{Binding PanelSearchText}" Foreground="{DynamicResource TextSecondary}"></TextBlock>
             </Grid>
         </Border>
         <Border Grid.Row="1" Padding="17 0">
@@ -66,10 +53,10 @@
                                         <TextBlock Grid.Column="0" VerticalAlignment="Center" Classes="dates" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToDateConverter}}"></TextBlock>
                                         <TextBlock Grid.Column="1" VerticalAlignment="Center" Classes="dates" Margin="6 0">/</TextBlock>
                                         <TextBlock Grid.Column="2" VerticalAlignment="Center" Classes="dates" Margin="0 0 16 0" Text="{Binding CompleteDate, Converter={StaticResource DateTimeToTimeConverter}}"></TextBlock>
-                                        <Button Grid.Column="3" Width="24" Height="24" Classes="taskEdit" Command="{Binding DataContext.TaskManagerVM.EditTask, ElementName=FilterTodayUserControl}" CommandParameter="{Binding}">
+                                        <Button Grid.Column="3" Width="24" Height="24" Classes="taskEdit" Command="{Binding DataContext.TaskManagerVM.EditTask, ElementName=SearchUserControl}" CommandParameter="{Binding}">
                                             <PathIcon Width="20" Height="20" Data="{StaticResource EditIcon}"></PathIcon>
                                         </Button>
-                                        <Button Grid.Column="4" Width="24" Height="24" Classes="taskTrash" Command="{Binding Path=DataContext.TaskManagerVM.RemoveTask, ElementName=FilterTodayUserControl}" CommandParameter="{Binding }">
+                                        <Button Grid.Column="4" Width="24" Height="24" Classes="taskTrash" Command="{Binding Path=DataContext.TaskManagerVM.RemoveTask, ElementName=SearchUserControl}" CommandParameter="{Binding }">
                                             <PathIcon Width="20" Height="20" Data="{StaticResource TrashIcon}"></PathIcon>
                                         </Button>
                                     </Grid>

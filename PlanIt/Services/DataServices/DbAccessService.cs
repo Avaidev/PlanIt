@@ -146,7 +146,7 @@ public class DbAccessService
             switch (node.NodeTitle)
             {
                 case "Today":
-                    foreach (var task in await _taskRepo.FindManyAsync(t => Utils.CheckDateForToday(t.CompleteDate), "today"))
+                    foreach (var task in await _taskRepo.FindManyAsync(t => Utils.CheckDateForToday(t.CompleteDate) &&  Utils.CheckDateForScheduled(t.CompleteDate), "today"))
                     {
                         task.CategoryObject = categories.FirstOrDefault(c => c.Id == task.Category);
                         node.Tasks.Add(task);
@@ -177,6 +177,18 @@ public class DbAccessService
         return nodes;
     }
 
+    public async Task<List<TaskItem>> GetTasksBySearchWithCategories(string searchParameter, IEnumerable<Category> enumerable)
+    {
+        var categories = enumerable.ToList();
+        var searched = (await _taskRepo.FindManyAsync(t => t.Title.ToLowerInvariant().Contains(searchParameter.ToLowerInvariant()))).ToList();
+        foreach (var task in searched)
+        {
+            var category =  categories.FirstOrDefault(c => c.Id == task.Category);
+            task.CategoryObject = category;
+        }
+        return searched;
+    }
+
     public async Task<int> CountTodayTasks()
     {
         return await _taskRepo.CountAsync(t => Utils.CheckDateForToday(t.CompleteDate), "today");
@@ -184,7 +196,7 @@ public class DbAccessService
 
     public async Task<int> CountScheduledTasks()
     {
-        return await _taskRepo.CountAsync(t => Utils.CheckDateForScheduled(t.CompleteDate), "scheduled");
+        return await _taskRepo.CountAsync(t => Utils.CheckDateForScheduled(t.CompleteDate));
     }
 
     public async Task<int> CountAllTasks()

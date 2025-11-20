@@ -111,6 +111,7 @@ public class TaskManagerViewModel : ViewModelBase
         if (category == null)
         {
             Console.WriteLine($"[TaskManager > RemoveTask] Error in finding category for task '{task.Title}'. Removing stopped!");
+            await MessageService.ErrorMessage($"Error in finding category for task '{task.Title}' Removing Stopped!");
             return false;
         }
         category.TasksCount--;
@@ -125,6 +126,7 @@ public class TaskManagerViewModel : ViewModelBase
             return true;
         }
         Console.WriteLine($"[TaskManager > RemoveTask] Error: '{task.Title}' was not removed");
+        await MessageService.ErrorMessage($"Error: Task '{task.Title}' was not removed");
         return false;
     });
 
@@ -228,11 +230,20 @@ public class TaskManagerViewModel : ViewModelBase
         var importance = ViewController.ImportanceComboValues[SelectedImportanceIndex];
         var repeat = ViewController.RepeatComboValues[SelectedRepeatIndex];
         var notify = ViewController.NotifyBeforeComboValues[SelectedNotifyIndex];
-        var category = ViewController.CategoriesCollection[SelectedCategoryIndex];
+        var newCategory = ViewController.CategoriesCollection[SelectedCategoryIndex];
+        var oldCategory = newTask.Category == null ? null : ViewController.CategoriesCollection.FirstOrDefault(c => c.Id == newTask.Category);
 
-        newTask.Category = category.Id;
+        if (oldCategory != null && !newCategory.Equals(oldCategory))
+        {
+            oldCategory.TasksCount--;
+            newCategory.TasksCount++;
+            await _db.UpdateCategory(oldCategory);
+        }
+        
+        newTask.Category = newCategory.Id;
         newTask.IsImportant = importance;
         newTask.Repeat = repeat;
+        newTask.IsDone = false;
         if (notify != null)
         {
             var notificationDate = CalculateOffsetToDateTime((int)notify, newTask.CompleteDate);
@@ -245,7 +256,7 @@ public class TaskManagerViewModel : ViewModelBase
                 { Title = newTask.Title, Message = newTask.Description, Repeat = repeat, Notify = notificationDate };
         }
 
-        if (_editMode) return await Update(newTask, notification, category);
-        return await Create(newTask, notification, category);
+        if (_editMode) return await Update(newTask, notification, newCategory);
+        return await Create(newTask, notification, newCategory);
     });
 }

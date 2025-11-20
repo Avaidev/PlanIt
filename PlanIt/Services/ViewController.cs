@@ -29,7 +29,7 @@ public class ViewController : ReactiveObject
     {
         CategoriesCollection = new ObservableCollection<Category>(await _db.GetAllCategories());
         await SetTodayCounter();
-        await SetImportantCounter();
+        await SetScheduledCounter();
         await SetImportantCounter();
         await SetAllCounter();
     }
@@ -454,11 +454,21 @@ public class ViewController : ReactiveObject
             TasksCollection.Add(task);
         }
     }
-    
+
+    public async Task LoadTasksForSearchAsync(string search)
+    {
+        var tasks = await _db.GetTasksBySearchWithCategories(search, CategoriesCollection);
+        TasksCollection.Clear();
+        NodesCollection.Clear();
+        foreach (var task in tasks)
+        {
+            TasksCollection.Add(task);
+        }
+    }
     
     #region No change collections
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public enum ViewStates {TODAY, SCHEDULED, ALL, IMPORTANT, CATEGORY}
+    public enum ViewStates {TODAY, SCHEDULED, ALL, IMPORTANT, CATEGORY, SEARCH}
     public ObservableCollection<string> Colors { get; } = ["Default", "Red", "Orange", "Yellow", "Pink", "Purple", "Green", "Blue", "Emerald"];
 
     public ObservableCollection<string> Icons { get; } =
