@@ -3,24 +3,16 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
-        <entry key="App.axaml" value="PlanIt.csproj" />
-        <entry key="Assets/Images/list-task 1.xaml" value="PlanIt.csproj" />
-        <entry key="Assets/Styles/Icons.axaml" value="PlanIt.csproj" />
-        <entry key="Assets/Styles/Styles.axaml" value="PlanIt.csproj" />
-        <entry key="Assets/Styles/Styles.xaml" value="PlanIt.csproj" />
-        <entry key="Assets/Styles/Themes.axaml" value="PlanIt.csproj" />
-        <entry key="Assets/Styles/Themes.xaml" value="PlanIt.csproj" />
-        <entry key="Views/CategoryCreationView.axaml" value="PlanIt.csproj" />
-        <entry key="Views/DefaultView.axaml" value="PlanIt.csproj" />
-        <entry key="Views/FilterAllView.axaml" value="PlanIt.csproj" />
-        <entry key="Views/FilterImportantView.axaml" value="PlanIt.csproj" />
-        <entry key="Views/FilterScheduledView.axaml" value="PlanIt.csproj" />
-        <entry key="Views/FilterTodayView.axaml" value="PlanIt.csproj" />
-        <entry key="Views/MainView.axaml" value="PlanIt.csproj" />
-        <entry key="Views/MainWindow.axaml" value="PlanIt.csproj" />
-        <entry key="Views/SearchView.axaml" value="PlanIt.csproj" />
-        <entry key="Views/TaskCreationView.axaml" value="PlanIt.csproj" />
-        <entry key="Views/WindowView.axaml" value="PlanIt.csproj" />
+        <entry key="PlanIt.UI/App.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Views/CategoryCreationView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Views/FilterAllView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Views/FilterImportantView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Views/FilterScheduledView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Views/FilterTodayView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Views/MainView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Views/SearchView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Views/TaskCreationView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Views/WindowView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
       </map>
     </option>
   </component>

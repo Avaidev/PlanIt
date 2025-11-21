@@ -1,0 +1,71 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:PlanIt.UI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="PlanIt.Views.CategoryCreationView"
+             x:DataType="vm:CategoryManagerViewModel"
+             x:Name="CategoryCreationUserControl">
+    
+    <Design.DataContext>
+        <vm:CategoryManagerViewModel></vm:CategoryManagerViewModel>
+    </Design.DataContext>
+    
+    <Grid>
+        <Border Background="Black" Opacity="0.4" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></Border>
+        <Border Width="352" Height="290" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="CategoryLayoutBorder">
+            <Grid RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="7">
+                <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Button Classes="basicBtn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding HideOverlay}">
+                        <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource TextMain}"></PathIcon>
+                    </Button>
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="t-b t-14" Foreground="{DynamicResource TextMain}">New Category</TextBlock>
+                    <Button Grid.Column="2" Classes="basicBtn confirm" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding ApplyCreation}" CommandParameter="{Binding NewCategory}">
+                        <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource AcceptIcon}" Foreground="{DynamicResource TextMain}"></PathIcon>
+                    </Button>
+                </Grid>
+                <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Margin="0 3 0 0" ColumnSpacing="36">
+                    <Grid VerticalAlignment="Center" HorizontalAlignment="Left">
+                        <Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" Width="80" Height="80" Fill="{Binding NewCategory.Color, Converter={StaticResource ResourceLookupConverter}}"></Ellipse>
+                        <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="36" Height="36" Data="{Binding NewCategory.Icon, Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource BackgroundMain}"></PathIcon>
+                    </Grid>
+                    <TextBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Watermark="Title" UseFloatingWatermark="True" Text="{Binding NewCategory.Title, Mode=TwoWay}" Classes="basicInput"></TextBox>
+                </Grid>
+                <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextSecondary}">Colors</TextBlock>
+                    <ListBox Grid.Row="1" x:Name="CategoryColorsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding NewCategory.Color, Mode=TwoWay}" ItemsSource="{Binding ViewController.Colors}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="9" RowSpacing="7" ColumnSpacing="7"></UniformGrid>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Ellipse Fill="{Binding ., Converter={StaticResource ResourceLookupConverter}}"></Ellipse>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+                <Grid Grid.Row="3" RowDefinitions="Auto, Auto">
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextSecondary}">Icons</TextBlock>
+                    <ListBox Grid.Row="1" x:Name="CategoryIconsListBox" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectedItem="{Binding NewCategory.Icon, Mode=TwoWay}" ItemsSource="{Binding ViewController.Icons}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="2" Columns="9" RowSpacing="7" ColumnSpacing="7"></UniformGrid>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{DynamicResource BackgroundDark}"></Ellipse>
+                                    <PathIcon Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{Binding ., Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource TextMain}"></PathIcon>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

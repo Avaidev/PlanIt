@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Avalonia" Version="11.3.9" />
+      <PackageReference Include="MessageBox.Avalonia" Version="3.3.0" />
+      <PackageReference Include="MongoDB.Driver" Version="3.5.1" />
+      <PackageReference Include="ReactiveUI.Avalonia" Version="11.3.8" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PlanIt.Data\PlanIt.Data.csproj" />
+      <ProjectReference Include="..\PlanIt.Notifications\PlanIt.Notifications.csproj" />
+    </ItemGroup>
+
+</Project>
