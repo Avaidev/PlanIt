@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Reactive;
+using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Styling;
-using PlanIt.Core.Models;
 using PlanIt.Core.Services;
-using PlanIt.Services;
+using PlanIt.Core.Services.Pipe;
+using PlanIt.Data.Models;
+using PlanIt.UI.Services;
 using ReactiveUI;
 
 namespace PlanIt.UI.ViewModels;
@@ -12,22 +15,30 @@ namespace PlanIt.UI.ViewModels;
 public class MainViewModel : ViewModelBase
 {
     #region Initialization
-    public MainViewModel()
+    public MainViewModel(
+        BackgroundController backgroundController,
+        ViewController viewController,
+        DataAccessService dataAccessService,
+        NavigationService navigationService,
+        TaskManagerViewModel taskManagerVM,
+        CategoryManagerViewModel  categoryManagerVM)
     {
-        _db = new DbAccessService();
-        ViewController = new ViewController(_db);
+        _backgroundController = backgroundController;
+        _db = dataAccessService;
+        _navigationService = navigationService;
+        _navigationService.ViewModelChanged += (sender, args) => this.RaisePropertyChanged(nameof(CurrentViewModel));
+        ViewController = viewController;
 
-        TaskManagerVM = new TaskManagerViewModel(_db, ViewController);
-        CategoryManagerVM = new CategoryManagerViewModel(_db, ViewController);
-        WindowVM = new WindowViewModel(ViewController, TaskManagerVM);
+        TaskManagerVM = taskManagerVM;
+        CategoryManagerVM = categoryManagerVM;
         
-        CurrentViewModel = WindowVM;
-        ViewController.ViewState = ViewController.ViewStates.CATEGORY;
+        _ = InitializeAsync();
         
+        //Binds
         ViewController.WhenAnyValue(x => x.SelectedCategory)
             .Subscribe(_ =>
             {
-                if (CurrentViewModel.GetType() != typeof(Category)) CurrentViewModel = WindowVM;
+                if (CurrentViewModel?.GetType() != typeof(Category)) _navigationService.NavigateTo<WindowViewModel>();
             });
         
         ViewController.WhenAnyValue(x => x.IsDarkTheme)
@@ -38,72 +49,80 @@ public class MainViewModel : ViewModelBase
                     : ThemeVariant.Light;
             });
     }
+
+    private async Task InitializeAsync()
+    {
+        ViewController.LoadingMessage = "Connecting...";
+        try
+        {
+            await _backgroundController.StartConnection();
+        }
+        catch (Exception ex)
+        {
+            await MessageService.ErrorMessage($"Error initializing background controller: {ex.Message}");
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+            {
+                lifetime.Shutdown();
+            }
+        }
+        
+        await ViewController.InitializeAsync();
+        await Task.Delay(500);
+        ViewController.IsLoadingVisible = false;
+        ViewController.ViewState = ViewController.ViewStates.CATEGORY;
+        _navigationService.NavigateTo<WindowViewModel>();
+    }
     #endregion
     
     #region Attributes
-    private DbAccessService _db { get; }
-    private ViewModelBase _currentViewModel;
-    private FilterTodayViewModel? _filterTodayVM;
-    private FilterScheduledViewModel? _filterScheduledVM;
-    private FilterImportantViewModel? _filterImportantVM;
-    private FilterAllViewModel? _filterAllVM;
-    private SearchViewModel? _searchVM;
-    
+    private DataAccessService _db { get; }
+    private readonly BackgroundController _backgroundController;
+    private readonly NavigationService _navigationService;
+    public ViewController ViewController { get; }
     public CategoryManagerViewModel CategoryManagerVM { get; }
     public TaskManagerViewModel TaskManagerVM { get; }
-    public WindowViewModel WindowVM { get; }
-    public ViewModelBase CurrentViewModel
-    {
-        get => _currentViewModel;
-        set => this.RaiseAndSetIfChanged(ref _currentViewModel, value);
-    }
-    public ViewController ViewController { get; }
+    public ViewModelBase? CurrentViewModel => _navigationService.CurrentViewModel;
     #endregion
 
     public ReactiveCommand<Unit, Unit> ShowTodayFilterView => ReactiveCommand.Create(() =>
     {
-        _filterTodayVM ??= new FilterTodayViewModel(ViewController, TaskManagerVM);
         ViewController.SelectedCategory = null;
         ViewController.ViewState = ViewController.ViewStates.TODAY;
-        CurrentViewModel = _filterTodayVM;
-        ViewController.LoadTasksForTodayAsync();
+        _navigationService.NavigateTo<FilterTodayViewModel>();
+        _ = ViewController.LoadTasksForTodayAsync();
     });
     
     public ReactiveCommand<Unit, Unit> ShowScheduledFilterView => ReactiveCommand.Create(() =>
     {
-        _filterScheduledVM ??= new FilterScheduledViewModel(ViewController,  TaskManagerVM);
         ViewController.SelectedCategory = null;
         ViewController.ViewState = ViewController.ViewStates.SCHEDULED;
-        CurrentViewModel = _filterScheduledVM;
-        ViewController.LoadNodesForScheduledAsync();
+        _navigationService.NavigateTo<FilterScheduledViewModel>();
+        _ = ViewController.LoadNodesForScheduledAsync();
     });
     
     public ReactiveCommand<Unit, Unit> ShowImportantFilterView => ReactiveCommand.Create(() =>
     {
-        _filterImportantVM ??= new FilterImportantViewModel(ViewController, TaskManagerVM);
         ViewController.SelectedCategory = null;
         ViewController.ViewState = ViewController.ViewStates.IMPORTANT;
-        CurrentViewModel = _filterImportantVM;
-        ViewController.LoadTasksForImportantAsync();
+        _navigationService.NavigateTo<FilterImportantViewModel>();
+        _ = ViewController.LoadTasksForImportantAsync();
     });
     
     public ReactiveCommand<Unit, Unit> ShowAllFilterView => ReactiveCommand.Create(() =>
     {
-        _filterAllVM ??= new FilterAllViewModel(ViewController, TaskManagerVM);
         ViewController.SelectedCategory = null;
         ViewController.ViewState = ViewController.ViewStates.ALL;
-        CurrentViewModel = _filterAllVM;
-        ViewController.LoadNodesForAllAsync();
+        _navigationService.NavigateTo<FilterAllViewModel>();
+        _ = ViewController.LoadNodesForAllAsync();
     });
 
     public ReactiveCommand<string, Unit> ShowSearchView => ReactiveCommand.Create<string, Unit>(searchParameter =>
     {
-        _searchVM ??= new SearchViewModel(ViewController, TaskManagerVM);
         ViewController.SelectedCategory = null;
         ViewController.ViewState = ViewController.ViewStates.SEARCH;
-        CurrentViewModel = _searchVM;
-        _searchVM.PanelSearchText = searchParameter;
-        ViewController.LoadTasksForSearchAsync(searchParameter);
+        _navigationService.NavigateTo<SearchViewModel>();
+        // _searchVM.PanelSearchText = searchParameter;
+        _ = ViewController.LoadTasksForSearchAsync(searchParameter);
         return Unit.Default;
     });
     
@@ -111,4 +130,10 @@ public class MainViewModel : ViewModelBase
     {
         ViewController.OpenCategoryOverlay();
     });
+
+    public void ShutDown()
+    {
+        _backgroundController.StopConnection();
+        _backgroundController.Dispose();
+    }
 }

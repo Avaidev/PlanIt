@@ -2,20 +2,21 @@
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using PlanIt.Core.Models;
+using Microsoft.Extensions.Logging;
 using PlanIt.Core.Services;
-using PlanIt.Services;
+using PlanIt.Data.Models;
+using PlanIt.UI.Services;
 using ReactiveUI;
-using Notification = PlanIt.Core.Models.Notification;
 
 namespace PlanIt.UI.ViewModels;
 
 public class TaskManagerViewModel : ViewModelBase
 {
     #region Initialization
-    public TaskManagerViewModel(DbAccessService db, ViewController controller)
+    public TaskManagerViewModel(DataAccessService db, ViewController controller, BackgroundController backgroundController, ILogger<TaskManagerViewModel> logger)
     {
+        _logger = logger;
+        _backgroundController = backgroundController;
         _db = db;
         ViewController = controller;
         ReturnToDefault();
@@ -33,7 +34,10 @@ public class TaskManagerViewModel : ViewModelBase
     #endregion
     
     #region Attributes
-    private readonly DbAccessService _db;
+
+    private readonly ILogger<TaskManagerViewModel> _logger;
+    private readonly BackgroundController _backgroundController;
+    private readonly DataAccessService _db;
     private TaskItem _newTaskItem;
     private int _selectedRepeatIndex;
     private int _selectedNotifyIndex;
@@ -104,61 +108,62 @@ public class TaskManagerViewModel : ViewModelBase
         ReturnToDefault();
     });
 
+    public ReactiveCommand<TaskItem, Unit> MarkTask => ReactiveCommand.CreateFromTask<TaskItem, Unit>(async task =>
+    {
+        task.IsDone = !task.IsDone;
+        await Task.Run(() => _db.Tasks.Update(task));
+        await _backgroundController.SendData(task.Id.ToByteArray());
+        await ViewController.SetScheduledCounter();
+        ViewController.SortTasksIfFound(task.Id);
+        ViewController.SortNodesWhereFound(task.Id);
+        return Unit.Default;
+    });
+    
     public ReactiveCommand<TaskItem, bool> RemoveTask => ReactiveCommand.CreateFromTask<TaskItem, bool>( async task =>
     {
         if (!await MessageService.AskYesNoMessage($"Do you want to delete '{task.Title}' task?")) return false;
         var category = ViewController.CategoriesCollection.FirstOrDefault(c => c.Id == task.Category);
         if (category == null)
         {
-            Console.WriteLine($"[TaskManager > RemoveTask] Error in finding category for task '{task.Title}'. Removing stopped!");
+            _logger.LogWarning("[TaskManager > RemoveTask] Error in finding category for task '{TaskTitle}'. Removing stopped!", task.Title);
             await MessageService.ErrorMessage($"Error in finding category for task '{task.Title}' Removing Stopped!");
             return false;
         }
         category.TasksCount--;
-        var updateCategory = _db.UpdateCategory(category);
-        var notificationRemove = task.Notification == null ? null : _db.RemoveNotification((ObjectId)task.Notification);
-        var taskRemove = _db.RemoveTask(task);
+        var updateCategory = _db.Categories.Update(category);
+        var taskRemove = _db.Tasks.Remove(task);
 
-        if ((notificationRemove == null || await notificationRemove) && await taskRemove && await updateCategory)
+        if (await taskRemove && await updateCategory)
         {
-            Console.WriteLine($"[TaskManager > RemoveTask] Task '{task.Title}' was removed");
+            _logger.LogInformation("[TaskManager > RemoveTask] Task '{TaskTitle}' was removed", task.Title);
+            await _backgroundController.SendData(task.Id.ToByteArray());
             ViewController.RemoveTaskFromView(task);
             return true;
         }
-        Console.WriteLine($"[TaskManager > RemoveTask] Error: '{task.Title}' was not removed");
+        _logger.LogError("[TaskManager > RemoveTask] Error: '{TaskTitle}' was not removed", task.Title);
         await MessageService.ErrorMessage($"Error: Task '{task.Title}' was not removed");
         return false;
     });
 
-    public ReactiveCommand<TaskItem, bool> EditTask => ReactiveCommand.CreateFromTask<TaskItem, bool>(async task =>
+    public ReactiveCommand<TaskItem, bool> EditTask => ReactiveCommand.Create<TaskItem, bool>( task =>
     {
         var category = ViewController.CategoriesCollection.FirstOrDefault(c => c.Id == task.Category);
         if (category == null)
         {
-            Console.WriteLine($"[TaskManager > EditTask] Invalid in finding category for task");
+            _logger.LogWarning($"[TaskManager > EditTask] Invalid in finding category for task");
             return false;
         }
         NewTaskItem = new TaskItem(task);
         SelectedCategoryIndex = ViewController.CategoriesCollection.IndexOf(category);
         SelectedImportanceIndex = task.IsImportant ? 1 : 0;
         SelectedRepeatIndex = ViewController.RepeatComboValues.IndexOf(task.Repeat);
-        if (task.Notification == null) SelectedNotifyIndex = 0;
+        if (task.NotifyDate == null) SelectedNotifyIndex = 0;
         else
         {
-            var notification = await _db.GetNotification((ObjectId)task.Notification);
-            if (notification == null)
-            {
-                SelectedNotifyIndex = 0;
-                NewTaskItem.Notification = null;
-                Console.WriteLine("[TaskManager > EditTask : TaskItem] Invalid in finding notification that is not null");
-            }
-            else
-            {
-                var difference = task.CompleteDate - notification.Notify;
-                SelectedNotifyIndex = difference.Days == 0
-                    ? ViewController.NotifyBeforeComboValues.IndexOf(-difference.Hours)
-                    : ViewController.NotifyBeforeComboValues.IndexOf(difference.Days);
-            }
+            var difference = task.CompleteDate - (DateTime)task.NotifyDate;
+            SelectedNotifyIndex = difference.Days == 0
+                ? ViewController.NotifyBeforeComboValues.IndexOf(-difference.Hours)
+                : ViewController.NotifyBeforeComboValues.IndexOf(difference.Days);
         }
         SetStartParameters(true);
         ViewController.OpenTaskOverlay();
@@ -168,46 +173,40 @@ public class TaskManagerViewModel : ViewModelBase
     private static DateTime CalculateOffsetToDateTime(int offset, DateTime dateTime) => 
         offset < 0 ? dateTime.AddHours(offset) : dateTime.AddDays(-1 * offset);
 
-    private async Task<bool> Create(TaskItem newTask, Notification? notification, Category category)
+    private async Task<bool> Create(TaskItem newTask, Category category)
     {
         category.TasksCount++;
-        newTask.Notification = notification?.Id;
-        
-        var insertTask = _db.InsertTask(newTask);
-        var insertNotification = notification == null ? null : _db.InsertNotification(notification);
-        var updateCategory = _db.UpdateCategory(category);
+        var insertTask = _db.Tasks.Insert(newTask);
+        var updateCategory = _db.Categories.Update(category);
 
-        if (await insertTask && (insertNotification == null || await insertNotification) && await updateCategory)
+        if (await insertTask && await updateCategory)
         {
             newTask.CategoryObject = category;
             ViewController.AddTaskToView(newTask);
             HideOverlay.Execute().Subscribe();
-            Console.WriteLine($"[TaskCreation] Task '{newTask.Title}' was created");
+            await _backgroundController.SendData([..newTask.Id.ToByteArray(), 1]);
+            _logger.LogInformation("[TaskCreation] Task '{NewTaskTitle}' was created", newTask.Title);
             return true;
         }
-        Console.WriteLine("[TaskCreation] Error: Task wasn't created!");
+        _logger.LogError("[TaskCreation] Error: Task '{NewTaskTitle}' wasn't created!", newTask.Title);
         await MessageService.ErrorMessage($"Error: Task '{newTask.Title}' wasn't created!");
         return false;
     }
 
-    private async Task<bool> Update(TaskItem newTask, Notification? notification, Category category)
+    private async Task<bool> Update(TaskItem newTask, Category category)
     {
-        var oldNotification = newTask.Notification;
-        newTask.Notification = notification?.Id;
+        var updateTask = _db.Tasks.Update(newTask);
 
-        var updateTask = _db.UpdateTask(newTask);
-        bool? removeOldNotification = oldNotification == null ? null : await _db.RemoveNotification((ObjectId)oldNotification);
-        var insertNotification = notification == null ? null : _db.InsertNotification(notification);
-
-        if (await updateTask && (removeOldNotification == null || (bool)removeOldNotification) && (insertNotification == null || await insertNotification))
+        if (await updateTask)
         {
             newTask.CategoryObject = category;
             ViewController.ChangeTaskInView(newTask);
             HideOverlay.Execute().Subscribe();
-            Console.WriteLine($"[TaskCreation] Task '{newTask.Title}' was updated");
+            await _backgroundController.SendData([..newTask.Id.ToByteArray(), 0]);
+            _logger.LogInformation("[TaskCreation] Task '{NewTaskTitle}' was updated", newTask.Title);
             return true;
         }
-        Console.WriteLine("[TaskCreation] Error: Task wasn't updated!");
+        _logger.LogError("[TaskCreation] Error: Task '{NewTaskTitle}' wasn't updated!", newTask.Title);
         return false;
     }
     
@@ -226,7 +225,6 @@ public class TaskManagerViewModel : ViewModelBase
             return false;
         }
         
-        Notification? notification = null;
         var importance = ViewController.ImportanceComboValues[SelectedImportanceIndex];
         var repeat = ViewController.RepeatComboValues[SelectedRepeatIndex];
         var notify = ViewController.NotifyBeforeComboValues[SelectedNotifyIndex];
@@ -237,13 +235,14 @@ public class TaskManagerViewModel : ViewModelBase
         {
             oldCategory.TasksCount--;
             newCategory.TasksCount++;
-            await _db.UpdateCategory(oldCategory);
+            await _db.Categories.Update(oldCategory);
         }
         
         newTask.Category = newCategory.Id;
         newTask.IsImportant = importance;
         newTask.Repeat = repeat;
         newTask.IsDone = false;
+        newTask.NotifyDate = null;
         if (notify != null)
         {
             var notificationDate = CalculateOffsetToDateTime((int)notify, newTask.CompleteDate);
@@ -252,11 +251,10 @@ public class TaskManagerViewModel : ViewModelBase
                 await MessageService.ErrorMessage("The date of notification must not be in past!");
                 return false;
             }
-            notification = new Notification
-                { Title = newTask.Title, Message = newTask.Description, Repeat = repeat, Notify = notificationDate };
+            newTask.NotifyDate = notificationDate;
         }
 
-        if (_editMode) return await Update(newTask, notification, newCategory);
-        return await Create(newTask, notification, newCategory);
+        if (_editMode) return await Update(newTask, newCategory);
+        return await Create(newTask, newCategory);
     });
 }

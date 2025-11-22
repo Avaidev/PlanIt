@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using PlanIt.Core.Models;
+using PlanIt.Data.Models;
 
-namespace PlanIt.Core.Services;
+namespace PlanIt.Data.Services;
 
 public static class Utils
 {
@@ -9,6 +9,7 @@ public static class Utils
     public static bool CheckDateForTomorrow(DateTime date) => date.Date == DateTime.Today.AddDays(1).Date;
     public static bool CheckDateForLater(DateTime date) => date.Date >= DateTime.Today.AddDays(2).Date;
     public static bool CheckDateForScheduled(DateTime date) => date > DateTime.Now;
+    public static bool CheckDateForTodayScheduled(DateTime date) => CheckDateForToday(date) && CheckDateForScheduled(date);
 
     public static void OrderTasks(IList<TaskItem> tasks)
     {
@@ -22,39 +23,30 @@ public static class Utils
             tasks.Add(item);
         }
     }
-
-
-    private static string GetAppDataPath()
-    {
-        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appDataPath, "PlanIt", "Data");
-    }
     
     public static string GetDataDirectory()
     {
-        var possibleDataPaths = new[]
+        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        string dataPath = Path.Combine(baseDir, "..", "..", "..", "..", "Data");
+        dataPath = Path.GetFullPath(dataPath);
+        
+        if (Directory.Exists(dataPath))
         {
-            // 1. Application base directory (production and development output)
-            Path.Combine(AppContext.BaseDirectory, "Data"),
-            // 2. Current working directory
-            Path.Combine(Directory.GetCurrentDirectory(), "Data"),
-            // 3. AppData as fallback
-            GetAppDataPath()
-        };
-            
-        foreach (var path in possibleDataPaths)
-        {
-            if (Directory.Exists(path))
-            {
-                Debug.WriteLine($"Found Data directory at: {path}");
-                return Path.GetFullPath(path);
-            }
+            return dataPath;
         }
         
-        var defaultPath = Path.Combine(AppContext.BaseDirectory, "Data");
-        Debug.WriteLine($"Creating Data directory at: {defaultPath}");
-        Directory.CreateDirectory(defaultPath);
-        return Path.GetFullPath(defaultPath);
+        string parentDataPath = Path.Combine(baseDir, "..", "Data");
+        parentDataPath = Path.GetFullPath(parentDataPath);
+        
+        if (Directory.Exists(parentDataPath))
+        {
+            return parentDataPath;
+        }
+        
+        string localDataPath = Path.Combine(baseDir, "Data");
+        Directory.CreateDirectory(localDataPath);
+        Console.WriteLine($"Created Data directory at {localDataPath}");
+        return localDataPath;
     }
 
     public static string GetFilePath(string fileName)

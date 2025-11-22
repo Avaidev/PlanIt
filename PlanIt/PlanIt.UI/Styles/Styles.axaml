@@ -1,6 +1,6 @@
 ﻿<Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:converters="clr-namespace:PlanIt.Converters">
+        xmlns:converters="clr-namespace:PlanIt.UI.Converters">
     
     <Styles.Resources>
         <ResourceDictionary>
@@ -15,6 +15,7 @@
         <converters:DateTimeToDateConverter x:Key="DateTimeToDateConverter"></converters:DateTimeToDateConverter>
         <converters:DateTimeToTimeConverter x:Key="DateTimeToTimeConverter"></converters:DateTimeToTimeConverter>
         <converters:ShowKeyFromPairConverter x:Key="ShowKeyFromPairConverter"></converters:ShowKeyFromPairConverter>
+        <converters:TaskStatusToClassesConverter x:Key="TaskStatusToClassesConverter"></converters:TaskStatusToClassesConverter>
     </Styles.Resources>
     
     <Style Selector="Border">
@@ -147,6 +148,14 @@
         <Style Selector="^.important">
             <Setter Property="BorderBrush" Value="{DynamicResource TextImportant}"></Setter>
         </Style>
+        
+        <Style Selector="^.missed">
+            <Style Selector="^ TextBlock.dates">
+                <Setter Property="Foreground" Value="{DynamicResource TextTrash}"></Setter>
+            </Style>
+        </Style>
+        
+        <Style Selector="^.completed"></Style>
     </Style>
     
     <Style Selector="ListBox#CategoryListBox > ListBoxItem">

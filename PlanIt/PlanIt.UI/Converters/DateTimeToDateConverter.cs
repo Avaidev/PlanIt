@@ -2,7 +2,7 @@
 using System.Globalization;
 using Avalonia.Data.Converters;
 
-namespace PlanIt.Converters;
+namespace PlanIt.UI.Converters;
 
 public class DateTimeToDateConverter : IValueConverter
 {

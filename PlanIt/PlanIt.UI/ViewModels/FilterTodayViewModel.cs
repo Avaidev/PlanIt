@@ -1,5 +1,5 @@
 ﻿using System.Reactive;
-using PlanIt.Services;
+using PlanIt.UI.Services;
 using ReactiveUI;
 
 namespace PlanIt.UI.ViewModels;
@@ -7,7 +7,6 @@ namespace PlanIt.UI.ViewModels;
 public class FilterTodayViewModel : ViewModelBase
 {
     #region Initialization
-
     public FilterTodayViewModel(ViewController viewController, TaskManagerViewModel taskManagerVM)
     {
         TaskManagerVM = taskManagerVM;

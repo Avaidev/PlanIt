@@ -1,8 +1,6 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using Avalonia.Controls;
 
-namespace PlanIt.Views;
+namespace PlanIt.UI.Views;
 
 public partial class FilterImportantView : UserControl
 {

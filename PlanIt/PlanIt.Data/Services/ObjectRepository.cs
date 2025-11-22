@@ -127,7 +127,7 @@ public class ObjectRepository<T>
         CleanOldCacheEntries();
         return data.ToList();
     }
-
+    
     public async Task<List<T>> GetAllAsync(string? cacheKey = null)
     {
         return await GetEntitiesAsync(cacheKey);
@@ -190,6 +190,12 @@ public class ObjectRepository<T>
         }
         Console.WriteLine($"[ObjectRepository > Delete] Entity {typeof(T).Name} was not deleted");
         return false;
+    }
+
+    public async Task<bool> ReplaceAllAsync(List<T> entities)
+    {
+        CleanFullCache();
+        return await SaveToDbAsync(entities);
     }
     
     public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, string? cacheKey = null)

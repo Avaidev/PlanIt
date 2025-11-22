@@ -1,5 +1,5 @@
 ﻿using System.Reactive;
-using PlanIt.Services;
+using PlanIt.UI.Services;
 using ReactiveUI;
 
 namespace PlanIt.UI.ViewModels;

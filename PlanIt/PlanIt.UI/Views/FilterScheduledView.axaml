@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:models="clr-namespace:PlanIt.Core.Models;assembly=PlanIt.Core"
              xmlns:vm="clr-namespace:PlanIt.UI.ViewModels"
+             xmlns:models="clr-namespace:PlanIt.Data.Models;assembly=PlanIt.Data"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="PlanIt.Views.FilterScheduledView"
+             x:Class="PlanIt.UI.Views.FilterScheduledView"
              x:DataType="vm:FilterScheduledViewModel"
              x:Name="FilterScheduledUserControl">
     
@@ -42,10 +42,10 @@
                                 <ItemsControl Grid.Row="1" ItemsSource="{Binding Tasks}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="models:TaskItem">
-                                            <Border Classes.task="True" Classes.important="{Binding IsImportant}">
+                                            <Border Classes.task="True" Classes.important="{Binding IsImportant}" Classes.missed="{Binding IsMissed}" Classes.completed="{Binding IsDone}">
                                                 <Grid ColumnDefinitions="*, Auto">
                                                     <Grid ColumnDefinitions="Auto, *, Auto, Auto" HorizontalAlignment="Left">
-                                                        <ToggleButton Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                                        <ToggleButton Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Left"  IsChecked="{Binding IsDone, Mode=OneWay}" Command="{Binding DataContext.TaskManagerVM.MarkTask, ElementName=FilterScheduledUserControl}" CommandParameter="{Binding}">
                                                         <Ellipse Width="16" Height="16"></Ellipse>
                                                         <ToggleButton.Styles>
                                                             <Style Selector=":checked /template/ ContentPresenter#PART_ContentPresenter">

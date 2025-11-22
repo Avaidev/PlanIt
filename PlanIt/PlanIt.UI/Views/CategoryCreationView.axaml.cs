@@ -1,10 +1,7 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using PlanIt.UI.ViewModels;
+﻿using PlanIt.UI.ViewModels;
 using ReactiveUI.Avalonia;
 
-namespace PlanIt.Views;
+namespace PlanIt.UI.Views;
 
 public partial class CategoryCreationView : ReactiveUserControl<CategoryManagerViewModel>
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Avalonia.Data.Converters;
 
-namespace PlanIt.Converters;
+namespace PlanIt.UI.Converters;
 
 public class ShowKeyFromPairConverter : IValueConverter
 {

@@ -4,6 +4,9 @@
     <option name="projectPerEditor">
       <map>
         <entry key="PlanIt.UI/App.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Assets/Styles/Icons.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Assets/Styles/Styles.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
+        <entry key="PlanIt.UI/Assets/Styles/Themes.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
         <entry key="PlanIt.UI/Views/CategoryCreationView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
         <entry key="PlanIt.UI/Views/FilterAllView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
         <entry key="PlanIt.UI/Views/FilterImportantView.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />

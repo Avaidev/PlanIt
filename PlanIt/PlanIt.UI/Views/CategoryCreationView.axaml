@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:PlanIt.UI.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="PlanIt.Views.CategoryCreationView"
+             x:Class="PlanIt.UI.Views.CategoryCreationView"
              x:DataType="vm:CategoryManagerViewModel"
              x:Name="CategoryCreationUserControl">
     

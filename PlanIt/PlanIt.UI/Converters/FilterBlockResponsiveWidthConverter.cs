@@ -1,10 +1,10 @@
-﻿using Avalonia.Data.Converters;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Avalonia.Data.Converters;
 
-namespace PlanIt.Converters
+namespace PlanIt.UI.Converters
 {
     public class FilterBlockResponsiveWidthConverter : IMultiValueConverter
     {

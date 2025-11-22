@@ -1,8 +1,8 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using ReactiveUI;
-using MongoDB.Bson;
 
-namespace PlanIt.Core.Models;
+namespace PlanIt.Data.Models;
 
 public class Category : ReactiveObject
 {

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using Avalonia;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
-namespace PlanIt.Converters;
+namespace PlanIt.UI.Converters;
 
 public class ResourceLookupConverter : IValueConverter
 {

@@ -5,7 +5,7 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 
-namespace PlanIt.Services;
+namespace PlanIt.Core.Services;
 
 public static class MessageService
 {

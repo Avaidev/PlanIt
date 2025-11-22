@@ -15,7 +15,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\PlanIt.Data\PlanIt.Data.csproj" />
-      <ProjectReference Include="..\PlanIt.Notifications\PlanIt.Notifications.csproj" />
     </ItemGroup>
 
 </Project>

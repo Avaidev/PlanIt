@@ -1,13 +1,9 @@
-﻿using System;
-using System.Reactive;
-using System.Reactive.Disposables.Fluent;
-using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia;
 using PlanIt.UI.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
 
-namespace PlanIt.Views;
+namespace PlanIt.UI.Views;
 
 public partial class MainView : ReactiveWindow<MainViewModel>
 

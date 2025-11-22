@@ -1,45 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using DynamicData;
-using PlanIt.Core.Models;
+using MongoDB.Bson;
 using PlanIt.Core.Services;
+using PlanIt.Data.Models;
+using PlanIt.Data.Services;
 using ReactiveUI;
 
-namespace PlanIt.Services;
+namespace PlanIt.UI.Services;
 
 public class ViewController : ReactiveObject
 {
-    
     #region Initialization
-    public ViewController(DbAccessService db)
+    public ViewController(DataAccessService db)
     {
         _db = db;
-        _ = InitializeAsync();
+        _categoriesCollection = [];
         _tasksCollection = [];
         _nodesCollection = [];
     }
 
-    private async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
-        CategoriesCollection = new ObservableCollection<Category>(await _db.GetAllCategories());
-        await SetTodayCounter();
-        await SetScheduledCounter();
-        await SetImportantCounter();
-        await SetAllCounter();
+        var categories = Task.Run(() => _db.Categories.GetAll());
+        LoadingMessage = "Loading categories...";
+        CategoriesCollection.Clear();
+        foreach (var category in await categories)
+        {
+            CategoriesCollection.Add(category);
+        }
+        
+        LoadingMessage = "Loading filters...";
+        Task.WaitAll([
+        Task.Run(SetTodayCounter),
+        Task.Run(SetScheduledCounter),
+        Task.Run(SetImportantCounter),
+        Task.Run(SetAllCounter)
+        ]);
     }
 
-    private async Task SetTodayCounter() => TodayFilterCounter = await _db.CountTodayTasks();
-    private async Task SetScheduledCounter() => ScheduleFilterCounter = await _db.CountScheduledTasks();
-    private async Task SetImportantCounter() => ImportantFilterCounter = await _db.CountImportantTasks();
-    private async Task SetAllCounter() => AllFilterCounter = await _db.CountAllTasks();
+    public async Task SetTodayCounter() => TodayFilterCounter = await _db.Tasks.CountTodayTasks();
+    public async Task SetScheduledCounter() => ScheduleFilterCounter = await _db.Tasks.CountScheduledTasks();
+    public async Task SetImportantCounter() => ImportantFilterCounter = await _db.Tasks.CountImportantTasks();
+    public async Task SetAllCounter() => AllFilterCounter = await _db.Tasks.CountAll();
     #endregion
     
     #region Attributes
-    private DbAccessService _db;
+    private DataAccessService _db;
     private ObservableCollection<Category> _categoriesCollection;
     private ObservableCollection<TaskItem> _tasksCollection;
     private ObservableCollection<Node> _nodesCollection;
@@ -51,6 +64,8 @@ public class ViewController : ReactiveObject
     private bool _isDarkTheme = true;
     private bool _isCategoryOverlayVisible;
     private bool _isTaskOverlayVisible;
+    private bool _isLoadingVisible = true;
+    private string _loadingMessage = "";
 
     public ViewStates ViewState { get; set; }
     public ObservableCollection<Category> CategoriesCollection
@@ -82,6 +97,18 @@ public class ViewController : ReactiveObject
                 _ = LoadTasksByCategoryAsync();
             }
         }
+    }
+
+    public bool IsLoadingVisible
+    {
+        get => _isLoadingVisible;
+        set => this.RaiseAndSetIfChanged(ref _isLoadingVisible, value);
+    }
+
+    public string LoadingMessage
+    {
+        get => _loadingMessage;
+        set => this.RaiseAndSetIfChanged(ref _loadingMessage, value);
     }
 
     public int TodayFilterCounter
@@ -128,7 +155,26 @@ public class ViewController : ReactiveObject
     
     public bool IsAnyOverlayVisible => IsCategoryOverlayVisible || IsTaskOverlayVisible;
     #endregion
-    
+
+    public void SortTasksIfFound(ObjectId? id=null)
+    {
+        if (id == null || TasksCollection.FirstOrDefault(t => t.Id == (ObjectId)id) != null)
+        {
+            Utils.OrderTasks(TasksCollection);
+        }
+    }
+
+    public void SortNodesWhereFound(ObjectId id)
+    {
+        foreach (var node in NodesCollection)
+        {
+            if (node.Tasks.FirstOrDefault(t => t.Id == id) != null)
+            {
+                Utils.OrderTasks(node.Tasks);
+                break;
+            }
+        }
+    }
     
     public void CloseCategoryOverlay() => IsCategoryOverlayVisible = false;
     public void OpenCategoryOverlay() => IsCategoryOverlayVisible = true;
@@ -199,6 +245,41 @@ public class ViewController : ReactiveObject
         if (Utils.CheckDateForScheduled(task.CompleteDate)) ScheduleFilterCounter++;
     }
     
+    public void MarkTaskAsMissed(ObjectId taskId)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            ScheduleFilterCounter--;
+            switch (ViewState)
+            {
+                case ViewStates.CATEGORY:
+                case ViewStates.TODAY:
+                case ViewStates.IMPORTANT:
+                {
+                    var task = TasksCollection.FirstOrDefault(t => t.Id == taskId);
+                    task?.RaisePropertyChanged(nameof(task.IsMissed));
+                    Utils.OrderTasks(TasksCollection);
+                    break;
+                }
+
+                case ViewStates.SCHEDULED:
+                case ViewStates.ALL:
+                    foreach (var node in NodesCollection)
+                    {
+                        var task = node.Tasks.FirstOrDefault(t => t.Id == taskId);
+                        if (task == null) continue;
+                        task.RaisePropertyChanged(nameof(task.IsMissed));
+                        Task.Delay(10).Wait();
+                        Utils.OrderTasks(node.Tasks);
+                    }
+
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        });
+    }
     
     public void AddTaskToView(TaskItem task)
     {
@@ -401,7 +482,7 @@ public class ViewController : ReactiveObject
     
     public async Task LoadTasksByCategoryAsync()
     {
-        var tasks = await _db.GetTasksByCategory(SelectedCategory!);
+        var tasks = await _db.Tasks.GetTasksByCategory(SelectedCategory!);
         Utils.OrderTasks(tasks);
         TasksCollection.Clear();
         NodesCollection.Clear();
@@ -412,7 +493,7 @@ public class ViewController : ReactiveObject
     }
     public async Task LoadNodesForAllAsync()
     {
-        var nodes = await _db.GetNodesForAllByCategories(CategoriesCollection);
+        var nodes = await _db.Tasks.GetNodesForAllByCategories(CategoriesCollection);
         TasksCollection.Clear();
         NodesCollection.Clear();
         foreach (var node in nodes)
@@ -422,7 +503,7 @@ public class ViewController : ReactiveObject
     }
     public async Task LoadNodesForScheduledAsync()
     {
-        var nodes = await _db.GetNodesForScheduledWithCategories(CategoriesCollection);
+        var nodes = await _db.Tasks.GetNodesForScheduledWithCategories(CategoriesCollection);
         TasksCollection.Clear();
         NodesCollection.Clear();
         foreach (var node in nodes)
@@ -432,7 +513,7 @@ public class ViewController : ReactiveObject
     }
     public async Task LoadTasksForTodayAsync()
     {
-        var tasks = await _db.GetTasksForTodayWithCategories(CategoriesCollection);
+        var tasks = await _db.Tasks.GetTasksForTodayWithCategories(CategoriesCollection);
         Utils.OrderTasks(tasks);
         TasksCollection.Clear();
         NodesCollection.Clear();
@@ -443,7 +524,7 @@ public class ViewController : ReactiveObject
     }
     public async Task LoadTasksForImportantAsync()
     {
-        var tasks = await _db.GetTasksForImportantWithCategories(CategoriesCollection);
+        var tasks = await _db.Tasks.GetTasksForImportantWithCategories(CategoriesCollection);
         Utils.OrderTasks(tasks);
         TasksCollection.Clear();
         NodesCollection.Clear();
@@ -455,7 +536,7 @@ public class ViewController : ReactiveObject
 
     public async Task LoadTasksForSearchAsync(string search)
     {
-        var tasks = await _db.GetTasksBySearchWithCategories(search, CategoriesCollection);
+        var tasks = await _db.Tasks.GetTasksBySearchWithCategories(search, CategoriesCollection);
         TasksCollection.Clear();
         NodesCollection.Clear();
         foreach (var task in tasks)

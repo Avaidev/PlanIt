@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Reactive;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
-using PlanIt.Core.Models;
 using PlanIt.Core.Services;
-using PlanIt.Services;
+using PlanIt.Data.Models;
+using PlanIt.UI.Services;
 using ReactiveUI;
 
 namespace PlanIt.UI.ViewModels;
@@ -12,8 +13,9 @@ namespace PlanIt.UI.ViewModels;
 public class CategoryManagerViewModel : ViewModelBase
 {
     #region Initialization
-    public  CategoryManagerViewModel(DbAccessService db, ViewController controller)
+    public  CategoryManagerViewModel(DataAccessService db, ViewController controller, ILogger<CategoryManagerViewModel> logger)
     {
+        _logger = logger;
         _db = db;
         ViewController = controller;
         ReturnToDefault();
@@ -28,7 +30,8 @@ public class CategoryManagerViewModel : ViewModelBase
     
     #region Attributes
     private Category _newCategory;
-    private readonly DbAccessService _db;
+    private readonly ILogger<CategoryManagerViewModel> _logger;
+    private readonly DataAccessService _db;
     
     private bool _editMode;
     
@@ -52,12 +55,8 @@ public class CategoryManagerViewModel : ViewModelBase
         {
             if (category.TasksCount != 0)
             {
-                var tasks = await _db.GetTasksByCategory(category);
-                foreach (var task in tasks)
-                {
-                    if (task.Notification != null) await _db.RemoveNotification((ObjectId)task.Notification);
-                }
-                if (await _db.RemoveTasksMany(tasks))
+                var tasks = await _db.Tasks.GetTasksByCategory(category);
+                if (await _db.Tasks.RemoveMany(tasks))
                 {
                     ViewController.AfterRemovingTasksMany(tasks);
                     Console.WriteLine($"[CategoryManager > RemoveCategory] All tasks of {category.Title} were removed");
@@ -65,13 +64,13 @@ public class CategoryManagerViewModel : ViewModelBase
                 else return false;
             }
             
-            if (await _db.RemoveCategory(category))
+            if (await _db.Categories.Remove(category))
             {
-                Console.WriteLine($"[CategoryManager > RemoveCategory] {category.Title} was removed");
+                _logger.LogInformation("[CategoryManager > RemoveCategory] {CategoryTitle} was removed", category.Title);
                 ViewController.RemoveCategoryFromView(category);
                 return true;
             }
-            Console.WriteLine($"[WindowVM > RemoveCategory] Error: {category.Title} was not removed");
+            _logger.LogError("[WindowVM > RemoveCategory] Error: {CategoryTitle} was not removed", category.Title);
             await MessageService.ErrorMessage($"Error: {category.Title} was not removed");
         }
         return false;
@@ -93,28 +92,28 @@ public class CategoryManagerViewModel : ViewModelBase
     
     private async Task<bool> Create(Category newCategory)
     {
-        if (await _db.InsertCategory(newCategory))
+        if (await _db.Categories.Insert(newCategory))
         {
-            Console.WriteLine($"[CategoryManager > CreateNew] Category '{newCategory.Title}' was created");
+            _logger.LogInformation("[CategoryManager > CreateNew] Category '{NewCategoryTitle}' was created", newCategory.Title);
             ViewController.AddCategoryToView(newCategory);
             HideOverlay.Execute().Subscribe();
             return true;
         }
-        Console.WriteLine("[CategoryManager > CreateNew] Error: Category wasn't created");
+        _logger.LogError("[CategoryManager > CreateNew] Error: Category '{NewCategoryTitle} wasn't created", newCategory.Title);
         await MessageService.ErrorMessage($"Error: {newCategory.Title} was not created");
         return false;
     }
 
     private async Task<bool> Update(Category newCategory)
     {
-        if (await _db.UpdateCategory(newCategory))
+        if (await _db.Categories.Update(newCategory))
         {
-            Console.WriteLine($"[CategoryManager > Update] Category '{newCategory.Title}' was updated");
+            _logger.LogInformation("[CategoryManager > Update] Category '{NewCategoryTitle}' was updated", newCategory.Title);
             ViewController.ChangeCategoryInView(newCategory);
             HideOverlay.Execute().Subscribe();
             return true;
         }
-        Console.WriteLine("[CategoryManager > Update] Error: Category wasn't updated");
+        _logger.LogError("[CategoryManager > Update] Error: Category '{NewCategoryTitle} wasn't updated", newCategory.Title);
         await MessageService.ErrorMessage($"Error: {newCategory.Title} was not updated");
         return false;
     }

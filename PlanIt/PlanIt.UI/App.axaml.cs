@@ -1,14 +1,18 @@
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using PlanIt.Core.Services;
+using PlanIt.Core.Services.Pipe;
+using PlanIt.UI.Services;
 using PlanIt.UI.ViewModels;
-using PlanIt.Views;
+using MainView = PlanIt.UI.Views.MainView;
 
-namespace PlanIt;
+namespace PlanIt.UI;
 
 public partial class App : Application
 {
@@ -19,25 +23,67 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        var collection = new ServiceCollection();
+        collection.AddLogging(builder =>
+        {
+            builder.AddConsole().AddDebug();
+        });
+        
+        collection.AddSingleton<PipeConfig>(config => new PipeConfig
+        {
+            PipeName = "PlanItPipe",
+            BufferSize = 1024
+        });
+        
+        collection.AddSingleton<DataAccessService>();
+        collection.AddSingleton<ViewController>();
+        collection.AddSingleton<NavigationService>();
+        collection.AddSingleton<TwoWayPipeClient>();
+        collection.AddSingleton<BackgroundController>();
+        collection.AddSingleton<TaskManagerViewModel>();
+        collection.AddSingleton<CategoryManagerViewModel>();
+        collection.AddSingleton<MainViewModel>();
+        
+        collection.AddTransient<WindowViewModel>();
+        collection.AddTransient<FilterAllViewModel>();
+        collection.AddTransient<FilterImportantViewModel>();
+        collection.AddTransient<FilterScheduledViewModel>();
+        collection.AddTransient<FilterTodayViewModel>();
+        collection.AddTransient<SearchViewModel>();
+        
+        var services = collection.BuildServiceProvider();
+        var mainVm = services.GetRequiredService<MainViewModel>();
+        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
-            // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainView
             {
-                DataContext = new MainViewModel(),
+                DataContext = mainVm
             };
+            
+            desktop.ShutdownRequested += OnShutdownRequested;
+            
         }
+        
         
         if (Application.Current is { } app)
         {
             app.RequestedThemeVariant = ThemeVariant.Dark;
         }
-
+        
         base.OnFrameworkInitializationCompleted();
     }
 
+    private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop &&
+            desktop.MainWindow?.DataContext is MainViewModel mainVm)
+        {
+            mainVm.ShutDown();
+        }
+    }
+    
     private void DisableAvaloniaDataAnnotationValidation()
     {
         // Get an array of plugins to remove

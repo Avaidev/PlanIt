@@ -2,11 +2,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:models="clr-namespace:PlanIt.Core.Models;assembly=PlanIt.Core"
-        xmlns:views="clr-namespace:PlanIt.Views"
+        xmlns:views="clr-namespace:PlanIt.UI.Views"
         xmlns:vm="clr-namespace:PlanIt.UI.ViewModels"
+        xmlns:models="clr-namespace:PlanIt.Data.Models;assembly=PlanIt.Data"
         mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="540"
-        x:Class="PlanIt.Views.MainView"
+        x:Class="PlanIt.UI.Views.MainView"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="PlanIt"
@@ -20,7 +20,10 @@
     </Design.DataContext>
 
     <Grid>
-        <Grid x:Name="MainWindowLayout" ZIndex="1">
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource BackgroundSide}">
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Classes="t-sb t-26" Text="{Binding ViewController.LoadingMessage}" Foreground="{DynamicResource TextMain}" IsVisible="{Binding ViewController.IsLoadingVisible}"></TextBlock>
+        </Grid>
+        <Grid x:Name="MainWindowLayout" ZIndex="1" IsVisible="{Binding !ViewController.IsLoadingVisible}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="27*" MinWidth="190"></ColumnDefinition>
                 <ColumnDefinition Width="73*"></ColumnDefinition>

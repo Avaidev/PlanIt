@@ -1,86 +1,46 @@
-﻿using MongoDB.Bson;
-using PlanIt.Data.Services;
-using PlanIt.Core.Models;
+﻿using PlanIt.Data.Interfaces;
+using PlanIt.Data.Models;
 
-namespace PlanIt.Core.Services;
+namespace PlanIt.Data.Services;
 
-public class DbAccessService
+public class TasksRepository : IObjectRepository<TaskItem>
 {
-    #region Initialization
-    public DbAccessService()
-    {
-        _baseDirectory = Utils.GetDataDirectory();
-        _taskRepo = new ObjectRepository<TaskItem>(Utils.GetFilePath("tasks.bson"));
-        _categoryRepo = new ObjectRepository<Category>(Utils.GetFilePath("categories.bson"));
-        _notificationRepo = new ObjectRepository<Notification>(Utils.GetFilePath("notifications.bson"));
-    }
-    #endregion
-
-    #region Attributes
-    private string _baseDirectory { get; set; }
-    private ObjectRepository<TaskItem> _taskRepo;
-    private ObjectRepository<Category> _categoryRepo;
-    private ObjectRepository<Notification> _notificationRepo;
-    #endregion
-
+    private ObjectRepository<TaskItem> _taskRepo = new(Utils.GetFilePath("tasks.bson"));
     
-
-    #region Categories
-    public async Task<Category?> GetCategoryById(ObjectId id)
-    {
-        return await _categoryRepo.FindAsync(c => c.Id == id);
-    }
-    
-    public async Task<List<Category>> GetAllCategories()
-    {
-        return await _categoryRepo.GetAllAsync("all");
-    }
-
-    public async Task<bool> InsertCategory(Category category)
-    {
-        return await _categoryRepo.AddAsync(category);
-    }
-
-    public async Task<bool> RemoveCategory(Category category)
-    {
-        return await _categoryRepo.DeleteAsync(category);
-    }
-
-    public async Task<bool> UpdateCategory(Category category)
-    {
-        return await _categoryRepo.UpdateAsync(category);
-    }
-
-    public async Task<int> CountCategories()
-    {
-        return await _categoryRepo.CountAsync();
-    }
-    #endregion
-
     #region Tasks
-    public async Task<bool> InsertTask(TaskItem task)
+    public async Task<bool> Insert(TaskItem task)
     {
         return await _taskRepo.AddAsync(task);
     }
 
-    public async Task<bool> RemoveTask(TaskItem task)
+    public async Task<bool> Remove(TaskItem task)
     {
         return await _taskRepo.DeleteAsync(task);
     }
 
-    public async Task<bool> UpdateTask(TaskItem task)
+    public async Task<bool> Update(TaskItem task)
     {
         return await _taskRepo.UpdateAsync(task);
     }
 
-    public async Task<bool> RemoveTasksMany(List<TaskItem> tasks)
+    public async Task<bool> RemoveMany(List<TaskItem> tasks)
     {
         bool allDeleted = true;
         foreach (var task in tasks)
         {
-            allDeleted = await RemoveTask(task);
+            allDeleted = await Remove(task);
         }
         return allDeleted;
+    }
+
+    public async Task ReplaceList(List<TaskItem> tasks)
+    {
+        await _taskRepo.ReplaceAllAsync(tasks);
+    }
+
+    public async Task<List<TaskItem>> GetAll()
+    {
+        return (await _taskRepo.FindManyAsync(t => true)).ToList();
     }
 
     public async Task<List<TaskItem>> GetTasksByCategory(Category category)
@@ -185,10 +145,10 @@ public class DbAccessService
 
     public async Task<int> CountScheduledTasks()
     {
-        return await _taskRepo.CountAsync(t => Utils.CheckDateForScheduled(t.CompleteDate));
+        return await _taskRepo.CountAsync(t => Utils.CheckDateForScheduled(t.CompleteDate) && !t.IsDone);
     }
 
-    public async Task<int> CountAllTasks()
+    public async Task<int> CountAll()
     {
         return await _taskRepo.CountAsync();
     }
@@ -199,19 +159,4 @@ public class DbAccessService
     }
     #endregion
 
-    #region Notifications
-    public async Task<Notification?> GetNotification(ObjectId notificationId)
-    {
-        return await _notificationRepo.GetByIdAsync(notificationId);
-    }
-    public async Task<bool> InsertNotification(Notification notification)
-    {
-        return await _notificationRepo.AddAsync(notification);
-    }
-
-    public async Task<bool> RemoveNotification(ObjectId notificationId)
-    {
-        return await _notificationRepo.DeleteAsync(notificationId);
-    }
-    #endregion
 }
