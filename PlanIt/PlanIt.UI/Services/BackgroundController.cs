@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.ServiceProcess;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
 using MongoDB.Bson;
 using PlanIt.Core.Services;
 using PlanIt.Core.Services.Pipe;
+#if WINDOWS
+using Microsoft.Win32;
+#endif
 
 namespace PlanIt.UI.Services;
 
@@ -20,65 +25,56 @@ public class BackgroundController : IDisposable
         _logger = logger;
         _viewController = viewController;
         _pipeClient = pipeClient;
-        _pipeClient.AddCallback(bytes =>
-        {
-            var objectId = new ObjectId(bytes);
-            _viewController.MarkTaskAsMissed(objectId);
-        });
-        _pipeClient.AddConnectionBrokeCallback(() =>
-        {
-            _ = MessageService.WarningMessage("Connection with background broke");
-            _ = StartConnection();
-        });
+        _pipeClient.AddReceivedCallback(OnDataReceived);
+        _pipeClient.AddConnectionBrokeCallback(OnConnectionBroke);
     }
     #endregion
 
-    private const string SERVICE_NAME = "PlanIt.Background";
+    private enum State {SHUT, CONNECTING, STARTING, CONNECTED, WORKING}
+    private const string APP_NAME = "PlanIt Notificator";
     private const string EXE_NAME = "PlanIt.Background";
     private readonly ViewController _viewController;
-    private ILogger<BackgroundController> _logger;
+    private readonly ILogger<BackgroundController> _logger;
     private TwoWayPipeClient? _pipeClient;
     private bool _startedByUs = false;
-    
-    public async Task StartConnection()
-    {
-        var connected = await _pipeClient!.Connect();
-        if (!connected) await StartManually();
-    }
+    private State _state = State.SHUT;
 
+    public async Task Connect()
+    {
+        if (_state == State.SHUT) _state = State.CONNECTING;
+        if (await _pipeClient!.Connect())
+        {
+            _state = State.CONNECTED;
+            return;
+        }
+
+        if (_state != State.STARTING) await StartManually();
+        if (_startedByUs &&
+            OperatingSystem.IsWindows() &&
+            await MessageService.AskYesNoMessage("Do you want to add this app to autostart for better working?"))
+        {
+            if (SetWindowsRegistry(true))
+                await MessageService.SuccessMesssage("The autostart has been successfully installed");
+            else await MessageService.ErrorMessage("Error in installing autostart");
+        }
+    }
+    
     private async Task StartManually()
     {
-        switch (GetPlatform())
+        _state = State.STARTING;
+        _logger.LogWarning("[BackgroundController] Error connecting to pipe. Starting server manually");
+        if ((OperatingSystem.IsWindows() && TryStartForWindows())
+            || ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) && StartExeApp())) _state = State.WORKING;
+        
+        if (_state == State.WORKING)
         {
-            case "win":
-            {
-                var ask = await MessageService.AskYesNoCancelMessage(
-                    "Do you want to add out app to autostart for better working (Yes - add / No - start without adding / Cancel - exit)");
-                if (ask == null) throw new Exception("Failed to load background");
-                if ((bool)ask)
-                {
-                    if (await StartForWindowsAsync()) break;
-                }
-                else if (await StartExeApp()) break;
-                _logger.LogCritical("[BackgroundController] Failed to start background app process");
-                throw new Exception("[BackgroundController] Failed to start background app process");
-            }
-
-            case "linux":
-            case "macos":
-                throw new NotImplementedException();
-                
-            default:
-                _logger.LogCritical("[BackgroundController] Invalid OS: {GetPlatform}", GetPlatform());
-                throw new Exception($"[BackgroundController] Invalid OS: {GetPlatform()}");
+            await Connect();
+            if (_state == State.CONNECTED) return;
         }
 
-        var connected = await _pipeClient!.Connect();
-        if (!connected)
-        {
-            _logger.LogCritical("[BackgroundController] Failed to connect to pipe");
-            throw new Exception("[BackgroundController] Failed to connect to pipe");
-        }
+        await MessageService.ErrorMessage("Invalid process start. Shutting down");
+        _logger.LogCritical("[BackgroundController] Invalid start. Shutting down");
+        ShutDown();
     }
 
     public void StopConnection()
@@ -86,7 +82,26 @@ public class BackgroundController : IDisposable
         _pipeClient!.Disconnect();
         if (_startedByUs) StopExeApp();
         _startedByUs = false;
+        _state = State.SHUT;
         _logger.LogInformation("[BackgroundController] Disconnected form background app");
+    }
+
+    public async Task ReconnectAsync()
+    {
+        await MessageService.ErrorMessage("Connection broke ");
+        await Task.Delay(1000);
+        await Connect();
+    
+        if (_state == State.CONNECTED)
+        {
+            _viewController.ReloadView();
+            _viewController.IsLoadingVisible = false;
+        }
+        else
+        {
+            await MessageService.ErrorMessage($"Reconnection failed. Shutting down");
+            ShutDown();
+        }
     }
 
     public async Task SendData(byte[] data)
@@ -94,63 +109,67 @@ public class BackgroundController : IDisposable
         await _pipeClient!.SendData(data);
     }
 
-    #region ForWindows
-    private async Task<bool> StartForWindowsAsync()
+    public void OnDataReceived(byte[] data)
     {
-        try
+        if (data.Length == 12)
         {
-            if (IsWindowsServiceInstalled() && StartWindowsService()) return true;
-            
-            if (StartWindowsRegistry()) return true;
-            
-            return await StartExeApp();
+            var objectId = new ObjectId(data);
+            Dispatcher.UIThread.Post(() => _viewController.MarkTaskAsMissed(objectId));
         }
-        catch (Exception ex)
+        else if (data.Length == 1)
         {
-            _logger.LogError("[BackgroundController] Failed to start background app process: {ex}", ex.Message);
-            return false;
-        }
-    }
-
-    private bool IsWindowsServiceInstalled()
-    {
-#if WINDOWS
-        try
-        {
-            using var controller = new ServiceController(SERVICE_NAME);
-            var status = controller.Status;
-            return true;
-        }
-        catch (InvalidOperationException)
-        {
-            return false;
-        }
-#else
-        return false;
-#endif
-    }
-
-    private bool StartWindowsService()
-    {
-#if WINDOWS
-        try
-        {
-            using var controller = new ServiceController(SERVICE_NAME);
-            if (controller.Status != ServiceControllerStatus.Running)
+            switch (data[0])
             {
-                controller.Start();
-                controller.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(30));
+                case 0:
+                    OnConnectionBroke();
+                    break;
+                
+                case 1:
+                    Dispatcher.UIThread.Post(() => _viewController.ReloadView());
+                    break;
             }
+        }
+    }
 
-            return true;
+    public void OnConnectionBroke()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (_state == State.STARTING) return;
+            _state = State.STARTING;
+
+            _viewController.LoadingMessage = "Reconnecting...";
+            _viewController.IsLoadingVisible = true;
+
+            _ = ReconnectAsync();
+        });
+    }
+
+    private void ShutDown()
+    {
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+        {
+            lifetime.Shutdown();
+        }
+    }
+
+    #region ForWindows
+    private bool TryStartForWindows()
+    {
+        try
+        {
+            if (StartWindowsRegistry()) return true;
+
+            if (StartExeApp()) return true;
+
         }
         catch (Exception ex)
         {
+            _logger.LogError("[BackgroundController > TryStartForWindows] Failed to start background app process: {ex}", ex.Message);
             return false;
         }
-#else
+
         return false;
-#endif
     }
 
     private bool StartWindowsRegistry()
@@ -159,16 +178,69 @@ public class BackgroundController : IDisposable
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false);
-            var value = key?.GetValue(SERVICE_NAME) as string;
-            if (!string.IsNullOrEmpty(value))
+            var value = key?.GetValue(APP_NAME) as string;
+            if (!string.IsNullOrEmpty(value) && ParseRegistryValue(value) is string path)
             {
-                Process.Start(value);
+                Process.Start(path);
                 return true;
             }
             return false;
         }
+        catch
+        {
+            return false;
+        }
+#else
+        return false;
+#endif
+    }
+
+    private bool SetWindowsRegistry(bool enable)
+    {
+#if WINDOWS 
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                _logger.LogWarning("Auto-start is only supported on Windows");
+                return false;
+            }
+
+            const string registryKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+
+            using var key = Registry.CurrentUser.OpenSubKey(registryKey, true);
+        
+            if (key == null)
+            {
+                _logger.LogError("Failed to open registry key: {Key}", registryKey);
+                return false;
+            }
+
+            if (enable)
+            {
+                var appPath = GetBackgroundAppPath();
+                if (string.IsNullOrEmpty(appPath))
+                {
+                    _logger.LogError("Cannot set auto-start: Background app not found");
+                    return true;
+                }
+
+                var registryValue = $"\"{appPath}\" --autostart";
+                key.SetValue(APP_NAME, registryValue);
+            
+                _logger.LogInformation("Auto-start enabled for background app: {Path}", appPath);
+            }
+            else
+            {
+                key.DeleteValue(APP_NAME, false);
+                _logger.LogInformation("Auto-start disabled for background app");
+            }
+
+            return true;
+        }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to set auto-start");
             return false;
         }
 #else
@@ -178,7 +250,7 @@ public class BackgroundController : IDisposable
     #endregion
 
     #region As Executable
-    private async Task<bool> StartExeApp()
+    private bool StartExeApp()
     {
         try
         {
@@ -196,7 +268,7 @@ public class BackgroundController : IDisposable
                 CreateNoWindow = true
             };
 
-            if (GetPlatform() == "win")
+            if (OperatingSystem.IsWindows())
             {
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             }
@@ -217,7 +289,7 @@ public class BackgroundController : IDisposable
             _startedByUs = true;
             return true;
         }
-        catch (Exception ex)
+        catch
         {
             _logger.LogError("[BackgroundController] Failed to start background app process");
             return false;
@@ -234,8 +306,7 @@ public class BackgroundController : IDisposable
 
         try
         {
-            var processName = Path.GetFileNameWithoutExtension(EXE_NAME);
-            var processes = Process.GetProcessesByName(processName);
+            var processes = Process.GetProcessesByName(EXE_NAME);
 
             bool killed = true;
             foreach (var process in processes)
@@ -279,38 +350,70 @@ public class BackgroundController : IDisposable
     #endregion
 
     #region Utils
-    private string GetPlatform()
-    {
-        if (OperatingSystem.IsWindows()) return "win";
-        if (OperatingSystem.IsLinux()) return "linux";
-        if (OperatingSystem.IsMacOS()) return "macos";
-        return "unknown";
-    }
-
     private string GetBackgroundAppPath()
     {
         try
-        {
-            var currentDir = AppContext.BaseDirectory;
+    {
+        var exeName = OperatingSystem.IsWindows() ? EXE_NAME + ".exe" : EXE_NAME;
+        
+        var currentDir = AppContext.BaseDirectory;
+        Console.WriteLine($"[APPDIR] UI App directory: {currentDir}");
 
-            if (GetPlatform() == "win")
+        var projectDir = Directory.GetParent(currentDir)?.Parent?.Parent?.Parent?.FullName;
+        if (!string.IsNullOrEmpty(projectDir))
+        {
+            var backgroundDir = Path.Combine(projectDir, "..", "PlanIt.Background");
+            backgroundDir = Path.GetFullPath(backgroundDir);
+            
+            Console.WriteLine($"[LOOKUP] Looking in background directory: {backgroundDir}");
+            
+            var productionPath = Path.Combine(backgroundDir, exeName);
+            if (File.Exists(productionPath))
             {
-                var appPath = Path.Combine(currentDir, EXE_NAME + ".exe");
-                if (File.Exists(appPath)) return appPath;
-            }
-            else
-            {
-                var appPath = Path.Combine(currentDir, EXE_NAME);
-                if (File.Exists(appPath)) return appPath;
+                Console.WriteLine($"[FOUND] Found in production: {productionPath}");
+                return productionPath;
             }
             
-            return string.Empty;
+            var developmentPath = Path.Combine(backgroundDir, "bin", "Debug", OperatingSystem.IsWindows() ? "net9.0-windows10.0.26100.0" : "net9.0", exeName);
+            if (File.Exists(developmentPath))
+            {
+                Console.WriteLine($"[FOUND] Found in development: {developmentPath}");
+                return developmentPath;
+            }
+            
+            var releasePath = Path.Combine(backgroundDir, "bin", "Release", OperatingSystem.IsWindows() ? "net9.0-windows10.0.26100.0" : "net9.0", exeName);
+            if (File.Exists(releasePath))
+            {
+                Console.WriteLine($"[FOUND] Found in release: {releasePath}");
+                return releasePath;
+            }
         }
-        catch (Exception ex)
+
+        var currentDirPath = Path.Combine(currentDir, exeName);
+        if (File.Exists(currentDirPath))
         {
-            _logger.LogError("[BackgroundController] Error finding background app path: {ex}", ex.Message);
-            return string.Empty;
+            Console.WriteLine($"[FOUND] Found in current directory: {currentDirPath}");
+            return currentDirPath;
         }
+
+        Console.WriteLine($"[NOT FOUND] Background app not found");
+        return string.Empty;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError("[BackgroundController] Error finding background app path: {ex}", ex.Message);
+        return string.Empty;
+    }
+    }
+
+    private string ParseRegistryValue(string value)
+    {
+        var regex = new Regex(@"""(.)+""", RegexOptions.Compiled);
+        foreach (Match match in regex.Matches(value))
+        {
+            if (match.Value.Contains(".exe")) return match.Value;
+        }
+        return string.Empty;
     }
     #endregion
     

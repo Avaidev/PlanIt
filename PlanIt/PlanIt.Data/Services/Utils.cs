@@ -57,4 +57,13 @@ public static class Utils
         var dataDirectory = GetDataDirectory();
         return Path.Combine(dataDirectory, fileName);
     }
+
+    public static string CutString(string input, int maxWords)
+    {
+        if (String.IsNullOrEmpty(input)) return input;
+        var words = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length <= maxWords) return input;
+        
+        return string.Join(" ",  words.Take(maxWords)) + "...";
+    }
 }

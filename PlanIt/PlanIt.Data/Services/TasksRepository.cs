@@ -57,7 +57,6 @@ public class TasksRepository : IObjectRepository<TaskItem>
             var category = categories.FirstOrDefault(c => c.Id == task.Category);
             task.CategoryObject = category;
         }
-
         return todayTasks;
     }
 

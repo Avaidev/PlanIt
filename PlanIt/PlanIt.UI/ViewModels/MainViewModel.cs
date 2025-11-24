@@ -53,19 +53,7 @@ public class MainViewModel : ViewModelBase
     private async Task InitializeAsync()
     {
         ViewController.LoadingMessage = "Connecting...";
-        try
-        {
-            await _backgroundController.StartConnection();
-        }
-        catch (Exception ex)
-        {
-            await MessageService.ErrorMessage($"Error initializing background controller: {ex.Message}");
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
-            {
-                lifetime.Shutdown();
-            }
-        }
-        
+        await _backgroundController.Connect();
         await ViewController.InitializeAsync();
         await Task.Delay(500);
         ViewController.IsLoadingVisible = false;

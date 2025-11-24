@@ -1,17 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFrameworks>net9.0;net9.0-windows10.0.26100.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>dotnet-PlanIt.Background-ea766dc4-f7f2-4f8c-aacf-d080ee3c1d99</UserSecretsId>
-        <OutputType>WinExe</OutputType>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
         <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.9" />
     </ItemGroup>
+
+    <PropertyGroup Condition="$(TargetFramework.StartsWith('net9.0-windows10'))">
+        <DefineConstants>WINDOWS</DefineConstants>
+    </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\PlanIt.Core\PlanIt.Core.csproj" />

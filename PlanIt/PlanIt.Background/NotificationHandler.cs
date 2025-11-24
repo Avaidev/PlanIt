@@ -1,38 +1,41 @@
 ﻿using MongoDB.Bson;
+using PlanIt.Core.Services;
 using PlanIt.Core.Services.DateTimeMonitor;
 using PlanIt.Core.Services.Pipe;
 using PlanIt.Data.Models;
 using PlanIt.Data.Services;
 
-namespace PlanIt.Notifications;
+namespace PlanIt.Background;
 
-public class NotificationHandler
+public class NotificationHandler : IDisposable
 {
+    private readonly ILogger<NotificationHandler> _logger;
     private TasksRepository _tasksRepo;
     private TimeMonitor _monitor;
     private TwoWayPipeServer _server;
 
-    public NotificationHandler(TimeMonitor monitor,TwoWayPipeServer server, TasksRepository tasksRepo)
+    public NotificationHandler(ILogger<NotificationHandler> logger, TimeMonitor monitor,TwoWayPipeServer server)
     {
         _server = server;
+        _logger = logger;
         _monitor = monitor;
-        _tasksRepo = tasksRepo;
+        _tasksRepo = new TasksRepository();
     }
 
     public async Task PrepareHandler()
     {
+        _logger.LogInformation("[NotificationHandler] Preparing handler]");
+        await _monitor.PrepareMonitorAsync(new TimeObjectRepositoryAdapter<TaskItem>(_tasksRepo));
+        _server.AddReceivedCallback(OnDataReceived);
         RegisterDailyChecker();
         TimeMonitorCallbackFuncs.TaskEndingEvent += SendMissedTask;
-        await RenovateTasksAsync();
+        await Task.Run(RenovateTasksAsync);
     }
 
-    public void ChangeRepository(TasksRepository repository)
+    public void StartHandling()
     {
-        _tasksRepo = repository;
-    }
-    public void ChangeMonitor(TimeMonitor monitor)
-    {
-        _monitor = monitor;
+        _server.StartServer();
+        _monitor.StartMonitoring();
     }
 
     private void RegisterDailyChecker()
@@ -76,12 +79,14 @@ public class NotificationHandler
 
     public void DailyCheckerCallback()
     {
+        _logger.LogInformation("Daily renovating...");
         _monitor.StopMonitoring();
-        var renovating = Task.Run(RenovateTasksAsync);
-        renovating.Wait();
+         Task.Run(RenovateTasksAsync).GetAwaiter().GetResult();
         _monitor.ClearAllItems();
         RegisterDailyChecker();
         _monitor.StartMonitoring();
+        _ = _server.SendData([1]);
+        _logger.LogInformation("Daily renovating completed");
     }
 
     private async Task RenovateTasksAsync()
@@ -102,5 +107,20 @@ public class NotificationHandler
         }
         
         await _tasksRepo.ReplaceList(tasks);
+    }
+
+    public void Dispose()
+    {
+        _logger.LogInformation("[NotificationHandler] Stopping at: {time}", DateTimeOffset.Now);
+        try
+        {
+            _server.SendData([0]).Wait(2000);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("[NotificationHandler] Failed to send message when disposing: {message}]", ex.Message);
+        }
+        _monitor.Dispose();
+        _server.Dispose();
     }
 }

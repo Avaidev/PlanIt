@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFrameworks>net9.0;net9.0-windows10.0.26100.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -11,6 +11,10 @@
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
+
+    <PropertyGroup Condition="$(TargetFramework.StartsWith('net9.0-windows10'))">
+        <DefineConstants>WINDOWS</DefineConstants>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.3.9" />

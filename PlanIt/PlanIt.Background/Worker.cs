@@ -1,27 +1,14 @@
-using MongoDB.Bson;
-using PlanIt.Core.Services.DateTimeMonitor;
-using PlanIt.Core.Services.Pipe;
-using PlanIt.Data.Models;
-using PlanIt.Data.Services;
-using PlanIt.Notifications;
-
 namespace PlanIt.Background;
 
 public class Worker : BackgroundService
 {
-    private readonly TimeMonitor _timeMonitor;
-    private readonly TwoWayPipeServer _pipeServer;
     private readonly ILogger<Worker> _logger;
-    private readonly TasksRepository _repository;
     private readonly NotificationHandler _notificationHandler;
 
-    public Worker(ILogger<Worker> logger, TimeMonitor timeMonitor, TwoWayPipeServer pipeServer)
+    public Worker(ILogger<Worker> logger, NotificationHandler notificationHandler)
     {
-        _repository = new TasksRepository();
         _logger = logger;
-        _timeMonitor = timeMonitor;
-        _pipeServer = pipeServer;
-        _notificationHandler = new NotificationHandler(_timeMonitor, _pipeServer, _repository);
+        _notificationHandler = notificationHandler;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,12 +16,8 @@ public class Worker : BackgroundService
         _logger.LogInformation("[Worker] Starting at: {time}", DateTimeOffset.Now);
         
         await _notificationHandler.PrepareHandler();
-        _timeMonitor.SetRepository(new TimeObjectRepositoryAdapter<TaskItem>(_repository));
-        _pipeServer.AddCallback(_notificationHandler.OnDataReceived);
-        
+        _notificationHandler.StartHandling();
         OptimizeProcess();
-        _pipeServer.StartServer();
-        _timeMonitor.StartMonitoring();
         
         _logger.LogInformation("[Worker] Started successfully");
         
@@ -44,11 +27,10 @@ public class Worker : BackgroundService
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("[Worker] Stopping at: {time}", DateTimeOffset.Now);
-        
-        _timeMonitor.Dispose();
-        _pipeServer.Dispose();
-        
         await base.StopAsync(cancellationToken);
+        
+        _notificationHandler.Dispose();
+        
     }
 
     private async Task WaitForStop(CancellationToken cancellationToken)

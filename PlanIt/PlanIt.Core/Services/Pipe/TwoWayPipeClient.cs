@@ -20,11 +20,17 @@ public class TwoWayPipeClient : IDisposable
     private readonly ILogger<TwoWayPipeClient> _logger;
     private readonly CancellationTokenSource _cancellationTokenSource;
     public bool IsConnected => _pipeClient?.IsConnected ?? false;
+    private bool _disposed = false;
     #endregion
     
-    public void AddCallback(Action<byte[]> callback)
+    public void AddReceivedCallback(Action<byte[]> callback)
     {
         _config.OnDataReceived += callback;
+    }
+
+    public void AddConnectedCallback(Action<bool> callback)
+    {
+        _config.ConnectionResult?.Invoke(true);
     }
 
     public void AddConnectionBrokeCallback(Action callback)
@@ -79,6 +85,7 @@ public class TwoWayPipeClient : IDisposable
     private async Task ListenForData(CancellationToken cancellationToken)
     {
         if (_pipeClient is not { IsConnected: true }) return;
+        _logger.LogInformation("[PipeClient] Listening for data...");
         byte[] buffer = new byte[_config.BufferSize];
         while (_pipeClient.IsConnected && !cancellationToken.IsCancellationRequested)
         {
@@ -96,6 +103,7 @@ public class TwoWayPipeClient : IDisposable
                 _logger.LogWarning("[PipeClient] Reading exception: {ExMessage}", ex.Message);
             }
         }
+        _logger.LogInformation("[PipeClient] Connection broke");
         _config.OnConnectionBroke?.Invoke();
     }
     
@@ -117,6 +125,8 @@ public class TwoWayPipeClient : IDisposable
     
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         Disconnect();
         _cancellationTokenSource.Dispose();
         _pipeClient?.Dispose();

@@ -29,12 +29,8 @@ public class TimeMonitor : IDisposable
     private bool _isRunning;
     private Task? _monitorTask;
     private const int MAX_ACTIVE_ELEMENTS = 6;
+    private bool _disposed = false;
     #endregion
-
-    public void SetRepository(IObjectRepository<ITimedObject> repository)
-    {
-        _repository = repository;
-    }
     
     private async Task MonitoringLoopAsync(CancellationToken token)
     {
@@ -102,7 +98,8 @@ public class TimeMonitor : IDisposable
         {
             activeObjectIds = new HashSet<ObjectId>(_activeItems.Values.Select(t => t.Id));
         }
-        var objects = await Task.Run(() => _repository!.GetAll());
+
+        var objects = await _repository!.GetAll();
         return objects
             .Where(obj => !obj.IsDone)
             .Where(obj => !activeObjectIds.Contains(obj.Id))
@@ -225,23 +222,33 @@ public class TimeMonitor : IDisposable
         }
     }
 
+    public async Task PrepareMonitorAsync(IObjectRepository<ITimedObject> repository)
+    {
+        _logger.LogInformation("[TimeMonitor] Preparing monitor...");
+        _repository = repository;
+        await LoadMonitorsAsync();
+        _logger.LogInformation("[TimeMonitor] Monitor prepared successfully");
+    }
+
     public void StartMonitoring()
     {
         if (_repository == null)
         {
-            _logger.LogError("[TimeMonitor] Repository not initialized, call SetRepository before");
+            _logger.LogError("[TimeMonitor] Monitor not prepared! Call PrepareMonitorAsync() first");
             return;
         }
-        if (_isRunning) return;
         _cancellationTokenSource = new CancellationTokenSource();
-        LoadMonitorsAsync().Wait();
-        _monitorTask = Task.Run(async () => await MonitoringLoopAsync(_cancellationTokenSource.Token));
+        
+        if (_isRunning) return;
+        _monitorTask = Task.Run(async () => await MonitoringLoopAsync(_cancellationTokenSource!.Token));
         _isRunning = true;
         _logger.LogInformation("[TimeMonitor] Monitoring started");
+        
     }
-
+    
     public void StopMonitoring()
     {
+        if(_disposed) return;
         _cancellationTokenSource?.Cancel();
         _isRunning = false;
         _logger.LogInformation("[TimeMonitor] Monitoring stopped");
@@ -250,8 +257,11 @@ public class TimeMonitor : IDisposable
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         StopMonitoring();
         _cancellationTokenSource?.Dispose();
-        _monitorTask?.Dispose();
+        
+        GC.SuppressFinalize(this);
     }
 }

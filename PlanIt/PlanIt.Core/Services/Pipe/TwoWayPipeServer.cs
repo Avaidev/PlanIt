@@ -10,8 +10,7 @@ public class TwoWayPipeServer : IDisposable
     public TwoWayPipeServer(ILogger<TwoWayPipeServer> logger, PipeConfig config)
     {
         _logger = logger;
-        _config = config;
-        _cancellationTokenSource = new CancellationTokenSource();
+        _config = config; 
     }
     #endregion
 
@@ -19,18 +18,30 @@ public class TwoWayPipeServer : IDisposable
     private readonly PipeConfig _config;
     private NamedPipeServerStream? _pipeServer;
     private readonly ILogger<TwoWayPipeServer> _logger;
-    private readonly CancellationTokenSource _cancellationTokenSource;
+    private CancellationTokenSource _cancellationTokenSource;
     private bool _isRunning = false;
+    private bool _disposed = false;
     #endregion
 
-    public void AddCallback(Action<byte[]> callback)
+    public void AddReceivedCallback(Action<byte[]> callback)
     {
         _config.OnDataReceived += callback;
+    }
+
+    public void AddConnectedCallback(Action<bool> callback)
+    {
+        _config.ConnectionResult += callback;
+    }
+
+    public void AddConnectionBrokeCallback(Action callback)
+    {
+        _config.OnConnectionBroke += callback;
     }
     
     public void StartServer()
     {
         if (_isRunning) return;
+        _cancellationTokenSource = new CancellationTokenSource();
         _logger.LogInformation("[PipeServer] Staring pipe server at {time}", DateTimeOffset.Now);
         _isRunning = RunServer(_cancellationTokenSource.Token);
     }
@@ -76,9 +87,11 @@ public class TwoWayPipeServer : IDisposable
             _logger.LogInformation("[PipeServer] Waiting for connection...");
             await _pipeServer!.WaitForConnectionAsync(cancellationToken);
             _logger.LogInformation("[PipeServer] Connected");
+            _config.ConnectionResult?.Invoke(true);
             
             await ListenForData(cancellationToken);
             _pipeServer.Disconnect();
+            _config.OnConnectionBroke?.Invoke();
             _logger.LogInformation("[PipeServer] Disconnected");
         }
     }
@@ -124,7 +137,12 @@ public class TwoWayPipeServer : IDisposable
 
     public void Dispose()
     {
-        StopServer();
+        if (_disposed) return;
+        _disposed = true;
+        try
+        {
+            StopServer();
+        }catch(OperationCanceledException){}
         _cancellationTokenSource?.Dispose();
         _pipeServer?.Dispose();
     }

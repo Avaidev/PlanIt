@@ -33,6 +33,24 @@ public static class MessageService
         await messageBox.ShowWindowDialogAsync(owner);
     }
 
+    public static async Task SuccessMesssage(string message, Window? owner = null)
+    {
+        owner ??= GetActiveWindow();
+        var messageBox = MessageBoxManager.GetMessageBoxStandard(new MessageBoxStandardParams
+        {
+            ButtonDefinitions = ButtonEnum.Ok,
+            ContentTitle = "Success",
+            ContentMessage = message,
+            Icon = Icon.Success,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            CanResize = false,
+            ShowInCenter = true,
+            Topmost = true,
+            SystemDecorations = SystemDecorations.Full
+        });
+        await messageBox.ShowWindowDialogAsync(owner);
+    }
+
     public static async Task WarningMessage(string message, Window? owner = null)
     {
         owner ??= GetActiveWindow();

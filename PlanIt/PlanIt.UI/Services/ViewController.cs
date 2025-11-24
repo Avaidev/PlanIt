@@ -180,7 +180,35 @@ public class ViewController : ReactiveObject
     public void OpenCategoryOverlay() => IsCategoryOverlayVisible = true;
     public void CloseTaskOverlay() => IsTaskOverlayVisible = false;
     public void OpenTaskOverlay() => IsTaskOverlayVisible = true;
-    
+
+    public void ReloadView()
+    {
+        _ = SetTodayCounter();
+        _ = SetImportantCounter();
+        _ = SetScheduledCounter();
+        
+        switch (ViewState)
+        {
+            case ViewStates.CATEGORY:
+                _ = LoadTasksByCategoryAsync();
+                break;
+            case ViewStates.TODAY:
+                _ = LoadTasksForTodayAsync();
+                break;
+            case ViewStates.IMPORTANT:
+                _ = LoadTasksForImportantAsync();
+                break;
+            case ViewStates.SCHEDULED:
+                _ = LoadNodesForScheduledAsync();
+                break;
+            case ViewStates.ALL:
+                _ = LoadNodesForAllAsync();
+                break;
+            
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
     
     public void AddCategoryToView(Category category)
     {
@@ -247,38 +275,35 @@ public class ViewController : ReactiveObject
     
     public void MarkTaskAsMissed(ObjectId taskId)
     {
-        Dispatcher.UIThread.Post(() =>
+        ScheduleFilterCounter--;
+        switch (ViewState)
         {
-            ScheduleFilterCounter--;
-            switch (ViewState)
+            case ViewStates.CATEGORY:
+            case ViewStates.TODAY:
+            case ViewStates.IMPORTANT:
             {
-                case ViewStates.CATEGORY:
-                case ViewStates.TODAY:
-                case ViewStates.IMPORTANT:
+                var task = TasksCollection.FirstOrDefault(t => t.Id == taskId);
+                task?.RaisePropertyChanged(nameof(task.IsMissed));
+                Utils.OrderTasks(TasksCollection);
+                break;
+            }
+
+            case ViewStates.SCHEDULED:
+            case ViewStates.ALL:
+                foreach (var node in NodesCollection)
                 {
-                    var task = TasksCollection.FirstOrDefault(t => t.Id == taskId);
-                    task?.RaisePropertyChanged(nameof(task.IsMissed));
-                    Utils.OrderTasks(TasksCollection);
-                    break;
+                    var task = node.Tasks.FirstOrDefault(t => t.Id == taskId);
+                    if (task == null) continue;
+                    task.RaisePropertyChanged(nameof(task.IsMissed));
+                    Task.Delay(10).Wait();
+                    Utils.OrderTasks(node.Tasks);
                 }
 
-                case ViewStates.SCHEDULED:
-                case ViewStates.ALL:
-                    foreach (var node in NodesCollection)
-                    {
-                        var task = node.Tasks.FirstOrDefault(t => t.Id == taskId);
-                        if (task == null) continue;
-                        task.RaisePropertyChanged(nameof(task.IsMissed));
-                        Task.Delay(10).Wait();
-                        Utils.OrderTasks(node.Tasks);
-                    }
+                break;
 
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        });
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
     
     public void AddTaskToView(TaskItem task)

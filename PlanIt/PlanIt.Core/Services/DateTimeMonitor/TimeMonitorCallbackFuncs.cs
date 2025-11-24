@@ -12,11 +12,13 @@ public static class TimeMonitorCallbackFuncs
         switch (context)
         {
             case IMonitorItem.TargetTimeContext.NOTIFICATION:
-                //TODO Send Notification
+            {
+                NotificationService.ShowNotificationTask(task);
                 break;
-            
+            }
+
             case IMonitorItem.TargetTimeContext.ENDING:
-                //TODO Send Notification
+                NotificationService.ShowMissedTask(task);
                 TaskEndingEvent.Invoke(task.Id);
                 break;
 

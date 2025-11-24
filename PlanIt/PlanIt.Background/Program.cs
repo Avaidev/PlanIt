@@ -3,10 +3,16 @@ using PlanIt.Core.Services.DateTimeMonitor;
 using PlanIt.Core.Services.Pipe;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddWindowsService(options =>
+
+bool isAutoStart = args.Contains("--autostart");
+
+if (isAutoStart)
 {
-    options.ServiceName = "PlanIt.Background";
-});
+    builder.Services.Configure<HostOptions>(options =>
+    {
+        options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+    });
+}
 
 builder.Services.AddSingleton<PipeConfig>(config => new PipeConfig
 {
@@ -17,9 +23,13 @@ builder.Services.AddSingleton<PipeConfig>(config => new PipeConfig
 
 builder.Services.AddSingleton<TimeMonitor>();
 builder.Services.AddSingleton<TwoWayPipeServer>();
+builder.Services.AddSingleton<NotificationHandler>();
 builder.Services.AddHostedService<Worker>();
 
-builder.Logging.AddConsole();
+if (!isAutoStart)
+{
+    builder.Logging.AddConsole();
+}
 builder.Logging.AddDebug();
 
 var host = builder.Build();
