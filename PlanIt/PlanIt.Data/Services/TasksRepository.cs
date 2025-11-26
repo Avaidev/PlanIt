@@ -60,10 +60,10 @@ public class TasksRepository : IObjectRepository<TaskItem>
         return todayTasks;
     }
 
-    public async Task<List<TaskItem>> GetTasksForImportantWithCategories(IEnumerable<Category> enumerable)
+    public async Task<List<TaskItem>> GetTasksForCompletedWithCategories(IEnumerable<Category> enumerable)
     {
         var categories = enumerable.ToList();
-        var importantTasks = (await _taskRepo.FindManyAsync(task => task.IsImportant == true, "important")).ToList();
+        var importantTasks = (await _taskRepo.FindManyAsync(task => task.IsDone == true, "completed")).ToList();
         foreach (var task in importantTasks)
         {
             var category =  categories.FirstOrDefault(c => c.Id == task.Category);
@@ -147,14 +147,19 @@ public class TasksRepository : IObjectRepository<TaskItem>
         return await _taskRepo.CountAsync(t => Utils.CheckDateForScheduled(t.CompleteDate) && !t.IsDone);
     }
 
+    public async Task<int> CountByCategory(Category category)
+    {
+        return await _taskRepo.CountAsync(t => t.Category == category.Id);
+    }
+
     public async Task<int> CountAll()
     {
         return await _taskRepo.CountAsync();
     }
 
-    public async Task<int> CountImportantTasks()
+    public async Task<int> CountCompletedTasks()
     {
-        return await _taskRepo.CountAsync(t => t.IsImportant == true, "important");
+        return await _taskRepo.CountAsync(t => t.IsDone == true, "completed");
     }
     #endregion
 

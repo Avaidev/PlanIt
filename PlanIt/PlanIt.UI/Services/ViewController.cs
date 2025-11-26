@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Threading;
 using DynamicData;
 using MongoDB.Bson;
@@ -35,20 +36,29 @@ public class ViewController : ReactiveObject
         {
             CategoriesCollection.Add(category);
         }
+
+        LoadingMessage = "Checking your tasks...";
+        await CountCategoriesTasks();
         
         LoadingMessage = "Loading filters...";
-        Task.WaitAll([
-        Task.Run(SetTodayCounter),
-        Task.Run(SetScheduledCounter),
-        Task.Run(SetImportantCounter),
-        Task.Run(SetAllCounter)
-        ]);
+        await SetTodayCounter();
+        await SetScheduledCounter();
+        await SetCompletedCounter();
+        await SetAllCounter();
     }
 
-    public async Task SetTodayCounter() => TodayFilterCounter = await _db.Tasks.CountTodayTasks();
-    public async Task SetScheduledCounter() => ScheduleFilterCounter = await _db.Tasks.CountScheduledTasks();
-    public async Task SetImportantCounter() => ImportantFilterCounter = await _db.Tasks.CountImportantTasks();
-    public async Task SetAllCounter() => AllFilterCounter = await _db.Tasks.CountAll();
+    private async Task SetTodayCounter() => TodayFilterCounter = await _db.Tasks.CountTodayTasks();
+    private async Task SetScheduledCounter() => ScheduleFilterCounter = await _db.Tasks.CountScheduledTasks();
+    private async Task SetCompletedCounter() => CompletedFilterCounter = await _db.Tasks.CountCompletedTasks();
+    private async Task SetAllCounter() => AllFilterCounter = await _db.Tasks.CountAll();
+    private async Task CountCategoriesTasks()
+    {
+        foreach (var category in CategoriesCollection)
+        {
+            var count = await _db.Tasks.CountByCategory(category);
+            category.TasksCount = count;
+        }
+    }
     #endregion
     
     #region Attributes
@@ -60,12 +70,13 @@ public class ViewController : ReactiveObject
     private int _todayFilterCounter;
     private int _scheduleFilterCounter;
     private int _allFilterCounter;
-    private int _importantFilterCounter;
+    private int _completedFilterCounter;
     private bool _isDarkTheme = true;
     private bool _isCategoryOverlayVisible;
     private bool _isTaskOverlayVisible;
     private bool _isLoadingVisible = true;
     private string _loadingMessage = "";
+    private string _searchParameter = "Results of your search:";
 
     public ViewStates ViewState { get; set; }
     public ObservableCollection<Category> CategoriesCollection
@@ -129,10 +140,16 @@ public class ViewController : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _allFilterCounter, value);
     }
 
-    public int ImportantFilterCounter
+    public int CompletedFilterCounter
     {
-        get => _importantFilterCounter;
-        set => this.RaiseAndSetIfChanged(ref _importantFilterCounter, value);
+        get => _completedFilterCounter;
+        set => this.RaiseAndSetIfChanged(ref _completedFilterCounter, value);
+    }
+    
+    public string SearchParameter
+    {
+        get =>  _searchParameter;
+        set => this.RaiseAndSetIfChanged(ref _searchParameter, $"Results for '{value}' search:");
     }
     
     public bool IsDarkTheme
@@ -184,7 +201,7 @@ public class ViewController : ReactiveObject
     public void ReloadView()
     {
         _ = SetTodayCounter();
-        _ = SetImportantCounter();
+        _ = SetCompletedCounter();
         _ = SetScheduledCounter();
         
         switch (ViewState)
@@ -195,8 +212,8 @@ public class ViewController : ReactiveObject
             case ViewStates.TODAY:
                 _ = LoadTasksForTodayAsync();
                 break;
-            case ViewStates.IMPORTANT:
-                _ = LoadTasksForImportantAsync();
+            case ViewStates.COMPLETED:
+                _ = LoadTasksForCompletedAsync();
                 break;
             case ViewStates.SCHEDULED:
                 _ = LoadNodesForScheduledAsync();
@@ -239,7 +256,7 @@ public class ViewController : ReactiveObject
                 break;
             }
             
-            case ViewStates.IMPORTANT:
+            case ViewStates.COMPLETED:
             case ViewStates.TODAY:
                 TasksCollection.RemoveMany(TasksCollection.Where(t => t.Category == category.Id));
                 break;
@@ -261,16 +278,26 @@ public class ViewController : ReactiveObject
     private void DecreaseFiltersNumbers(TaskItem task)
     {
         AllFilterCounter--;
-        if (task.IsImportant) ImportantFilterCounter--;
+        if (task.IsDone) CompletedFilterCounter--;
         if (Utils.CheckDateForToday(task.CompleteDate)) TodayFilterCounter--;
         if (Utils.CheckDateForScheduled(task.CompleteDate)) ScheduleFilterCounter--;
     }
     private void IncreaseFiltersNumbers(TaskItem task)
     {
         AllFilterCounter++;
-        if (task.IsImportant) ImportantFilterCounter++;
+        if (task.IsDone) CompletedFilterCounter++;
         if (Utils.CheckDateForToday(task.CompleteDate)) TodayFilterCounter++;
         if (Utils.CheckDateForScheduled(task.CompleteDate)) ScheduleFilterCounter++;
+    }
+
+    public void MarkTaskInView(TaskItem task)
+    {
+        _ = SetScheduledCounter();
+        if (task.IsDone) CompletedFilterCounter++;
+        else CompletedFilterCounter--;
+        if (ViewState == ViewStates.COMPLETED && !task.IsDone) TasksCollection.Remove(task);
+        SortTasksIfFound(task.Id);
+        SortNodesWhereFound(task.Id);
     }
     
     public void MarkTaskAsMissed(ObjectId taskId)
@@ -280,7 +307,7 @@ public class ViewController : ReactiveObject
         {
             case ViewStates.CATEGORY:
             case ViewStates.TODAY:
-            case ViewStates.IMPORTANT:
+            case ViewStates.COMPLETED:
             {
                 var task = TasksCollection.FirstOrDefault(t => t.Id == taskId);
                 task?.RaisePropertyChanged(nameof(task.IsMissed));
@@ -324,12 +351,7 @@ public class ViewController : ReactiveObject
                 }
                 break;
             
-            case ViewStates.IMPORTANT:
-                if (task.IsImportant)
-                {
-                    TasksCollection.Add(task);
-                    Utils.OrderTasks(TasksCollection);
-                }
+            case ViewStates.COMPLETED:
                 break;
             
             case ViewStates.SCHEDULED:
@@ -370,7 +392,6 @@ public class ViewController : ReactiveObject
     public void ChangeTaskInView(TaskItem task)
     {
         _ = SetTodayCounter();
-        _ = SetImportantCounter();
         _ = SetScheduledCounter();
 
         switch (ViewState)
@@ -396,16 +417,14 @@ public class ViewController : ReactiveObject
                 }
                 break;
             
-            case  ViewStates.IMPORTANT:
-                if (!task.IsImportant) TasksCollection.Remove(task);
-                else
-                {
-                    var index = TasksCollection.IndexOf(task);
-                    TasksCollection[index].ChangeObject(task);
-                    Utils.OrderTasks(TasksCollection);
-                }
+            case  ViewStates.COMPLETED:
+            {
+                var index = TasksCollection.IndexOf(task);
+                TasksCollection[index].ChangeObject(task);
+                Utils.OrderTasks(TasksCollection);
                 break;
-            
+            }
+
             case ViewStates.SCHEDULED:
                 if (!Utils.CheckDateForScheduled(task.CompleteDate)) TasksCollection.Remove(task);
                 else
@@ -479,7 +498,7 @@ public class ViewController : ReactiveObject
         {
             case ViewStates.CATEGORY:
             case ViewStates.TODAY:
-            case ViewStates.IMPORTANT:
+            case ViewStates.COMPLETED:
                 TasksCollection.Remove(task);
                 break;
             
@@ -547,9 +566,9 @@ public class ViewController : ReactiveObject
             TasksCollection.Add(task);
         }
     }
-    public async Task LoadTasksForImportantAsync()
+    public async Task LoadTasksForCompletedAsync()
     {
-        var tasks = await _db.Tasks.GetTasksForImportantWithCategories(CategoriesCollection);
+        var tasks = await _db.Tasks.GetTasksForCompletedWithCategories(CategoriesCollection);
         Utils.OrderTasks(tasks);
         TasksCollection.Clear();
         NodesCollection.Clear();
@@ -572,7 +591,7 @@ public class ViewController : ReactiveObject
     
     #region No change collections
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public enum ViewStates {TODAY, SCHEDULED, ALL, IMPORTANT, CATEGORY, SEARCH}
+    public enum ViewStates {TODAY, SCHEDULED, ALL, COMPLETED, CATEGORY, SEARCH}
     public ObservableCollection<string> Colors { get; } = ["Default", "Red", "Orange", "Yellow", "Pink", "Purple", "Green", "Blue", "Emerald"];
 
     public ObservableCollection<string> Icons { get; } =

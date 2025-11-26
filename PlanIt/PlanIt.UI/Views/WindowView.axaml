@@ -25,7 +25,7 @@
                 <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding ViewController.SelectedCategory, Converter={x:Static ObjectConverters.IsNotNull}}">
                     <TextBlock Classes="t-sb t-24" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="16 0 0 0" Text="{Binding ViewController.SelectedCategory.Title, FallbackValue=NoTitle}" Foreground="{Binding ViewController.SelectedCategory.Color, FallbackValue=Default, Converter={StaticResource ResourceLookupConverter}}"></TextBlock>
                     <Button Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Width="30" Height="30" Classes="panelBtn" Command="{Binding AddNewTask}">
-                        <PathIcon Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource BackgroundItems}"></PathIcon>
+                        <PathIcon Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource BackgroundMain}"></PathIcon>
                         <Button.Styles>
                             <Style Selector="">
                                  <Setter Property="Background" Value="{Binding DataContext.ViewController.SelectedCategory.Color, FallbackValue=Default,  Converter={StaticResource ResourceLookupConverter}, ElementName=WindowUserControl}"></Setter>

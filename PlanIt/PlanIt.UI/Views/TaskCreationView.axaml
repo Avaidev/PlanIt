@@ -51,7 +51,7 @@
                         <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextSecondary}">Priority</TextBlock>
                         <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Classes="t-8 t-b" Foreground="{DynamicResource TextSecondary}">Category</TextBlock>
                         <ComboBox Grid.Row="1" Grid.Column="0" Width="147" ItemsSource="{Binding ViewController.ImportanceComboCollection}" SelectedIndex="{Binding SelectedImportanceIndex}"></ComboBox>
-                        <ComboBox Grid.Row="1" Grid.Column="1" Width="147" ItemsSource="{Binding ViewController.CategoriesCollection}" SelectedIndex="{Binding SelectedCategoryIndex}"></ComboBox>
+                        <ComboBox Grid.Row="1" Grid.Column="1" Width="147" ItemsSource="{Binding ViewController.CategoriesCollection}" SelectedItem="{Binding SelectedCategoryItem, Mode=TwoWay}"></ComboBox>
                     </Grid>
                 </Grid>
             </Grid>

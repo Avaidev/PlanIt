@@ -2,9 +2,9 @@
 
 namespace PlanIt.UI.Views;
 
-public partial class FilterImportantView : UserControl
+public partial class FilterCompletedView : UserControl
 {
-    public FilterImportantView()
+    public FilterCompletedView()
     {
         InitializeComponent();
     }

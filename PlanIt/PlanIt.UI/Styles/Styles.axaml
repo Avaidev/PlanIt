@@ -247,7 +247,7 @@
         </Style>
         
         <Style Selector="^#CategoryIconsListBox > ListBoxItem">
-            <Setter Property="Background" Value="{DynamicResource BackgroundDark}"></Setter>
+            <Setter Property="Background" Value="{DynamicResource BackgroundIconChoose}"></Setter>
             <Setter Property="CornerRadius" Value="15"></Setter>
             <Setter Property="Padding" Value="0"></Setter>
             <Setter Property="Margin" Value="0"></Setter>
@@ -255,14 +255,14 @@
             <Setter Property="Height" Value="30"></Setter>
             
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource BackgroundDark}"></Setter>
+                <Setter Property="Background" Value="{DynamicResource BackgroundIconChoose}"></Setter>
                 <Setter Property="Cursor" Value="Hand"></Setter>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"></Setter>
                 <Setter Property="BorderThickness" Value="2"></Setter>
             </Style>
             
             <Style Selector="^:selected /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource BackgroundDark}"></Setter>
+                <Setter Property="Background" Value="{DynamicResource BackgroundIconChoose}"></Setter>
                 <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"></Setter>
                 <Setter Property="BorderThickness" Value="2"></Setter>
             </Style>
@@ -325,6 +325,10 @@
             <Setter Property="Foreground" Value="{DynamicResource TextScheduled}"></Setter>
         </Style>
         
+        <Style Selector="^.completed">
+            <Setter Property="Foreground" Value="{DynamicResource TextCompleted}"></Setter>
+        </Style>
+        
         <Style Selector="^.important">
             <Setter Property="Foreground" Value="{DynamicResource TextImportant}"></Setter>
         </Style>
@@ -361,6 +365,10 @@
         
         <Style Selector="^.important">
             <Setter Property="Fill" Value="{DynamicResource TextImportant}"></Setter>
+        </Style>
+        
+        <Style Selector="^.completed">
+            <Setter Property="Fill" Value="{DynamicResource TextCompleted}"></Setter>
         </Style>
         
         <Style Selector="^.all">
@@ -538,8 +546,24 @@
     
     <Style Selector="ToggleSwitch">
         <Style Selector="^#ThemeChanger">
-            <Style Selector="^ /template/ Border#SwitchKnobBounds">
-                <Setter Property="BorderBrush" Value="{DynamicResource BackgroundButton}"/>
+            <Style Selector="^:checked">
+                
+                <Style Selector="^ /template/ Border#SwitchKnobBounds">
+                    <Setter Property="Background" Value="{DynamicResource BackgroundThemeSwitch}"></Setter>
+                </Style>
+                
+                <Style Selector="^ /template/ Ellipse#SwitchKnobOff">
+                    <Setter Property="Fill" Value="{DynamicResource TextMain}"></Setter>
+                </Style>
+            </Style>
+            <Style Selector="^:unchecked">
+                <Style Selector="^ /template/ Border#OuterBorder">
+                    <Setter Property="BorderBrush" Value="{DynamicResource BorderLogo}"></Setter>
+                    <Setter Property="Background" Value="{DynamicResource BackgroundThemeSwitch}"></Setter>
+                </Style>
+                <Style Selector="^ /template/ Ellipse#SwitchKnobOff">
+                    <Setter Property="Fill" Value="{DynamicResource BorderLogo}"></Setter>
+                </Style>
             </Style>
         </Style>
     </Style>

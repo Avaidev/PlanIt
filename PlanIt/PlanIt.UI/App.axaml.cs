@@ -46,7 +46,7 @@ public partial class App : Application
         
         collection.AddTransient<WindowViewModel>();
         collection.AddTransient<FilterAllViewModel>();
-        collection.AddTransient<FilterImportantViewModel>();
+        collection.AddTransient<FilterCompletedViewModel>();
         collection.AddTransient<FilterScheduledViewModel>();
         collection.AddTransient<FilterTodayViewModel>();
         collection.AddTransient<SearchViewModel>();

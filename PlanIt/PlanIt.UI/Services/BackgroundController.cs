@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using PlanIt.Core.Services;
 using PlanIt.Core.Services.Pipe;
+using PlanIt.Data.Services;
 #if WINDOWS
 using Microsoft.Win32;
 #endif
@@ -30,7 +31,7 @@ public class BackgroundController : IDisposable
     }
     #endregion
 
-    private enum State {SHUT, CONNECTING, STARTING, CONNECTED, WORKING}
+    private enum State {SHUT, CONNECTING, STARTING, CONNECTED, WORKING, RECONNECTING}
     private const string APP_NAME = "PlanIt Notificator";
     private const string EXE_NAME = "PlanIt.Background";
     private readonly ViewController _viewController;
@@ -48,8 +49,8 @@ public class BackgroundController : IDisposable
             return;
         }
 
-        if (_state != State.STARTING) await StartManually();
-        if (_startedByUs &&
+        if (_state == State.CONNECTING) await StartManually();
+        if (_state == State.CONNECTED && _startedByUs &&
             OperatingSystem.IsWindows() &&
             await MessageService.AskYesNoMessage("Do you want to add this app to autostart for better working?"))
         {
@@ -63,8 +64,20 @@ public class BackgroundController : IDisposable
     {
         _state = State.STARTING;
         _logger.LogWarning("[BackgroundController] Error connecting to pipe. Starting server manually");
-        if ((OperatingSystem.IsWindows() && TryStartForWindows())
-            || ((OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) && StartExeApp())) _state = State.WORKING;
+        if (CheckForExisting())
+        {
+            _startedByUs = true;
+            StopExeApp();
+            _startedByUs = false;
+        }
+        if (OperatingSystem.IsWindows())
+        {
+            if (TryStartForWindows()) _state = State.WORKING;
+        }
+        else
+        {
+            if (StartExeApp()) _state = State.WORKING;
+        }
         
         if (_state == State.WORKING)
         {
@@ -90,6 +103,7 @@ public class BackgroundController : IDisposable
     {
         await MessageService.ErrorMessage("Connection broke ");
         await Task.Delay(1000);
+        _state = State.RECONNECTING;
         await Connect();
     
         if (_state == State.CONNECTED)
@@ -218,7 +232,7 @@ public class BackgroundController : IDisposable
 
             if (enable)
             {
-                var appPath = GetBackgroundAppPath();
+                var appPath = Utils.GetAppPath(EXE_NAME, "PlanIt.Background");
                 if (string.IsNullOrEmpty(appPath))
                 {
                     _logger.LogError("Cannot set auto-start: Background app not found");
@@ -254,7 +268,7 @@ public class BackgroundController : IDisposable
     {
         try
         {
-            var appPath = GetBackgroundAppPath();
+            var appPath = Utils.GetAppPath(EXE_NAME, "PlanIt.Background");
             if (string.IsNullOrEmpty(appPath))
             {
                 _logger.LogError("[BackgroundController] No background app executable path provided");
@@ -292,6 +306,20 @@ public class BackgroundController : IDisposable
         catch
         {
             _logger.LogError("[BackgroundController] Failed to start background app process");
+            return false;
+        }
+    }
+
+    private bool CheckForExisting()
+    {
+        try
+        {
+            var processes = Process.GetProcessesByName(EXE_NAME);
+            return (processes.Length > 0);
+        }
+        catch
+        {
+            _logger.LogError("[BackgroundController] Failed to check for existing background app processes");
             return false;
         }
     }
@@ -350,62 +378,6 @@ public class BackgroundController : IDisposable
     #endregion
 
     #region Utils
-    private string GetBackgroundAppPath()
-    {
-        try
-    {
-        var exeName = OperatingSystem.IsWindows() ? EXE_NAME + ".exe" : EXE_NAME;
-        
-        var currentDir = AppContext.BaseDirectory;
-        Console.WriteLine($"[APPDIR] UI App directory: {currentDir}");
-
-        var projectDir = Directory.GetParent(currentDir)?.Parent?.Parent?.Parent?.FullName;
-        if (!string.IsNullOrEmpty(projectDir))
-        {
-            var backgroundDir = Path.Combine(projectDir, "..", "PlanIt.Background");
-            backgroundDir = Path.GetFullPath(backgroundDir);
-            
-            Console.WriteLine($"[LOOKUP] Looking in background directory: {backgroundDir}");
-            
-            var productionPath = Path.Combine(backgroundDir, exeName);
-            if (File.Exists(productionPath))
-            {
-                Console.WriteLine($"[FOUND] Found in production: {productionPath}");
-                return productionPath;
-            }
-            
-            var developmentPath = Path.Combine(backgroundDir, "bin", "Debug", OperatingSystem.IsWindows() ? "net9.0-windows10.0.26100.0" : "net9.0", exeName);
-            if (File.Exists(developmentPath))
-            {
-                Console.WriteLine($"[FOUND] Found in development: {developmentPath}");
-                return developmentPath;
-            }
-            
-            var releasePath = Path.Combine(backgroundDir, "bin", "Release", OperatingSystem.IsWindows() ? "net9.0-windows10.0.26100.0" : "net9.0", exeName);
-            if (File.Exists(releasePath))
-            {
-                Console.WriteLine($"[FOUND] Found in release: {releasePath}");
-                return releasePath;
-            }
-        }
-
-        var currentDirPath = Path.Combine(currentDir, exeName);
-        if (File.Exists(currentDirPath))
-        {
-            Console.WriteLine($"[FOUND] Found in current directory: {currentDirPath}");
-            return currentDirPath;
-        }
-
-        Console.WriteLine($"[NOT FOUND] Background app not found");
-        return string.Empty;
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError("[BackgroundController] Error finding background app path: {ex}", ex.Message);
-        return string.Empty;
-    }
-    }
-
     private string ParseRegistryValue(string value)
     {
         var regex = new Regex(@"""(.)+""", RegexOptions.Compiled);

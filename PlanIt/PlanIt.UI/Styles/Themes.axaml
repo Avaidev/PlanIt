@@ -2,16 +2,69 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
+            <Color x:Key="BackgroundMain">#F8FAFC</Color>
+            <Color x:Key="BackgroundSide">#F1F4F7</Color>
+            <Color x:Key="BackgroundUpper">#E4E6E9</Color>
+            <Color x:Key="BackgroundItems">#E6E6E6</Color>
+            <Color x:Key="BackgroundIconChoose">#F1F4F7</Color>
+            <Color x:Key="BackgroundFocus">#DEDEDE</Color>
+            <Color x:Key="BackgroundThemeSwitch">#F7F7F8</Color>
+            <Color x:Key="BackgroundHover">#D5D5D5</Color>
             
+            <Color x:Key="BorderLogo">#B5BBC4</Color>
+            <Color x:Key="BorderItems">#CECECE</Color>
+            
+            <Color x:Key="TextMain">#747888</Color>
+            <Color x:Key="TextMainHover">#5B5F6D</Color>
+            <Color x:Key="TextSecondaryMainBar">#E9E9E9</Color>
+            <Color x:Key="TextSecondaryMainBarHover">#AEAEAE</Color>
+            <Color x:Key="TextSecondary">#AAABB0</Color>
+            <Color x:Key="TextSecondaryHover">#868890</Color>
+            <Color x:Key="TextTrash">#C18686</Color>
+            <Color x:Key="TextTrashHover">#966565</Color>
+            <Color x:Key="TextTrashSideBar">#C36A6A</Color>
+            <Color x:Key="TextTrashSideBarHover">#A65B5B</Color>
+            <Color x:Key="TextToday">#60AACA</Color>
+            <Color x:Key="TextScheduled">#D4797F</Color>
+            <Color x:Key="TextImportant">#D6C26A</Color>
+            <Color x:Key="TextAll">#7F7F88</Color>
+            <Color x:Key="TextCompleted"> #98E77C</Color>
+            
+            <Color x:Key="TextTodayHover">#4D839A</Color>
+            <Color x:Key="TextScheduledHover">#9F555A</Color>
+            <Color x:Key="TextImportantHover">#C3AE53</Color>
+            <Color x:Key="TextCompletedHover">#84CB6B</Color>
+            <Color x:Key="TextAllHover">#5E5E67</Color>
+            
+            <Color x:Key="Default">#7F7F88</Color>
+            <Color x:Key="Red">#F96767</Color>
+            <Color x:Key="Orange">#F9B367</Color>
+            <Color x:Key="Yellow">#E4DC00</Color>
+            <Color x:Key="Pink">#E76AB5</Color>
+            <Color x:Key="Purple">#DE90FF</Color>
+            <Color x:Key="Green">#91E989</Color>
+            <Color x:Key="Blue">#95A7E6</Color>
+            <Color x:Key="Emerald">#59CDDA</Color>
+            
+            <Color x:Key="DefaultHover">#767680</Color>
+            <Color x:Key="RedHover">#AF4848</Color>
+            <Color x:Key="OrangeHover">#C48E53</Color>
+            <Color x:Key="YellowHover">#BEB800</Color>
+            <Color x:Key="PinkHover">#C25797</Color>
+            <Color x:Key="PurpleHover">#9D65B5</Color>
+            <Color x:Key="GreenHover">#6EBA67</Color>
+            <Color x:Key="BlueHover">#7582B1</Color>
+            <Color x:Key="EmeraldHover">#43A8B4</Color>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <Color x:Key="BackgroundMain">#4B4B54</Color>
             <Color x:Key="BackgroundSide">#44444E</Color>
             <Color x:Key="BackgroundUpper">#37353E</Color>
             <Color x:Key="BackgroundItems">#2E3138</Color>
-            <Color x:Key="BackgroundDark">#333333</Color>
+            <Color x:Key="BackgroundIconChoose">#333333</Color>
             <Color x:Key="BackgroundFocus">#3A3E47</Color>
             <Color x:Key="BackgroundHover">#1A1D24</Color>
+            <Color x:Key="BackgroundThemeSwitch">#6C677C</Color>
             
             <Color x:Key="BorderLogo">#747888</Color>
             <Color x:Key="BorderItems">#24272D</Color>
@@ -30,8 +83,10 @@
             <Color x:Key="TextScheduled">#F4A7AC</Color>
             <Color x:Key="TextImportant">#F6EBBC</Color>
             <Color x:Key="TextAll">#E8E8E8</Color>
+            <Color x:Key="TextCompleted">#BCF6BF</Color>
             
             <Color x:Key="TextTodayHover">#779DAD</Color>
+            <Color x:Key="TextCompletedHover">#86B989</Color>
             <Color x:Key="TextScheduledHover">#B77F83</Color>
             <Color x:Key="TextImportantHover">#B1A985</Color>
             <Color x:Key="TextAllHover">#A2A2A2</Color>

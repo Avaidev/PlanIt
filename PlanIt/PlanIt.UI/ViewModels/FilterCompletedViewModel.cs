@@ -4,11 +4,11 @@ using ReactiveUI;
 
 namespace PlanIt.UI.ViewModels;
 
-public class FilterImportantViewModel : ViewModelBase
+public class FilterCompletedViewModel : ViewModelBase
 {
     #region Initialization
 
-    public FilterImportantViewModel(ViewController viewController, TaskManagerViewModel taskManagerVM)
+    public FilterCompletedViewModel(ViewController viewController, TaskManagerViewModel taskManagerVM)
     {
         TaskManagerVM = taskManagerVM;
         ViewController = viewController;
@@ -20,9 +20,4 @@ public class FilterImportantViewModel : ViewModelBase
     public TaskManagerViewModel TaskManagerVM { get; }
     #endregion
     
-    public ReactiveCommand<Unit, Unit> AddNewTask => ReactiveCommand.Create(() =>
-    {
-        ViewController.OpenTaskOverlay();
-        TaskManagerVM.SetStartParameters(isImportant: true);
-    });
 }

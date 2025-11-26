@@ -15,14 +15,6 @@ public class SearchViewModel : ViewModelBase
     #endregion
     
     #region Attributes
-
-    private string _panelSearchText = "Results for .. search:";
-
-    public string PanelSearchText
-    {
-        get =>  _panelSearchText;
-        set => this.RaiseAndSetIfChanged(ref _panelSearchText, $"Results for '{value}' search:");
-    }
     public ViewController ViewController { get; }
     public TaskManagerViewModel TaskManagerVM { get; }
     #endregion

@@ -28,7 +28,7 @@ public class TaskManagerViewModel : ViewModelBase
         SelectedRepeatIndex = 0;
         SelectedNotifyIndex = 0;
         SelectedImportanceIndex = 0;
-        SelectedCategoryIndex = 0;
+        SelectedCategoryItem = ViewController.CategoriesCollection.Count != 0 ? ViewController.CategoriesCollection.First() : null;
         _editMode = false;
     }
     #endregion
@@ -42,7 +42,7 @@ public class TaskManagerViewModel : ViewModelBase
     private int _selectedRepeatIndex;
     private int _selectedNotifyIndex;
     private int _selectedImportanceIndex;
-    private int _selectedCategoryIndex;
+    private Category? _selectedCategoryItem;
     private bool _editMode;
     
     public ViewController ViewController { get; }
@@ -87,10 +87,10 @@ public class TaskManagerViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedImportanceIndex, value);
     }
 
-    public int SelectedCategoryIndex
+    public Category? SelectedCategoryItem
     {
-        get => _selectedCategoryIndex;
-        set => this.RaiseAndSetIfChanged(ref _selectedCategoryIndex, value);
+        get => _selectedCategoryItem;
+        set => this.RaiseAndSetIfChanged(ref _selectedCategoryItem, value);
     }
 
     #endregion
@@ -98,7 +98,7 @@ public class TaskManagerViewModel : ViewModelBase
     public void SetStartParameters(bool editMode = false, Category? category = null, bool? isImportant = null)
     {
         _editMode = editMode;
-        if (category != null) SelectedCategoryIndex = ViewController.CategoriesCollection.IndexOf(category);
+        if (category != null) SelectedCategoryItem = category;
         if (isImportant != null) SelectedImportanceIndex = (bool)isImportant ? 1 : 0;
     }
     
@@ -111,11 +111,9 @@ public class TaskManagerViewModel : ViewModelBase
     public ReactiveCommand<TaskItem, Unit> MarkTask => ReactiveCommand.CreateFromTask<TaskItem, Unit>(async task =>
     {
         task.IsDone = !task.IsDone;
-        await Task.Run(() => _db.Tasks.Update(task));
+        await _db.Tasks.Update(task);
         await _backgroundController.SendData(task.Id.ToByteArray());
-        await ViewController.SetScheduledCounter();
-        ViewController.SortTasksIfFound(task.Id);
-        ViewController.SortNodesWhereFound(task.Id);
+        ViewController.MarkTaskInView(task);
         return Unit.Default;
     });
     
@@ -154,7 +152,7 @@ public class TaskManagerViewModel : ViewModelBase
             return false;
         }
         NewTaskItem = new TaskItem(task);
-        SelectedCategoryIndex = ViewController.CategoriesCollection.IndexOf(category);
+        SelectedCategoryItem = category;
         SelectedImportanceIndex = task.IsImportant ? 1 : 0;
         SelectedRepeatIndex = ViewController.RepeatComboValues.IndexOf(task.Repeat);
         if (task.NotifyDate == null) SelectedNotifyIndex = 0;
@@ -195,9 +193,7 @@ public class TaskManagerViewModel : ViewModelBase
 
     private async Task<bool> Update(TaskItem newTask, Category category)
     {
-        var updateTask = _db.Tasks.Update(newTask);
-
-        if (await updateTask)
+        if (await _db.Tasks.Update(newTask))
         {
             newTask.CategoryObject = category;
             ViewController.ChangeTaskInView(newTask);
@@ -224,24 +220,17 @@ public class TaskManagerViewModel : ViewModelBase
             await MessageService.ErrorMessage("The date & time of task must not be in past!");
             return false;
         }
+
+        if (SelectedCategoryItem == null)
+        {
+            await MessageService.ErrorMessage("Please select a task category!");
+            return false;
+        }
         
         var importance = ViewController.ImportanceComboValues[SelectedImportanceIndex];
         var repeat = ViewController.RepeatComboValues[SelectedRepeatIndex];
         var notify = ViewController.NotifyBeforeComboValues[SelectedNotifyIndex];
-        var newCategory = ViewController.CategoriesCollection[SelectedCategoryIndex];
-        var oldCategory = newTask.Category == null ? null : ViewController.CategoriesCollection.FirstOrDefault(c => c.Id == newTask.Category);
-
-        if (oldCategory != null && !newCategory.Equals(oldCategory))
-        {
-            oldCategory.TasksCount--;
-            newCategory.TasksCount++;
-            await _db.Categories.Update(oldCategory);
-        }
         
-        newTask.Category = newCategory.Id;
-        newTask.IsImportant = importance;
-        newTask.Repeat = repeat;
-        newTask.IsDone = false;
         newTask.NotifyDate = null;
         if (notify != null)
         {
@@ -253,7 +242,20 @@ public class TaskManagerViewModel : ViewModelBase
             }
             newTask.NotifyDate = notificationDate;
         }
-
+        
+        var newCategory = SelectedCategoryItem!;
+        var oldCategory = newTask.Category == null ? null : ViewController.CategoriesCollection.FirstOrDefault(c => c.Id == newTask.Category);
+        if (oldCategory != null && !newCategory.Equals(oldCategory))
+        {
+            oldCategory.TasksCount--;
+            newCategory.TasksCount++;
+            await _db.Categories.Update(oldCategory);
+        }
+        
+        newTask.Category = newCategory.Id;
+        newTask.IsImportant = importance;
+        newTask.Repeat = repeat;
+        
         if (_editMode) return await Update(newTask, newCategory);
         return await Create(newTask, newCategory);
     });

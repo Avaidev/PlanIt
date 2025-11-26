@@ -66,4 +66,60 @@ public static class Utils
         
         return string.Join(" ",  words.Take(maxWords)) + "...";
     }
+
+    public static string GetAppPath(string appName, string folder)
+    {
+        try
+        {
+            var exeName = OperatingSystem.IsWindows() ? appName + ".exe" : appName;
+        
+            var currentDir = AppContext.BaseDirectory;
+            Console.WriteLine($"[APPDIR] UI App directory: {currentDir}");
+
+            var projectDir = Directory.GetParent(currentDir)?.Parent?.Parent?.Parent?.FullName;
+            if (!string.IsNullOrEmpty(projectDir))
+            {
+                var backgroundDir = Path.Combine(projectDir, "..", folder.Trim());
+                backgroundDir = Path.GetFullPath(backgroundDir);
+            
+                Console.WriteLine($"[LOOKUP] Looking in background directory: {backgroundDir}");
+            
+                var productionPath = Path.Combine(backgroundDir, exeName);
+                if (File.Exists(productionPath))
+                {
+                    Console.WriteLine($"[FOUND] Found in production: {productionPath}");
+                    return productionPath;
+                }
+            
+                var developmentPath = Path.Combine(backgroundDir, "bin", "Debug", OperatingSystem.IsWindows() ? "net9.0-windows10.0.26100.0" : "net9.0", exeName);
+                if (File.Exists(developmentPath))
+                {
+                    Console.WriteLine($"[FOUND] Found in development: {developmentPath}");
+                    return developmentPath;
+                }
+            
+                var releasePath = Path.Combine(backgroundDir, "bin", "Release", OperatingSystem.IsWindows() ? "net9.0-windows10.0.26100.0" : "net9.0", exeName);
+                if (File.Exists(releasePath))
+                {
+                    Console.WriteLine($"[FOUND] Found in release: {releasePath}");
+                    return releasePath;
+                }
+            }
+
+            var currentDirPath = Path.Combine(currentDir, exeName);
+            if (File.Exists(currentDirPath))
+            {
+                Console.WriteLine($"[FOUND] Found in current directory: {currentDirPath}");
+                return currentDirPath;
+            }
+
+            Console.WriteLine($"[NOT FOUND] Background app not found");
+            return string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[BackgroundController] Error finding background app path: {ex.Message}");
+            return string.Empty;
+        }
+    }
 }

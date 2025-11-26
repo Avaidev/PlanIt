@@ -58,7 +58,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{DynamicResource BackgroundDark}"></Ellipse>
+                                    <Ellipse VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{DynamicResource BackgroundIconChoose}"></Ellipse>
                                     <PathIcon Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" Data="{Binding ., Converter={StaticResource ResourceLookupConverter}}" Foreground="{DynamicResource TextMain}"></PathIcon>
                                 </Grid>
                             </DataTemplate>

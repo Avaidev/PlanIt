@@ -16,7 +16,7 @@
     <Grid RowDefinitions="Auto, *" RowSpacing="2">
         <Border Padding="17 12" HorizontalAlignment="Stretch">
             <Grid>
-                <TextBlock Classes="t-m t-18" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="16 0 0 0" Text="{Binding PanelSearchText}" Foreground="{DynamicResource TextSecondary}"></TextBlock>
+                <TextBlock Classes="t-m t-18" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="16 0 0 0" Text="{Binding ViewController.SearchParameter}" Foreground="{DynamicResource TextSecondary}"></TextBlock>
             </Grid>
         </Border>
         <Border Grid.Row="1" Padding="17 0">

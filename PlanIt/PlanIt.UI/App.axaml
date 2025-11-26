@@ -16,8 +16,8 @@
         <DataTemplate DataType="vm:FilterScheduledViewModel">
             <views:FilterScheduledView></views:FilterScheduledView>
         </DataTemplate>
-        <DataTemplate DataType="vm:FilterImportantViewModel">
-            <views:FilterImportantView></views:FilterImportantView>
+        <DataTemplate DataType="vm:FilterCompletedViewModel">
+            <views:FilterCompletedView></views:FilterCompletedView>
         </DataTemplate>
         <DataTemplate DataType="vm:FilterAllViewModel">
             <views:FilterAllView></views:FilterAllView>

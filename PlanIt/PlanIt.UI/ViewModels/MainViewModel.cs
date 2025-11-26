@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using PlanIt.Core.Services;
 using PlanIt.Core.Services.Pipe;
 using PlanIt.Data.Models;
@@ -34,6 +36,8 @@ public class MainViewModel : ViewModelBase
         
         _ = InitializeAsync();
         
+        ThemeBindingRefreshService.Initialize();
+        
         //Binds
         ViewController.WhenAnyValue(x => x.SelectedCategory)
             .Subscribe(_ =>
@@ -47,6 +51,8 @@ public class MainViewModel : ViewModelBase
                 Application.Current!.RequestedThemeVariant = isDark
                     ? ThemeVariant.Dark
                     : ThemeVariant.Light;
+                
+                ThemeBindingRefreshService.RefreshAllActiveWindows();
             });
     }
 
@@ -86,14 +92,16 @@ public class MainViewModel : ViewModelBase
         ViewController.ViewState = ViewController.ViewStates.SCHEDULED;
         _navigationService.NavigateTo<FilterScheduledViewModel>();
         _ = ViewController.LoadNodesForScheduledAsync();
+
     });
     
-    public ReactiveCommand<Unit, Unit> ShowImportantFilterView => ReactiveCommand.Create(() =>
+    public ReactiveCommand<Unit, Unit> ShowCompletedFilter => ReactiveCommand.Create(() =>
     {
         ViewController.SelectedCategory = null;
-        ViewController.ViewState = ViewController.ViewStates.IMPORTANT;
-        _navigationService.NavigateTo<FilterImportantViewModel>();
-        _ = ViewController.LoadTasksForImportantAsync();
+        ViewController.ViewState = ViewController.ViewStates.COMPLETED;
+        _navigationService.NavigateTo<FilterCompletedViewModel>();
+        _ = ViewController.LoadTasksForCompletedAsync();
+        
     });
     
     public ReactiveCommand<Unit, Unit> ShowAllFilterView => ReactiveCommand.Create(() =>
@@ -102,6 +110,8 @@ public class MainViewModel : ViewModelBase
         ViewController.ViewState = ViewController.ViewStates.ALL;
         _navigationService.NavigateTo<FilterAllViewModel>();
         _ = ViewController.LoadNodesForAllAsync();
+        
+
     });
 
     public ReactiveCommand<string, Unit> ShowSearchView => ReactiveCommand.Create<string, Unit>(searchParameter =>
@@ -109,7 +119,7 @@ public class MainViewModel : ViewModelBase
         ViewController.SelectedCategory = null;
         ViewController.ViewState = ViewController.ViewStates.SEARCH;
         _navigationService.NavigateTo<SearchViewModel>();
-        // _searchVM.PanelSearchText = searchParameter;
+        ViewController.SearchParameter = searchParameter;
         _ = ViewController.LoadTasksForSearchAsync(searchParameter);
         return Unit.Default;
     });

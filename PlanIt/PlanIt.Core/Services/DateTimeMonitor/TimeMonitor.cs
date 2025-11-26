@@ -30,6 +30,8 @@ public class TimeMonitor : IDisposable
     private Task? _monitorTask;
     private const int MAX_ACTIVE_ELEMENTS = 6;
     private bool _disposed = false;
+
+    private event Action<ITimedObject, IMonitorItem.TargetTimeContext>? ObjectEventCallback;
     #endregion
     
     private async Task MonitoringLoopAsync(CancellationToken token)
@@ -86,7 +88,7 @@ public class TimeMonitor : IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogError("[TimeMonitor] Exception in items checking: {ex}", ex.Message);
+                _logger.LogError("[TimeMonitor] Exception in items checking: {0}", ex.Message);
             }
         }
     }
@@ -121,7 +123,7 @@ public class TimeMonitor : IDisposable
         else if (oneMore) needed++;
         
         if (needed <= 0) return;
-        var closestTasks = await Task.Run(() => GetTasksFromDbAsync(needed));
+        var closestTasks = await GetTasksFromDbAsync(needed);
         lock (_lock)
         {
             foreach (var task in closestTasks)
@@ -134,14 +136,9 @@ public class TimeMonitor : IDisposable
         }
     }
 
-    private void RegisterObjectForMonitoring(ITimedObject obj)
+    private void RegisterObjectForMonitoring(ITimedObject timedObject)
     {
-        switch (obj)
-        {
-            case TaskItem task:
-                AddMonitor(task, TimeMonitorCallbackFuncs.TaskBasicCallback);
-                break;
-        }
+        AddMonitor(timedObject, (obj, context) => { ObjectEventCallback?.Invoke(obj, context); });
     }
 
     public void RegisterNonObjForMonitoring(DateTime targetTime, NonObjectCallback callback, int repeat = 0)
@@ -222,10 +219,11 @@ public class TimeMonitor : IDisposable
         }
     }
 
-    public async Task PrepareMonitorAsync(IObjectRepository<ITimedObject> repository)
+    public async Task PrepareMonitorAsync(IObjectRepository<ITimedObject> repository, Action<ITimedObject, IMonitorItem.TargetTimeContext> callback)
     {
         _logger.LogInformation("[TimeMonitor] Preparing monitor...");
         _repository = repository;
+        ObjectEventCallback += callback;
         await LoadMonitorsAsync();
         _logger.LogInformation("[TimeMonitor] Monitor prepared successfully");
     }

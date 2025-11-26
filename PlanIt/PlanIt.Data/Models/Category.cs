@@ -14,8 +14,8 @@ public class Category : ReactiveObject
         private string _color = "Default";
     [BsonElement("icon")] 
         private string _icon = "CubesIcon";
-    [BsonElement("tasksCount")] 
-        private int  _tasksCount = 0;
+    [BsonIgnore] 
+        private int _tasksCount = 0;
     
     public Category(){}
 

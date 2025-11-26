@@ -20,8 +20,8 @@
     </Design.DataContext>
 
     <Grid>
-        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource BackgroundSide}">
-            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Classes="t-sb t-26" Text="{Binding ViewController.LoadingMessage}" Foreground="{DynamicResource TextMain}" IsVisible="{Binding ViewController.IsLoadingVisible}"></TextBlock>
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ZIndex="3" Background="{DynamicResource BackgroundSide}" IsVisible="{Binding ViewController.IsLoadingVisible}">
+            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Classes="t-sb t-26" Text="{Binding ViewController.LoadingMessage}" Foreground="{DynamicResource TextMain}"></TextBlock>
         </Grid>
         <Grid x:Name="MainWindowLayout" ZIndex="1" IsVisible="{Binding !ViewController.IsLoadingVisible}">
             <Grid.ColumnDefinitions>
@@ -100,17 +100,17 @@
                                             </DockPanel>
                                         </Grid>
                                     </Button>
-                                    <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch" Command="{Binding ShowImportantFilterView}">
+                                    <Button Padding="8" Classes="filterBlock" HorizontalAlignment="Stretch" Command="{Binding ShowCompletedFilter}">
                                         <Grid ColumnDefinitions="*, Auto">
                                             <StackPanel Orientation="Vertical" Spacing="6" HorizontalAlignment="Left">
                                                 <Grid HorizontalAlignment="Left">
-                                                    <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="important"></Ellipse>
-                                                    <PathIcon HorizontalAlignment="Center" VerticalAlignment="Center" Height="18" Width="18" Data="{StaticResource ExclamationIcon}" Foreground="{DynamicResource BackgroundItems}"></PathIcon>
+                                                    <Ellipse Height="34" Width="34" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="completed"></Ellipse>
+                                                    <PathIcon HorizontalAlignment="Center" VerticalAlignment="Center" Height="16" Width="16" Margin="0 1 0 0 " Data="{StaticResource CheckIcon}" Foreground="{DynamicResource BackgroundItems}"></PathIcon>
                                                 </Grid>
-                                                <TextBlock Classes="t-16 important t-sb" HorizontalAlignment="Left">Important</TextBlock>
+                                                <TextBlock Classes="t-16 completed t-sb" HorizontalAlignment="Left">Completed</TextBlock>
                                             </StackPanel>
                                             <DockPanel Grid.Column="1" HorizontalAlignment="Right">
-                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 important t-b" Text="{Binding ViewController.ImportantFilterCounter}"></TextBlock>
+                                                <TextBlock DockPanel.Dock="Top" Classes="t-20 completed t-b" Text="{Binding ViewController.CompletedFilterCounter}"></TextBlock>
                                             </DockPanel>
                                         </Grid>
                                     </Button>

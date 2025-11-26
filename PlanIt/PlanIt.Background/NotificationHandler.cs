@@ -2,6 +2,7 @@
 using PlanIt.Core.Services;
 using PlanIt.Core.Services.DateTimeMonitor;
 using PlanIt.Core.Services.Pipe;
+using PlanIt.Data.Interfaces;
 using PlanIt.Data.Models;
 using PlanIt.Data.Services;
 
@@ -25,11 +26,32 @@ public class NotificationHandler : IDisposable
     public async Task PrepareHandler()
     {
         _logger.LogInformation("[NotificationHandler] Preparing handler]");
-        await _monitor.PrepareMonitorAsync(new TimeObjectRepositoryAdapter<TaskItem>(_tasksRepo));
+        await _monitor.PrepareMonitorAsync(new TimeObjectRepositoryAdapter<TaskItem>(_tasksRepo), TasksCallback);
         _server.AddReceivedCallback(OnDataReceived);
         RegisterDailyChecker();
-        TimeMonitorCallbackFuncs.TaskEndingEvent += SendMissedTask;
         await Task.Run(RenovateTasksAsync);
+    }
+    
+    public void TasksCallback(ITimedObject obj, IMonitorItem.TargetTimeContext context)
+    {
+        if (obj is not TaskItem task) return;
+        switch (context)
+        {
+            case IMonitorItem.TargetTimeContext.NOTIFICATION:
+            {
+                NotificationService.ShowNotificationTask(task);
+                break;
+            }
+
+            case IMonitorItem.TargetTimeContext.ENDING:
+                NotificationService.ShowMissedTask(task);
+                SendMissedTask(task.Id);
+                break;
+
+            case IMonitorItem.TargetTimeContext.CYCLED:
+            default:
+                break;
+        }
     }
 
     public void StartHandling()

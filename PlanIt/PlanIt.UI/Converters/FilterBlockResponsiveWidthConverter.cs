@@ -24,7 +24,7 @@ namespace PlanIt.UI.Converters
         {
             var half = panelWidth / 2 - 6;
             var len = DEFAULT_FILTER_BTN_LEN + DIGIT_PIXELS * digitCount;
-            if (len < 105) len = 105;
+            if (len < 108) len = 108;
             return half < len
                 ? panelWidth
                 : half;

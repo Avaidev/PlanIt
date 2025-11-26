@@ -5,30 +5,19 @@
              xmlns:vm="clr-namespace:PlanIt.UI.ViewModels"
              xmlns:models="clr-namespace:PlanIt.Data.Models;assembly=PlanIt.Data"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="PlanIt.UI.Views.FilterImportantView"
-             x:DataType="vm:FilterImportantViewModel"
+             x:Class="PlanIt.UI.Views.FilterCompletedView"
+             x:DataType="vm:FilterCompletedViewModel"
              x:Name="FilterImportantUserControl">
     
     <Design.DataContext>
-        <vm:FilterImportantViewModel></vm:FilterImportantViewModel>
+        <vm:FilterCompletedViewModel></vm:FilterCompletedViewModel>
     </Design.DataContext>
     
     <Grid RowDefinitions="Auto, *" RowSpacing="2">
         <Border Padding="17 10" HorizontalAlignment="Stretch">
             <Grid>
                 <Grid ColumnDefinitions="*, Auto">
-                    <TextBlock Classes="t-sb t-24" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="16 0 0 0" Text="Important" Foreground="{DynamicResource TextImportant}"></TextBlock>
-                    <Button Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Width="30" Height="30" Classes="panelBtn" Command="{Binding AddNewTask}">
-                        <PathIcon Height="14" Width="14" Data="{StaticResource PlusIcon}" Foreground="{DynamicResource BackgroundItems}"></PathIcon>
-                        <Button.Styles>
-                            <Style Selector="">
-                                <Setter Property="Background" Value="{DynamicResource TextImportant}"></Setter>
-                            </Style>
-                            <Style Selector=":pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                <Setter Property="Background" Value="{DynamicResource TextImportantHover}"></Setter>
-                            </Style>
-                        </Button.Styles>
-                    </Button>
+                    <TextBlock Classes="t-sb t-24" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="16 0 0 0" Text="Completed" Foreground="{DynamicResource TextCompleted}"></TextBlock>
                 </Grid>
             </Grid>
         </Border>
@@ -37,7 +26,7 @@
                 <ItemsControl ItemsSource="{Binding ViewController.TasksCollection}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="models:TaskItem">
-                            <Border Classes.task="True" Classes.important="True" Classes.missed="{Binding IsMissed}" Classes.completed="{Binding IsDone}">
+                            <Border Classes.task="True" Classes.important="{Binding IsImportant}" Classes.missed="{Binding IsMissed}" Classes.completed="{Binding IsDone}">
                                 <Grid ColumnDefinitions="*, Auto">
                                     <Grid ColumnDefinitions="Auto, *, Auto, Auto" HorizontalAlignment="Left">
                                         <ToggleButton Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Left" IsChecked="{Binding IsDone, Mode=OneWay}" Command="{Binding DataContext.TaskManagerVM.MarkTask, ElementName=FilterImportantUserControl}" CommandParameter="{Binding}">
