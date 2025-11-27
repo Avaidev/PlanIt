@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanIt.UI", "PlanIt.UI\PlanIt.UI.csproj", "{82B35110-4F71-4291-865A-EFCE56D37448}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppUI", "AppUI\AppUI.csproj", "{82B35110-4F71-4291-865A-EFCE56D37448}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanIt.Data", "PlanIt.Data\PlanIt.Data.csproj", "{6E7862D6-CE75-4103-942B-E24B4AF75583}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLayer", "DataLayer\DataLayer.csproj", "{6E7862D6-CE75-4103-942B-E24B4AF75583}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanIt.Background", "PlanIt.Background\PlanIt.Background.csproj", "{F3F2888E-5C38-41F2-AD56-1559B2F40F32}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notificator", "Notificator\Notificator.csproj", "{F3F2888E-5C38-41F2-AD56-1559B2F40F32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanIt.Core", "PlanIt.Core\PlanIt.Core.csproj", "{030E81CC-D234-437C-A042-D7DC4D1CC458}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{030E81CC-D234-437C-A042-D7DC4D1CC458}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

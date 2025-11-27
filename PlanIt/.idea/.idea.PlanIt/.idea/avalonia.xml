@@ -3,6 +3,11 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
+        <entry key="AppUI/App.axaml" value="AppUI/AppUI.csproj" />
+        <entry key="AppUI/Views/FilterAllView.axaml" value="AppUI/AppUI.csproj" />
+        <entry key="AppUI/Views/FilterScheduledView.axaml" value="AppUI/AppUI.csproj" />
+        <entry key="AppUI/Views/MainView.axaml" value="AppUI/AppUI.csproj" />
+        <entry key="AppUI/Views/WindowView.axaml" value="AppUI/AppUI.csproj" />
         <entry key="PlanIt.UI/App.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
         <entry key="PlanIt.UI/Assets/Styles/Icons.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />
         <entry key="PlanIt.UI/Assets/Styles/Styles.axaml" value="PlanIt.UI/PlanIt.UI.csproj" />

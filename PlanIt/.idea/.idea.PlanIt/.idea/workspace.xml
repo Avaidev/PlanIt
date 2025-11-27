@@ -10,43 +10,96 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="34151c3f-ecca-417b-a387-6806daa84ad2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/PlanIt.UI/Services/ThemeBindingRefreshService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/AppUI/AppUI.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/AppUI/Assets/planit-icon.ico" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Core.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Services/AppConfigManager.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Data/appsettings.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DataLayer/DataLayer.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DataLayer/Models/AppSettings.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.PlanIt/.idea/avalonia.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.PlanIt/.idea/avalonia.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.PlanIt/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.PlanIt/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data/categories.bson" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Data/tasks.bson" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.Background/NotificationHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.Background/NotificationHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.Background/PlanIt.Background.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.Background/PlanIt.Background.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/DateTimeMonitor/TimeMonitor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.Core/Services/DateTimeMonitor/TimeMonitor.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/DateTimeMonitor/TimeMonitorCallbackFuncs.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/NotificationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.Core/Services/NotificationService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.Core1/PlanIt.Core1.csproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Models/Category.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.Data/Models/Category.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Services/TasksRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.Data/Services/TasksRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Services/Utils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.Data/Services/Utils.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/App.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/App.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/App.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/App.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Converters/FilterBlockResponsiveWidthConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Converters/FilterBlockResponsiveWidthConverter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Services/BackgroundController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Services/BackgroundController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Services/ViewController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Services/ViewController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Styles/Icons.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Styles/Icons.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Styles/Styles.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Styles/Styles.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Styles/Themes.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Styles/Themes.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/FilterImportantViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/ViewModels/FilterCompletedViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/MainViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/ViewModels/MainViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/SearchViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/ViewModels/SearchViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/TaskManagerViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/ViewModels/TaskManagerViewModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/CategoryCreationView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/CategoryCreationView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterAllView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/FilterAllView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterImportantView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/FilterCompletedView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterImportantView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/FilterCompletedView.axaml.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterScheduledView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/FilterScheduledView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterTodayView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/FilterTodayView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/MainView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/MainView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/SearchView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/SearchView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/TaskCreationView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/TaskCreationView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/WindowView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.UI/Views/WindowView.axaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PlanIt.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data/categories.bson" beforeDir="false" afterPath="$PROJECT_DIR$/Data/categories.bson" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Data/tasks.bson" beforeDir="false" afterPath="$PROJECT_DIR$/Data/tasks.bson" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Background/NotificationHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Notificator/NotificationHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Background/PlanIt.Background.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Notificator/Notificator.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Background/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Notificator/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Background/Properties/launchSettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/Notificator/Properties/launchSettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Background/Worker.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Notificator/Worker.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Background/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/Notificator/appsettings.Development.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Background/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/Notificator/appsettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Core/PlanIt.Core.csproj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/DataAccessService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/DataAccessService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/DateTimeMonitor/TimeMonitor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/DateTimeMonitor/TimeMonitor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/DateTimeMonitor/TimeObjectRepositoryAdapter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/DateTimeMonitor/TimeObjectRepositoryAdapter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/MessageService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/MessageService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/NotificationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/NotificationService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/Pipe/PipeConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/Pipe/PipeConfig.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/Pipe/TwoWayPipeClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/Pipe/TwoWayPipeClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Core/Services/Pipe/TwoWayPipeServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Services/Pipe/TwoWayPipeServer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Interfaces/IMonitorItem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Interfaces/IMonitorItem.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Interfaces/IObjectRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Interfaces/IObjectRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Interfaces/ITimedObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Interfaces/ITimedObject.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Models/Category.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Models/Category.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Models/MonitorItem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Models/MonitorItem.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Models/Node.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Models/Node.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Models/TaskItem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Models/TaskItem.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/PlanIt.Data.csproj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Services/CategoriesRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Services/CategoriesRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Services/ObjectRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Services/ObjectRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Services/TasksRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Services/TasksRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.Data/Services/Utils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DataLayer/Services/Utils.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/App.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/App.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/App.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/App.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Assets/avalonia-logo.ico" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Assets/avalonia-logo.ico" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Converters/DateTimeToDateConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Converters/DateTimeToDateConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Converters/DateTimeToTimeConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Converters/DateTimeToTimeConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Converters/DividerResponsiveWidthConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Converters/DividerResponsiveWidthConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Converters/FilterBlockResponsiveWidthConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Converters/FilterBlockResponsiveWidthConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Converters/ResourceLookupConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Converters/ResourceLookupConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Converters/ShowKeyFromPairConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Converters/ShowKeyFromPairConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Converters/TaskIsMissedConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Converters/TaskIsMissedConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Converters/TaskStatusToClassesConverter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Converters/TaskStatusToClassesConverter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/PlanIt.UI.csproj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Services/BackgroundController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Services/BackgroundController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Services/NavigationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Services/NavigationService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Services/ThemeBindingRefreshService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Services/ThemeBindingRefreshService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Services/ViewController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Services/ViewController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Styles/Icons.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Styles/Icons.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Styles/Styles.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Styles/Styles.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Styles/Themes.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Styles/Themes.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewLocator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewLocator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/CategoryManagerViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/CategoryManagerViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/FilterAllViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/FilterAllViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/FilterCompletedViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/FilterCompletedViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/FilterScheduledViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/FilterScheduledViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/FilterTodayViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/FilterTodayViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/MainViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/MainViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/SearchViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/SearchViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/TaskManagerViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/TaskManagerViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/ViewModelBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/ViewModelBase.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/ViewModels/WindowViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/ViewModels/WindowViewModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/CategoryCreationView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/CategoryCreationView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/CategoryCreationView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/CategoryCreationView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterAllView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/FilterAllView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterAllView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/FilterAllView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterCompletedView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/FilterCompletedView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterCompletedView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/FilterCompletedView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterScheduledView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/FilterScheduledView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterScheduledView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/FilterScheduledView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterTodayView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/FilterTodayView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/FilterTodayView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/FilterTodayView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/MainView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/MainView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/MainView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/MainView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/SearchView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/SearchView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/SearchView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/SearchView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/TaskCreationView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/TaskCreationView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/TaskCreationView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/TaskCreationView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/WindowView.axaml" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/WindowView.axaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/Views/WindowView.axaml.cs" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/Views/WindowView.axaml.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.UI/app.manifest" beforeDir="false" afterPath="$PROJECT_DIR$/AppUI/app.manifest" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PlanIt.sln" beforeDir="false" afterPath="$PROJECT_DIR$/PlanIt.sln" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,6 +108,13 @@
   </component>
   <component name="DpaMonitoringSettings">
     <option name="firstShow" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JSON File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
@@ -84,25 +144,28 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/b3575a2f41d7c2dbfaa36e866b8a361e11dd7223ff82bc574c1d5d4b7522f735/Future.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/ceefe1b1ae7acb46df8b369547b87717be93e4b7ddefc94bc0f172ad7b7853b8/ToastContentBuilder.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/f5c5fabf10b2751774ff136491ac41fbc0932fbd1315879ac29f2d13e2ad24b/Monitor.CoreCLR.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Background/NotificationHandler.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Core/Services/DataAccessService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Core/Services/DateTimeMonitor/TimeMonitor.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Core/Services/DateTimeMonitor/TimeObjectRepositoryAdapter.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Core/Services/NotificationService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Core/Services/Pipe/PipeConfig.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Core/Services/Pipe/TwoWayPipeClient.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Core/Services/Pipe/TwoWayPipeServer.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Data/Interfaces/IMonitorItem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Data/Interfaces/IObjectRepository.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Data/Interfaces/ITimedObject.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Data/Models/MonitorItem.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Data/Services/CategoriesRepository.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.Data/Services/TasksRepository.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.UI/Converters/TaskIsMissedConverter.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.UI/Converters/TaskStatusToClassesConverter.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.UI/Services/BackgroundController.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.UI/Services/NavigationService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/PlanIt.UI/Services/ThemeBindingRefreshService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/AppUI/Converters/TaskIsMissedConverter.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/AppUI/Converters/TaskStatusToClassesConverter.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/AppUI/Services/BackgroundController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/AppUI/Services/NavigationService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/AppUI/Services/ThemeBindingRefreshService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Services/AppConfigManager.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Services/DataAccessService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Services/DateTimeMonitor/TimeMonitor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Services/DateTimeMonitor/TimeObjectRepositoryAdapter.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Services/NotificationService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Services/Pipe/PipeConfig.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Services/Pipe/TwoWayPipeClient.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Core/Services/Pipe/TwoWayPipeServer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Data/appsettings.json" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/DataAccess/Interfaces/IMonitorItem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/DataAccess/Interfaces/IObjectRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/DataAccess/Interfaces/ITimedObject.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/DataAccess/Models/AppSettings.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/DataAccess/Models/MonitorItem.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/DataAccess/Services/CategoriesRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/DataAccess/Services/TasksRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Notificator/NotificationHandler.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProblemsViewState">
@@ -152,7 +215,7 @@
       <option name="USE_MONO" value="0" />
       <option name="RUNTIME_ARGUMENTS" value="" />
       <option name="AUTO_ATTACH_CHILDREN" value="0" />
-      <option name="PROJECT_PATH" value="$PROJECT_DIR$/PlanIt.UI/PlanIt.UI.csproj" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/AppUI/AppUI.csproj" />
       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
       <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
@@ -177,7 +240,7 @@
       <option name="USE_MONO" value="0" />
       <option name="RUNTIME_ARGUMENTS" value="" />
       <option name="AUTO_ATTACH_CHILDREN" value="0" />
-      <option name="PROJECT_PATH" value="$PROJECT_DIR$/PlanIt.UI/PlanIt.UI.csproj" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/AppUI/AppUI.csproj" />
       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
       <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
@@ -190,7 +253,7 @@
       </method>
     </configuration>
     <configuration name="PlanIt.Background-win" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
-      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/PlanIt.Background/PlanIt.Background.csproj" />
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/Notificator/Notificator.csproj" />
       <option name="LAUNCH_PROFILE_TFM" value="net9.0-windows10.0.26100.0" />
       <option name="LAUNCH_PROFILE_NAME" value="PlanIt.Background" />
       <option name="USE_EXTERNAL_CONSOLE" value="0" />
@@ -208,7 +271,7 @@
       </method>
     </configuration>
     <configuration name="PlanIt.Background" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
-      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/PlanIt.Background/PlanIt.Background.csproj" />
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/Notificator/Notificator.csproj" />
       <option name="LAUNCH_PROFILE_TFM" value="net9.0" />
       <option name="LAUNCH_PROFILE_NAME" value="PlanIt.Background" />
       <option name="USE_EXTERNAL_CONSOLE" value="0" />
@@ -246,7 +309,9 @@
       <workItem from="1764007444675" duration="8699000" />
       <workItem from="1764016195742" duration="779000" />
       <workItem from="1764016993868" duration="2004000" />
-      <workItem from="1764093626253" duration="30338000" />
+      <workItem from="1764093626253" duration="30594000" />
+      <workItem from="1764234295629" duration="612000" />
+      <workItem from="1764249654545" duration="11962000" />
     </task>
     <task id="LOCAL-00001" summary="Project structure changed to multi-layer;&#10;Getting Data folder path function changed;">
       <option name="closed" value="true" />
@@ -296,7 +361,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764095674038</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Notifications full working;&#10;Bug fixes;&#10;Light theme added;&#10;Dark theme changed;&#10;Window refreshing added;&#10;FilterImportant removed;&#10;FilterCompleted added;&#10;Toggle theme switch design changed">
+      <option name="closed" value="true" />
+      <created>1764192912742</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1764192912743</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -311,7 +384,8 @@
     <MESSAGE value="Background app implementation;&#10;Pipe server/client connector created;&#10;TimeMonitor created;&#10;NotificationHandler created;&#10;Background Avalonia monitor added;&#10;Navigation Avalonia service added;&#10;Dependency injection implemented;&#10;Notification object removed;&#10;Notification Repository removed;&#10;Notifications now in TaskItem objects;&#10;Data folder path getter logic changed;&#10;Logger added;&#10;Bug fixes;" />
     <MESSAGE value="Background compl;&#10;Notifications started" />
     <MESSAGE value="PlanIt.Background now working;&#10;BackgroundController now working;&#10;Notifications now working;&#10;&#10;Implemented connecting, reconnecting, disconnecting from back;&#10;Implemented autostart of background app working;&#10;&#10;Cross-platform partially implemented (win, osx, linux)" />
-    <option name="LAST_COMMIT_MESSAGE" value="PlanIt.Background now working;&#10;BackgroundController now working;&#10;Notifications now working;&#10;&#10;Implemented connecting, reconnecting, disconnecting from back;&#10;Implemented autostart of background app working;&#10;&#10;Cross-platform partially implemented (win, osx, linux)" />
+    <MESSAGE value="Notifications full working;&#10;Bug fixes;&#10;Light theme added;&#10;Dark theme changed;&#10;Window refreshing added;&#10;FilterImportant removed;&#10;FilterCompleted added;&#10;Toggle theme switch design changed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Notifications full working;&#10;Bug fixes;&#10;Light theme added;&#10;Dark theme changed;&#10;Window refreshing added;&#10;FilterImportant removed;&#10;FilterCompleted added;&#10;Toggle theme switch design changed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
