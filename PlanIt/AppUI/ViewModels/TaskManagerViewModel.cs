@@ -112,7 +112,7 @@ public class TaskManagerViewModel : ViewModelBase
     {
         task.IsDone = !task.IsDone;
         await _db.Tasks.Update(task);
-        await _backgroundController.SendData(task.Id.ToByteArray());
+        await _backgroundController.SendData(task.Id.ToByteArray(), 0);
         ViewController.MarkTaskInView(task);
         return Unit.Default;
     });
@@ -134,7 +134,7 @@ public class TaskManagerViewModel : ViewModelBase
         if (await taskRemove && await updateCategory)
         {
             _logger.LogInformation("[TaskManager > RemoveTask] Task '{TaskTitle}' was removed", task.Title);
-            await _backgroundController.SendData(task.Id.ToByteArray());
+            await _backgroundController.SendData(task.Id.ToByteArray(), 0);
             ViewController.RemoveTaskFromView(task);
             return true;
         }
@@ -182,7 +182,7 @@ public class TaskManagerViewModel : ViewModelBase
             newTask.CategoryObject = category;
             ViewController.AddTaskToView(newTask);
             HideOverlay.Execute().Subscribe();
-            await _backgroundController.SendData([..newTask.Id.ToByteArray(), 1]);
+            await _backgroundController.SendData(newTask.Id.ToByteArray(), 2);
             _logger.LogInformation("[TaskCreation] Task '{NewTaskTitle}' was created", newTask.Title);
             return true;
         }
@@ -198,7 +198,7 @@ public class TaskManagerViewModel : ViewModelBase
             newTask.CategoryObject = category;
             ViewController.ChangeTaskInView(newTask);
             HideOverlay.Execute().Subscribe();
-            await _backgroundController.SendData([..newTask.Id.ToByteArray(), 0]);
+            await _backgroundController.SendData(newTask.Id.ToByteArray(), 1);
             _logger.LogInformation("[TaskCreation] Task '{NewTaskTitle}' was updated", newTask.Title);
             return true;
         }

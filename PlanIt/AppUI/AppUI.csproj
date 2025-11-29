@@ -9,8 +9,9 @@
         <RootNamespace>PlanIt.UI</RootNamespace>
         <AssemblyName>PlanIt</AssemblyName>
         <ApplicationIcon>Assets/planit-icon.ico</ApplicationIcon>
-        <PublishAot>true</PublishAot>
+        <PublishAot>false</PublishAot>
         <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+        <PublishTrimmed>false</PublishTrimmed>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(TargetFramework.StartsWith('net9.0-windows10'))">

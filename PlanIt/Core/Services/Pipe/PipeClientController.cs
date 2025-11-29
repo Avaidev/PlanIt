@@ -3,40 +3,44 @@ using Microsoft.Extensions.Logging;
 
 namespace PlanIt.Core.Services.Pipe;
 
-public class TwoWayPipeClient : IDisposable
+public class PipeClientController : IDisposable
 {
     #region Initialization
-    public TwoWayPipeClient(ILogger<TwoWayPipeClient> logger, PipeConfig config)
+    public PipeClientController(ILogger<PipeClientController> logger)
     {
-        _config = config;
         _logger = logger;
     }
     #endregion
 
     #region Attributes
-    private readonly PipeConfig _config;
-    private readonly ILogger<TwoWayPipeClient> _logger;
+    private readonly ILogger<PipeClientController> _logger;
     private NamedPipeClientStream? _pipeClient;
     private CancellationTokenSource _cancellationTokenSource;
     private bool _disposed = false;
+    private int _bufferSize = 1024;
+    
+    private Action<bool>? ConnectionResult;
+    private Action<byte[]>? OnDataReceived;
+    private Action? ConnectionBroke;
+
+    public int BufferSize
+    {
+        get => _bufferSize;
+        set 
+        {
+            if (value >= 1) _bufferSize = value;
+        }
+    }
+
     #endregion
     
-    public void AddReceivedCallback(Action<byte[]> callback)
-    {
-        _config.OnDataReceived += callback;
-    }
+    public void AddReceivedCallback(Action<byte[]> callback) => OnDataReceived += callback;
 
-    public void AddConnectedCallback(Action<bool> callback)
-    {
-        _config.ConnectionResult?.Invoke(true);
-    }
+    public void AddConnectedCallback(Action<bool> callback) => ConnectionResult += callback;
 
-    public void AddConnectionBrokeCallback(Action callback)
-    {
-        _config.OnConnectionBroke += callback;
-    }
+    public void AddConnectionBrokeCallback(Action callback) => ConnectionBroke += callback;
 
-    public async Task<bool> Connect(int timeout = 5000)
+    public async Task<bool> Connect(string pipeName, int timeout = 5000)
     {
         _cancellationTokenSource = new CancellationTokenSource();
         CancellationToken cancellationToken = _cancellationTokenSource.Token;
@@ -44,7 +48,7 @@ public class TwoWayPipeClient : IDisposable
         {
             _pipeClient = new NamedPipeClientStream(
                 ".",
-                _config.PipeName,
+                pipeName,
                 PipeDirection.InOut,
                 PipeOptions.Asynchronous);
 
@@ -52,14 +56,14 @@ public class TwoWayPipeClient : IDisposable
             await _pipeClient.ConnectAsync(timeout, cancellationToken);
             _logger.LogInformation("[PipeClient] Connected to pipe server");
 
-            _config.ConnectionResult?.Invoke(true);
+            ConnectionResult?.Invoke(true);
             _ = Task.Run(() => ListenForData(cancellationToken), cancellationToken);
             return true;
         }
         catch (TimeoutException)
         {
             _logger.LogInformation("[PipeClient] Timed out");
-            _config.ConnectionResult?.Invoke(false);
+            ConnectionResult?.Invoke(false);
             return false;
         }
         catch (OperationCanceledException)
@@ -69,7 +73,7 @@ public class TwoWayPipeClient : IDisposable
         catch (Exception ex)
         {
             _logger.LogError($"[PipeClient] Exception: {ex.Message}");
-            _config.ConnectionResult?.Invoke(false);
+            ConnectionResult?.Invoke(false);
             return false;
         }
     }
@@ -85,17 +89,17 @@ public class TwoWayPipeClient : IDisposable
     {
         if (_pipeClient is not { IsConnected: true }) return;
         _logger.LogInformation("[PipeClient] Listening for data...");
-        byte[] buffer = new byte[_config.BufferSize];
+        byte[] buffer = new byte[_bufferSize];
         while (_pipeClient.IsConnected && !cancellationToken.IsCancellationRequested)
         {
             try
             {
-                int readBytes = await _pipeClient.ReadAsync(buffer, 0, _config.BufferSize, cancellationToken);
+                int readBytes = await _pipeClient.ReadAsync(buffer, 0, _bufferSize, cancellationToken);
                 if (readBytes == 0) break;
                 byte[] received = new byte[readBytes];
                 Buffer.BlockCopy(buffer, 0, received, 0, readBytes);
-                _logger.LogDebug("[PipeClient] Received {ReadBytes} bytes]", readBytes);
-                _config.OnDataReceived?.Invoke(received);
+                _logger.LogInformation("[PipeClient] Received {ReadBytes} bytes", readBytes);
+                OnDataReceived?.Invoke(received);
             }
             catch (Exception ex)
             {
@@ -103,7 +107,7 @@ public class TwoWayPipeClient : IDisposable
             }
         }
         _logger.LogInformation("[PipeClient] Connection broke");
-        _config.OnConnectionBroke?.Invoke();
+        ConnectionBroke?.Invoke();
     }
     
     public async Task SendData(byte[] data)

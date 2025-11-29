@@ -1,8 +1,12 @@
-﻿using MongoDB.Bson;
+﻿using System.Diagnostics;
+#if WINDOWS
+using Windows.UI.Notifications;
+#endif
+using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Uwp.Notifications;
+using MongoDB.Bson;
 using PlanIt.Core.Services;
-using PlanIt.Core.Services.DateTimeMonitor;
 using PlanIt.Core.Services.Pipe;
-using PlanIt.Data.Interfaces;
 using PlanIt.Data.Models;
 using PlanIt.Data.Services;
 
@@ -10,139 +14,161 @@ namespace PlanIt.Notificator;
 
 public class NotificationHandler : IDisposable
 {
-    private readonly ILogger<NotificationHandler> _logger;
-    private TasksRepository _tasksRepo;
-    private TimeMonitor _monitor;
-    private TwoWayPipeServer _server;
-
-    public NotificationHandler(ILogger<NotificationHandler> logger, TimeMonitor monitor,TwoWayPipeServer server)
+    public NotificationHandler(ILogger<NotificationHandler> logger, PipeClientController clientController)
     {
-        _server = server;
         _logger = logger;
-        _monitor = monitor;
-        _tasksRepo = new TasksRepository();
-    }
-
-    public async Task PrepareHandler()
-    {
-        _logger.LogInformation("[NotificationHandler] Preparing handler]");
-        await _monitor.PrepareMonitorAsync(new TimeObjectRepositoryAdapter<TaskItem>(_tasksRepo), TasksCallback);
-        _server.AddReceivedCallback(OnDataReceived);
-        RegisterDailyChecker();
-        await Task.Run(RenovateTasksAsync);
+        _pipeClientController = clientController;
+        _taskRepository = new TasksRepository();
+        _settings = AppConfigManager.Settings;
+        _pipeClientController.BufferSize = _settings.BufferSize;
+        _pipeClientController.AddConnectionBrokeCallback(OnConnectionBroke);
+        _pipeClientController.AddReceivedCallback(OnDataReceived);
     }
     
-    public void TasksCallback(ITimedObject obj, IMonitorItem.TargetTimeContext context)
+    private readonly TasksRepository _taskRepository;
+    private readonly AppSettings _settings;
+    private readonly ILogger<NotificationHandler> _logger;
+    private readonly PipeClientController _pipeClientController;
+    private CancellationTokenSource _cancellationTokenSource;
+
+    public async Task RunAsync()
     {
-        if (obj is not TaskItem task) return;
-        switch (context)
+        _cancellationTokenSource = new CancellationTokenSource();
+        _logger.LogInformation("[NotificationHandler] Starting");
+        if (await _pipeClientController.Connect(_settings.PipeName + ".Notificator", 10000))
         {
-            case IMonitorItem.TargetTimeContext.NOTIFICATION:
-            {
-                NotificationService.ShowNotificationTask(task);
-                break;
-            }
-
-            case IMonitorItem.TargetTimeContext.ENDING:
-                NotificationService.ShowMissedTask(task);
-                SendMissedTask(task.Id);
-                break;
-
-            case IMonitorItem.TargetTimeContext.CYCLED:
-            default:
-                break;
+            _logger.LogInformation("[NotificationHandler] Connected");
+            await WaitingForStopAsync(_cancellationTokenSource.Token);
         }
     }
-
-    public void StartHandling()
+    private async Task WaitingForStopAsync(CancellationToken cancellationToken)
     {
-        _server.StartServer();
-        _monitor.StartMonitoring();
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            await Task.Delay(1000, cancellationToken);
+        }
+    }
+    public void Stop()
+    {
+        _cancellationTokenSource.Cancel();
+        _pipeClientController.Disconnect();
     }
 
-    private void RegisterDailyChecker()
-    {
-        var targetTime = DateTime.Today.AddDays(1);
-        NonObjectCallback callback = DailyCheckerCallback;
-        var repeat = 24;
-        
-        _monitor.RegisterNonObjForMonitoring(targetTime, callback, repeat);
-    }
+    public void OnConnectionBroke() => Stop();
 
-    public void SendMissedTask(ObjectId id)
-    {
-        _ = _server.SendData(id.ToByteArray());
-    }
-    
+    // Data = [0 target][1 function][2:14 ObjectId] = 14 - operate with task; 
+    // Target: 0 - Server; 1 - UI; 2 - Notificator;
+    // Function: 0 - ConnectionBroke; 1 - Task Missed; 2 - Task Notification;
     public void OnDataReceived(byte[] data)
     {
-        if (data.Length == 12)
+        if (data.Length is not (14 or 2))
         {
-            var id = new ObjectId(data);
-            _monitor.RemoveMonitor(id);
+            _logger.LogWarning("[NotificationHandler] Received data of wrong length");
+            return;
         }
-        else if (data.Length == 13)
-        {
-            var flag = data[12];
-            var id = new ObjectId(data.Take(12).ToArray());
 
-            switch (flag)
+        var target = data[0];
+        if (target != 2)
+        {
+            _logger.LogWarning("[NotificationHandler] Client '2' received data for client '{0}'", target);
+            return;
+        }
+
+        var function = data[1];
+        var isMissed = false;
+        switch (function)
+        {
+            case 0:
+                OnConnectionBroke();
+                break;
+            
+            case 1:
+                isMissed = true;
+                goto case 2;
+            case 2:
             {
-                case 0:
-                    _monitor.RemoveMonitor(id, false);
-                    _monitor.TryAddOne(id);
-                    break;
-                case 1:
-                    _monitor.TryAddOne(id);
-                    break;
+                if (data.Length != 14) break;
+                var idBytes = new byte[12];
+                Array.Copy(data, 2, idBytes, 0, 12);
+                var objectId = new ObjectId(idBytes);
+                _ = Task.Run(() => SendNotification(objectId, isMissed));
+                break;
             }
+
+            default:
+                _logger.LogWarning($"[NotificationHandler] Received data with wrong function");
+                break;
         }
     }
 
-    public void DailyCheckerCallback()
+    private async Task SendNotification(ObjectId id, bool isMissed = false)
     {
-        _logger.LogInformation("Daily renovating...");
-        _monitor.StopMonitoring();
-         Task.Run(RenovateTasksAsync).GetAwaiter().GetResult();
-        _monitor.ClearAllItems();
-        RegisterDailyChecker();
-        _monitor.StartMonitoring();
-        _ = _server.SendData([1]);
-        _logger.LogInformation("Daily renovating completed");
-    }
-
-    private async Task RenovateTasksAsync()
-    {
-        var tasks = await _tasksRepo.GetAll();
-        foreach (var task in tasks)
+        var task = await _taskRepository.GetTask(id);
+        if (task == null)
         {
-            if (task.Repeat == null) continue;
-            var difference = (int)(DateTime.Today - task.CompleteDate.Date).TotalDays;
-            
-            if (difference <= 0) continue;
-            task.IsDone = false;
-            var intervalsNum = difference / task.Repeat.Value;
-            if (difference % task.Repeat.Value != 0) intervalsNum++;
-            
-            task.CompleteDate = task.CompleteDate.AddDays(intervalsNum * task.Repeat.Value);
-            task.NotifyDate = task.NotifyDate?.AddDays(intervalsNum * task.Repeat.Value);
+            _logger.LogWarning($"[NotificationHandler] Received task with id {id} not found");
+            return;
         }
-        
-        await _tasksRepo.ReplaceList(tasks);
+
+        ShowNotification(task.Title, isMissed ? "You missed the task" : $"{Utils.CutString(task.Description, 15)}",
+            $"{task.CompleteDate:f}", id.ToString(), isMissed ? "taskMissed0" : "taskNotif0");
+    }
+    
+    private void ShowNotification(string title, string message, string other, string id, string? group = null)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+#if WINDOWS
+            var tag = id[..8];
+            group ??= Guid.NewGuid().ToString()[..4];
+            new ToastContentBuilder().AddText(title).AddText(message).AddText(other).Show(t =>
+            {
+                t.Tag = tag;
+                t.Group = group;
+
+                t.Activated += (sender, args) =>
+                {
+                    var history = ToastNotificationManagerCompat.History.GetHistory();
+                    if (history.Any(n => n.Tag == tag && n.Group == group))
+                    {
+                        ToastNotificationManagerCompat.History.Remove(tag, group);
+                    }
+                };
+            });
+#endif
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "notify-send",
+                    Arguments = $"\"{title}\" \"{message} at {other}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            process.Start();
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "osascript",
+                    Arguments = $"-e 'display notification \"{message} at {other}\" with title \"{title}\"'",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            process.Start();
+        }
     }
 
     public void Dispose()
     {
-        _logger.LogInformation("[NotificationHandler] Stopping at: {time}", DateTimeOffset.Now);
-        try
-        {
-            _server.SendData([0]).Wait(2000);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("[NotificationHandler] Failed to send message when disposing: {message}]", ex.Message);
-        }
-        _monitor.Dispose();
-        _server.Dispose();
+        _pipeClientController.Dispose();
     }
 }

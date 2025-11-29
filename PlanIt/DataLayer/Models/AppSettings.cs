@@ -2,9 +2,10 @@
 
 public class AppSettings
 {
-    public string AppName { get; set; } = "PlanIt";
-    public string ExeName { get; set; } = "Notifier";
-    public int MaxConnections { get; set; } = 1;
+    public string BackgroundName { get; set; } = "Monitor";
+    public string BackgroundNameExe { get; set; } = "Monitor";
+    public string NotificatorName { get; set; } = "Notifier";
+    public string NotificatorNameExe { get; set; } = "Notifier";
     public int BufferSize { get; set; } = 1024;
     public string PipeName { get; set; } = "PlanItPipe";
     public string Theme { get; set; } = "light";

@@ -47,4 +47,6 @@ public class MonitorItem<T> : IMonitorItem where T : ITimedObject
         if (TimeReachedCallbackObject != null) TimeReachedCallbackObject.Invoke(Item!, this.TimeContext);
         else TimeReachedCallbackNonObject?.Invoke();
     }
+    
+    public bool IsObject => Item != null;
 }

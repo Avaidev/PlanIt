@@ -88,7 +88,7 @@ public class TimeMonitor : IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogError("[TimeMonitor] Exception in items checking: {0}", ex.Message);
+                _logger.LogError("[TimeMonitor] Exception in items checking: {0} from source {1}", ex.Message, ex.Source);
             }
         }
     }
@@ -102,13 +102,23 @@ public class TimeMonitor : IDisposable
         }
 
         var objects = await _repository!.GetAll();
-        return objects
+        using var closestObjectsEnumerator = objects
             .Where(obj => !obj.IsDone)
             .Where(obj => !activeObjectIds.Contains(obj.Id))
-            .Where(obj => (obj.NotifyDate != null && Utils.CheckDateForTodayScheduled((DateTime)obj.NotifyDate)) || Utils.CheckDateForTodayScheduled(obj.CompleteDate))
-            .OrderBy(t => t.TargetTime)
-            .Take(count)
-            .ToList();
+            .Where(obj => (obj.NotifyDate != null && Utils.CheckDateForTodayScheduled((DateTime)obj.NotifyDate)) ||
+                          Utils.CheckDateForTodayScheduled(obj.CompleteDate))
+            .OrderBy(t => t.TargetTime).GetEnumerator();
+        if (!closestObjectsEnumerator.MoveNext()) return [];
+        var timeOfFirst = closestObjectsEnumerator.Current.TargetTime;
+        var i = 0;
+        List<ITimedObject> result = [closestObjectsEnumerator.Current];
+        while (closestObjectsEnumerator.MoveNext())
+        {
+            if (closestObjectsEnumerator.Current.TargetTime == timeOfFirst || i < count) 
+                result.Add(closestObjectsEnumerator.Current);
+            i++;
+        }
+        return result;
     }
     
     private async Task LoadMonitorsAsync(bool oneMore = false)
@@ -123,7 +133,7 @@ public class TimeMonitor : IDisposable
         else if (oneMore) needed++;
         
         if (needed <= 0) return;
-        var closestTasks = await GetTasksFromDbAsync(needed);
+        var closestTasks = await Task.Run(() => GetTasksFromDbAsync(needed));
         lock (_lock)
         {
             foreach (var task in closestTasks)
@@ -173,25 +183,41 @@ public class TimeMonitor : IDisposable
         try
         {
             LoadMonitorsAsync(true).Wait();
+            PriorityQueue<IMonitorItem, DateTime> tempQueue;
             lock (_lock)
             {
-                var addedItem = _activeItems.Values.FirstOrDefault(m => m.Id == id);
-                if (addedItem != null && _queue.TryPeek(out var item, out var priority) && item.Id != id &&
-                    _queue.Remove(addedItem, out var removed, out var _))
+                if (_queue.Count <= MAX_ACTIVE_ELEMENTS + 1) return;
+                tempQueue = new PriorityQueue<IMonitorItem, DateTime>(_queue.UnorderedItems);
+            }
+
+            bool isFirst = true;
+            IMonitorItem? firstElement = null;
+            IMonitorItem? lastElement = null;
+            while (tempQueue.TryDequeue(out var item, out _))
+            {
+                if (!item.IsObject) continue;
+                if (isFirst) firstElement = item;
+                lastElement = item;
+                isFirst = false;
+            }
+
+            if (firstElement != null && lastElement != null && !firstElement.TargetTime.Equals(lastElement.TargetTime))
+            {
+                lock (_lock)
                 {
-                    if (removed.Equals(addedItem)) _activeItems.Remove(id);
-                    else
+                    if (_queue.Remove(lastElement!, out var removedElement, out var priority))
                     {
-                        _queue.Enqueue(addedItem, addedItem.TargetTime);
+                        if (removedElement.Id == lastElement!.Id) _activeItems.Remove(lastElement.Id);
+                        else _queue.Enqueue(removedElement, priority);
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError("[TimeMonitor] Failed to add monitor with ID: {id}\nException: {ex}", id, ex.Message);
+            _logger.LogError("[TimeMonitor] Failed to add monitor with ID: {id} Exception: {ex}", id, ex.Message);
         }
-        
+
     }
     
     public bool RemoveMonitor(ObjectId id, bool reload = true)
@@ -199,7 +225,12 @@ public class TimeMonitor : IDisposable
         var removed = false;
         lock (_lock)
         {
-            removed = _activeItems.Remove(id);
+            if (_activeItems.Remove(id, out var element)
+                && _queue.Remove(element, out var actuallyRemoved, out var priority))
+            {
+                if (actuallyRemoved.Id != id) _queue.Enqueue(actuallyRemoved, priority);
+                removed = true;
+            }
         }
 
         _logger.LogInformation(removed

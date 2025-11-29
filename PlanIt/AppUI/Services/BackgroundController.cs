@@ -22,31 +22,31 @@ public class BackgroundController : IDisposable
 {
     #region Initialization
 
-    public BackgroundController(ILogger<BackgroundController> logger, TwoWayPipeClient pipeClient, ViewController viewController)
+    public BackgroundController(ILogger<BackgroundController> logger, PipeClientController pipeClientController, ViewController viewController)
     {
         _logger = logger;
         _settings = AppConfigManager.Settings;
         _viewController = viewController;
-        _pipeClient = pipeClient;
-        _pipeClient.AddReceivedCallback(OnDataReceived);
-        _pipeClient.AddConnectionBrokeCallback(OnConnectionBroke);
+        _pipeClientController = pipeClientController;
+        _pipeClientController.BufferSize = _settings.BufferSize;
+        _pipeClientController.AddReceivedCallback(OnDataReceived);
+        _pipeClientController.AddConnectionBrokeCallback(OnConnectionBroke);
     }
     #endregion
 
     private enum State {SHUT, CONNECTING, STARTING, CONNECTED, WORKING, RECONNECTING}
 
     private AppSettings _settings;
-    private const string folderName = "Notificator";
     private readonly ViewController _viewController;
     private readonly ILogger<BackgroundController> _logger;
-    private TwoWayPipeClient? _pipeClient;
+    private PipeClientController? _pipeClientController;
     private bool _startedByUs = false;
     private State _state = State.SHUT;
 
     public async Task Connect()
     {
         if (_state == State.SHUT) _state = State.CONNECTING;
-        if (await _pipeClient!.Connect())
+        if (await _pipeClientController!.Connect(_settings.PipeName + ".UI"))
         {
             _state = State.CONNECTED;
             return;
@@ -95,7 +95,7 @@ public class BackgroundController : IDisposable
 
     public void StopConnection()
     {
-        _pipeClient!.Disconnect();
+        _pipeClientController!.Disconnect();
         if (_startedByUs) StopExeApp();
         _startedByUs = false;
         _state = State.SHUT;
@@ -121,30 +121,52 @@ public class BackgroundController : IDisposable
         }
     }
 
-    public async Task SendData(byte[] data)
+    public async Task SendData(byte[] data, byte function)
     {
-        await _pipeClient!.SendData(data);
+        await _pipeClientController!.SendData([0, function, ..data]);
     }
 
+    // Data = [0 target][1 function][2:14 ObjectId] = 14 - operate with task; 
+    // Target: 0 - Server; 1 - UI; 2 - Notificator;
+    // Function: 0 - ConnectionBroke; 1 - Reload View; 2 - Mark Task as Missed;
     public void OnDataReceived(byte[] data)
     {
-        if (data.Length == 12)
+        if (data.Length is not (14 or 2))
         {
-            var objectId = new ObjectId(data);
-            Dispatcher.UIThread.Post(() => _viewController.MarkTaskAsMissed(objectId));
+            _logger.LogWarning("[BackgroundController] Received data of wrong length");
+            return;
         }
-        else if (data.Length == 1)
+
+        var target = data[0];
+        if (target != 1)
         {
-            switch (data[0])
+            _logger.LogWarning("[BackgroundController] Client '1' received data for client '{0}'", target);
+            return;
+        }
+
+        var function = data[1];
+        switch (function)
+        {
+            case 0:
+                OnConnectionBroke();
+                break;
+
+            case 1:
+                Dispatcher.UIThread.Post(() => _viewController.ReloadView());
+                break;
+            
+            case 2:
             {
-                case 0:
-                    OnConnectionBroke();
-                    break;
-                
-                case 1:
-                    Dispatcher.UIThread.Post(() => _viewController.ReloadView());
-                    break;
+                var idBytes = new byte[12];
+                Array.Copy(data, 2, idBytes, 0, 12);
+                var objectId = new ObjectId(idBytes);
+                Dispatcher.UIThread.Post(() => _viewController.MarkTaskAsMissed(objectId));
+                break;
             }
+
+            default:
+                _logger.LogWarning($"[BackgroundController] Received data with wrong function");
+                break;
         }
     }
 
@@ -195,7 +217,7 @@ public class BackgroundController : IDisposable
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false);
-            var value = key?.GetValue(_settings.AppName) as string;
+            var value = key?.GetValue(_settings.BackgroundName) as string;
             if (!string.IsNullOrEmpty(value) && ParseRegistryValue(value) is string path)
             {
                 Process.Start(path);
@@ -217,7 +239,7 @@ public class BackgroundController : IDisposable
 #if WINDOWS 
         try
         {
-            if (OperatingSystem.IsWindows())
+            if (!OperatingSystem.IsWindows())
             {
                 _logger.LogWarning("Auto-start is only supported on Windows");
                 return false;
@@ -235,7 +257,7 @@ public class BackgroundController : IDisposable
 
             if (enable)
             {
-                var appPath = Utils.GetAppPath(_settings.ExeName, folderName);
+                var appPath = Utils.GetAppPath(_settings.BackgroundNameExe, "MonitorService");
                 if (string.IsNullOrEmpty(appPath))
                 {
                     _logger.LogError("Cannot set auto-start: Background app not found");
@@ -243,13 +265,13 @@ public class BackgroundController : IDisposable
                 }
 
                 var registryValue = $"\"{appPath}\" --autostart";
-                key.SetValue(_settings.AppName, registryValue);
+                key.SetValue(_settings.BackgroundName, registryValue);
             
                 _logger.LogInformation("Auto-start enabled for background app: {Path}", appPath);
             }
             else
             {
-                key.DeleteValue(_settings.AppName, false);
+                key.DeleteValue(_settings.BackgroundName, false);
                 _logger.LogInformation("Auto-start disabled for background app");
             }
 
@@ -271,7 +293,7 @@ public class BackgroundController : IDisposable
     {
         try
         {
-            var appPath = Utils.GetAppPath(_settings.ExeName, folderName);
+            var appPath = Utils.GetAppPath(_settings.BackgroundNameExe, "MonitorService");
             if (string.IsNullOrEmpty(appPath))
             {
                 _logger.LogError("[BackgroundController] No background app executable path provided");
@@ -317,7 +339,7 @@ public class BackgroundController : IDisposable
     {
         try
         {
-            var processes = Process.GetProcessesByName(_settings.ExeName);
+            var processes = Process.GetProcessesByName(_settings.BackgroundNameExe);
             return (processes.Length > 0);
         }
         catch
@@ -337,7 +359,7 @@ public class BackgroundController : IDisposable
 
         try
         {
-            var processes = Process.GetProcessesByName(_settings.ExeName);
+            var processes = Process.GetProcessesByName(_settings.BackgroundNameExe);
 
             bool killed = true;
             foreach (var process in processes)

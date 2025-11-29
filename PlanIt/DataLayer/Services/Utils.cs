@@ -26,24 +26,26 @@ public static class Utils
     
     public static string GetDataDirectory()
     {
-        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        string dataPath = Path.Combine(baseDir, "..", "..", "..", "..", "Data");
-        dataPath = Path.GetFullPath(dataPath);
-        
-        if (Directory.Exists(dataPath))
+        var currentDir = AppContext.BaseDirectory;
+        var dataFolder = "Data";
+
+        var availablePaths = new[]
         {
-            return dataPath;
+            Path.Combine(currentDir, "..", dataFolder),
+            Path.Combine(currentDir, "..", "..", dataFolder),
+            Path.Combine(currentDir, "..", "..", "..", "..", dataFolder),
+        };
+
+        foreach (var path in availablePaths)
+        {
+            var fullPath = Path.GetFullPath(path);
+            if (Directory.Exists(fullPath))
+            {
+                return fullPath;
+            }
         }
         
-        string parentDataPath = Path.Combine(baseDir, "..", "Data");
-        parentDataPath = Path.GetFullPath(parentDataPath);
-        
-        if (Directory.Exists(parentDataPath))
-        {
-            return parentDataPath;
-        }
-        
-        string localDataPath = Path.Combine(baseDir, "Data");
+        var localDataPath = Path.Combine(currentDir, "..", "Data");
         Directory.CreateDirectory(localDataPath);
         Console.WriteLine($"Created Data directory at {localDataPath}");
         return localDataPath;
@@ -72,45 +74,28 @@ public static class Utils
         try
         {
             var exeName = OperatingSystem.IsWindows() ? appName + ".exe" : appName;
-        
             var currentDir = AppContext.BaseDirectory;
-            Console.WriteLine($"[APPDIR] UI App directory: {currentDir}");
-
-            var projectDir = Directory.GetParent(currentDir)?.Parent?.Parent?.Parent?.FullName;
-            if (!string.IsNullOrEmpty(projectDir))
+            var tfm = OperatingSystem.IsWindows() ? "net9.0-windows10.0.26100.0" : "net9.0";
+            
+            var availablePaths = new[]
             {
-                var backgroundDir = Path.Combine(projectDir, "..", folder.Trim());
-                backgroundDir = Path.GetFullPath(backgroundDir);
-            
-                Console.WriteLine($"[LOOKUP] Looking in background directory: {backgroundDir}");
-            
-                var productionPath = Path.Combine(backgroundDir, exeName);
-                if (File.Exists(productionPath))
-                {
-                    Console.WriteLine($"[FOUND] Found in production: {productionPath}");
-                    return productionPath;
-                }
-            
-                var developmentPath = Path.Combine(backgroundDir, "bin", "Debug", OperatingSystem.IsWindows() ? "net9.0-windows10.0.26100.0" : "net9.0", exeName);
-                if (File.Exists(developmentPath))
-                {
-                    Console.WriteLine($"[FOUND] Found in development: {developmentPath}");
-                    return developmentPath;
-                }
-            
-                var releasePath = Path.Combine(backgroundDir, "bin", "Release", OperatingSystem.IsWindows() ? "net9.0-windows10.0.26100.0" : "net9.0", exeName);
-                if (File.Exists(releasePath))
-                {
-                    Console.WriteLine($"[FOUND] Found in release: {releasePath}");
-                    return releasePath;
-                }
-            }
+                Path.Combine(currentDir, "..", folder, exeName),
+                Path.Combine(currentDir, "..", "..", folder, exeName),
+                Path.Combine(currentDir, "..", "..", "..", "..", folder, "bin", "Debug", tfm, exeName),
+                Path.Combine(currentDir, "..", "..", "..", "..", folder, "bin", "Release", tfm, exeName),
+                Path.Combine(currentDir, exeName),
+                Path.Combine(currentDir, "..", exeName)
+            };
 
-            var currentDirPath = Path.Combine(currentDir, exeName);
-            if (File.Exists(currentDirPath))
+            foreach (var path in availablePaths)
             {
-                Console.WriteLine($"[FOUND] Found in current directory: {currentDirPath}");
-                return currentDirPath;
+               var fullPath = Path.GetFullPath(path);
+               Console.WriteLine($"[LOOKUP] {fullPath}");
+               if (File.Exists(fullPath))
+               {
+                   Console.WriteLine($"[FOUND] Found in: {fullPath}");
+                   return fullPath;
+               }
             }
 
             Console.WriteLine($"[NOT FOUND] Background app not found");

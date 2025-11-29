@@ -13,11 +13,12 @@ namespace PlanIt.UI.ViewModels;
 public class CategoryManagerViewModel : ViewModelBase
 {
     #region Initialization
-    public  CategoryManagerViewModel(DataAccessService db, ViewController controller, ILogger<CategoryManagerViewModel> logger)
+    public  CategoryManagerViewModel(DataAccessService db, ViewController controller, ILogger<CategoryManagerViewModel> logger, BackgroundController backgroundController)
     {
         _logger = logger;
         _db = db;
         ViewController = controller;
+        _backgroundController = backgroundController;
         ReturnToDefault();
     }
     
@@ -32,6 +33,7 @@ public class CategoryManagerViewModel : ViewModelBase
     private Category _newCategory;
     private readonly ILogger<CategoryManagerViewModel> _logger;
     private readonly DataAccessService _db;
+    private readonly BackgroundController _backgroundController;
     
     private bool _editMode;
     
@@ -58,7 +60,12 @@ public class CategoryManagerViewModel : ViewModelBase
                 var tasks = await _db.Tasks.GetTasksByCategory(category);
                 if (await _db.Tasks.RemoveMany(tasks))
                 {
-                    ViewController.AfterRemovingTasksMany(tasks);
+                    foreach (var task in tasks)
+                    {
+                        await _backgroundController.SendData(task.Id.ToByteArray(), 0);
+                        ViewController.DecreaseFiltersNumbers(task);
+                        await Task.Delay(100);
+                    }
                     Console.WriteLine($"[CategoryManager > RemoveCategory] All tasks of {category.Title} were removed");
                 }
                 else return false;

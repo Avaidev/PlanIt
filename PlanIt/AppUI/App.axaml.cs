@@ -30,18 +30,10 @@ public partial class App : Application
             builder.AddConsole().AddDebug();
         });
 
-        var settings = AppConfigManager.Settings;
-        
-        collection.AddSingleton<PipeConfig>(config => new PipeConfig
-        {
-            PipeName = settings.PipeName,
-            BufferSize = settings.BufferSize
-        });
-        
         collection.AddSingleton<DataAccessService>();
         collection.AddSingleton<ViewController>();
         collection.AddSingleton<NavigationService>();
-        collection.AddSingleton<TwoWayPipeClient>();
+        collection.AddSingleton<PipeClientController>();
         collection.AddSingleton<BackgroundController>();
         collection.AddSingleton<TaskManagerViewModel>();
         collection.AddSingleton<CategoryManagerViewModel>();

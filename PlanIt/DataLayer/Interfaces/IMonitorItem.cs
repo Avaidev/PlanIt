@@ -10,4 +10,5 @@ public interface IMonitorItem
     TargetTimeContext TimeContext { get; }
     int CycleRepeater { get; set; }
     void ExecuteCallback();
+    bool IsObject { get; }
 }

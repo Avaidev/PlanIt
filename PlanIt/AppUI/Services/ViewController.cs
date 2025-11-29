@@ -249,6 +249,7 @@ public class ViewController : ReactiveObject
         {
             case ViewStates.CATEGORY:
                 if (SelectedCategory != null && category.Id == SelectedCategory.Id) SelectedCategory = null;
+                TasksCollection.Clear();
                 break;
             
             case ViewStates.ALL:
@@ -277,19 +278,19 @@ public class ViewController : ReactiveObject
     }
 
 
-    private void DecreaseFiltersNumbers(TaskItem task)
+    public void DecreaseFiltersNumbers(TaskItem task)
     {
         AllFilterCounter--;
         if (task.IsDone) CompletedFilterCounter--;
         if (Utils.CheckDateForToday(task.CompleteDate)) TodayFilterCounter--;
-        if (Utils.CheckDateForScheduled(task.CompleteDate)) ScheduleFilterCounter--;
+        if (Utils.CheckDateForScheduled(task.CompleteDate) && !task.IsDone) ScheduleFilterCounter--;
     }
-    private void IncreaseFiltersNumbers(TaskItem task)
+    public void IncreaseFiltersNumbers(TaskItem task)
     {
         AllFilterCounter++;
         if (task.IsDone) CompletedFilterCounter++;
         if (Utils.CheckDateForToday(task.CompleteDate)) TodayFilterCounter++;
-        if (Utils.CheckDateForScheduled(task.CompleteDate)) ScheduleFilterCounter++;
+        if (Utils.CheckDateForScheduled(task.CompleteDate) && !task.IsDone) ScheduleFilterCounter++;
     }
 
     public void MarkTaskInView(TaskItem task)
@@ -314,13 +315,13 @@ public class ViewController : ReactiveObject
         ScheduleFilterCounter--;
         switch (ViewState)
         {
+            case ViewStates.COMPLETED:
+                break;
             case ViewStates.CATEGORY:
             case ViewStates.TODAY:
-            case ViewStates.COMPLETED:
             {
                 var task = TasksCollection.FirstOrDefault(t => t.Id == taskId);
                 task?.RaisePropertyChanged(nameof(task.IsMissed));
-                Utils.OrderTasks(TasksCollection);
                 break;
             }
 
@@ -332,9 +333,8 @@ public class ViewController : ReactiveObject
                     if (task == null) continue;
                     task.RaisePropertyChanged(nameof(task.IsMissed));
                     Task.Delay(10).Wait();
-                    Utils.OrderTasks(node.Tasks);
+                    if (ViewState == ViewStates.SCHEDULED) node.Tasks.Remove(task);
                 }
-
                 break;
 
             default:
@@ -523,15 +523,6 @@ public class ViewController : ReactiveObject
                 throw new ArgumentOutOfRangeException();
         }
     }
-
-    public void AfterRemovingTasksMany(IEnumerable<TaskItem> tasks)
-    {
-        foreach (var task in tasks)
-        {
-            DecreaseFiltersNumbers(task);
-        }
-    }
-    
     
     public async Task LoadTasksByCategoryAsync()
     {

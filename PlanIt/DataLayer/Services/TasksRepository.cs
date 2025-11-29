@@ -1,4 +1,5 @@
-﻿using PlanIt.Data.Interfaces;
+﻿using MongoDB.Bson;
+using PlanIt.Data.Interfaces;
 using PlanIt.Data.Models;
 
 namespace PlanIt.Data.Services;
@@ -41,6 +42,11 @@ public class TasksRepository : IObjectRepository<TaskItem>
     public async Task<List<TaskItem>> GetAll()
     {
         return (await _taskRepo.FindManyAsync(t => true)).ToList();
+    }
+
+    public async Task<TaskItem?> GetTask(ObjectId id)
+    {
+        return await _taskRepo.GetByIdAsync(id);
     }
 
     public async Task<List<TaskItem>> GetTasksByCategory(Category category)
