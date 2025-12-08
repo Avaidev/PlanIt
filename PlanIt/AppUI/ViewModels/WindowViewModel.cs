@@ -21,6 +21,7 @@ public class WindowViewModel : ViewModelBase
     
     public ReactiveCommand<Unit, Unit> AddNewTask => ReactiveCommand.Create(() =>
     {
+        ViewController.CreateWindowTitle = "New Task";
         ViewController.OpenTaskOverlay();
         TaskManagerVM.SetStartParameters(category: ViewController.SelectedCategory);
     });

@@ -79,6 +79,7 @@ public class ViewController : ReactiveObject
     private bool _isLoadingVisible = true;
     private string _loadingMessage = "";
     private string _searchParameter = "Results of your search:";
+    private string _createWindowTitle = "";
 
     public ViewStates ViewState { get; set; }
     public ObservableCollection<Category> CategoriesCollection
@@ -171,7 +172,13 @@ public class ViewController : ReactiveObject
         get => _isTaskOverlayVisible;
         set => this.RaiseAndSetIfChanged(ref _isTaskOverlayVisible, value);
     }
-    
+
+    public string CreateWindowTitle
+    {
+        get => _createWindowTitle;
+        set => this.RaiseAndSetIfChanged(ref _createWindowTitle, value);
+    }
+
     public bool IsAnyOverlayVisible => IsCategoryOverlayVisible || IsTaskOverlayVisible;
     #endregion
 

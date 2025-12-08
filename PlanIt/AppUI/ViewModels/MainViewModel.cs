@@ -128,6 +128,7 @@ public class MainViewModel : ViewModelBase
     
     public ReactiveCommand<Unit, Unit> AddNewCategory => ReactiveCommand.Create(() =>
     {
+        ViewController.CreateWindowTitle = "New Category";
         ViewController.OpenCategoryOverlay();
     });
 

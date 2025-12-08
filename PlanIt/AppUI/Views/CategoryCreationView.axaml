@@ -20,7 +20,7 @@
                     <Button Classes="basicBtn" Width="30" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Command="{Binding HideOverlay}">
                         <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource DenyIcon}" Foreground="{DynamicResource TextMain}"></PathIcon>
                     </Button>
-                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="t-b t-14" Foreground="{DynamicResource TextMain}">New Category</TextBlock>
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="t-b t-14" Foreground="{DynamicResource TextMain}" Text="{Binding ViewController.CreateWindowTitle}"></TextBlock>
                     <Button Grid.Column="2" Classes="basicBtn confirm" Width="30" Height="30" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding ApplyCreation}" CommandParameter="{Binding NewCategory}">
                         <PathIcon VerticalAlignment="Center" HorizontalAlignment="Center" Width="12" Height="12" Data="{StaticResource AcceptIcon}" Foreground="{DynamicResource TextMain}"></PathIcon>
                     </Button>

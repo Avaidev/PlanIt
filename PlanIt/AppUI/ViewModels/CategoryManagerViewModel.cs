@@ -87,6 +87,7 @@ public class CategoryManagerViewModel : ViewModelBase
     {
         NewCategory = new Category(category);
         _editMode = true;
+        ViewController.CreateWindowTitle = "Edit Category";
         ViewController.OpenCategoryOverlay();
         return true;
     });

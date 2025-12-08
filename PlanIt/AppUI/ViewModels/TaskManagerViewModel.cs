@@ -164,6 +164,7 @@ public class TaskManagerViewModel : ViewModelBase
                 : ViewController.NotifyBeforeComboValues.IndexOf(difference.Days);
         }
         SetStartParameters(true);
+        ViewController.CreateWindowTitle = "Edit Task";
         ViewController.OpenTaskOverlay();
         return true;
     });
